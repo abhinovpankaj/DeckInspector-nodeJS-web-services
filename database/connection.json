@@ -1,0 +1,15 @@
+{
+    "production": {
+      "url": "ds042138.mongolab.com",      
+      "db": "test_messages",
+      "user": "user",
+      "password": "123"
+    },
+    "development": {
+      "url": "localhost",
+      "port": "27017",
+      "db": "test_messages",
+      "user": "",
+      "password": ""
+    }
+  }
