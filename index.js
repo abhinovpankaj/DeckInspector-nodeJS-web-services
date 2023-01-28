@@ -1,4 +1,7 @@
 "use strict";
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
 const express = require('express');
 const app =  express();
 var path = require('path');
@@ -13,30 +16,39 @@ app.use(bodyParser.json());
 //app.use('/api', router);
 
 // ERROR Handler 400
-app.use(function (req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-});
+//Swagger details
+const options = {
+    definition: {
+      openapi: "3.0.0",
+      info: {
+        title: "Library API",
+        version: "1.0.0",
+        description: "DeckInspectors Library API",
+        termsOfService: "http://example.com/terms/",
+        contact: {
+          name: "API Support",
+          url: "http://www.exmaple.com/support",
+          email: "support@example.com",
+        },
+      },
+  
+      servers: [
+        {
+          url: "http://localhost:3000",
+          description: "Deck Inspectors Documentation",
+        },
+      ],
+    },
+    apis: ['./api-docs/*.yaml'],
+  };
+  
+  
+  const specs = swaggerJsdoc(options);
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-// ERROR Handler 505
-if (app.get('env') === 'development') {
-    app.use(function (req, res, next) {
-        var err = new Error('Not Found' + ' - Development Mode');
-        err.status = 505;
-        next(err);
-    });
-}
-
-app.use(function (err, req, res) {
-    res.status(err.status || 500);
-    res.send(err.status + ': Internal Server Error\n\r' + err.message);
-});
-
-
-// Initialize SERVER & DB connection once
+  // Initialize SERVER & DB connection once
 mongo.Connect();
-app.set('port', process.env.PORT || 1337);
+app.set('port', process.env.PORT || 3000);
 var server = app.listen(app.get('port'), async function () {
         
     console.log('Express server listening on port ' + server.address().port);

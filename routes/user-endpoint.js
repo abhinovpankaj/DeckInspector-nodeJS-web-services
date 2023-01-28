@@ -16,6 +16,7 @@ require("dotenv").config();
 //User registration + Login
 
 // Register user
+
 router.route('/register')
 .get(function(req,res){
   res.send("in get user endpoint");
@@ -24,53 +25,57 @@ router.route('/register')
 
 try {
     // Get user input
-    const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email, password,username,access_type } = req.body;
 
     // Validate user input
-    if (!(email && password && first_name && last_name)) {
+    if (!(email && password && first_name && last_name&&username)) {
       res.status(400).send("All input is required");
     }
 
     // check if user already exist
     // Validate if user exist in our database
     
-    users.getUser(email, function (err, record) {
+    users.getUser(email, async function (err, record) {
   
-        if (record) {
-             res.status(409).send("User Already Exist. Please Login");
-        }   
-    });
-    
-    //Encrypt user password
-    var encryptedPassword =  bcrypt.hash(password, 10);
+      if (record) {
+            res.status(409).send("User Already Exist. Please Login");
+      }else{        
+        //Encrypt user password
+        var encryptedPassword =  await bcrypt.hash(password, 10);
 
-    // Create user in our database
-    users.addUser({
-      first_name,
-      last_name,      
-      email: email.toLowerCase(), // sanitize: convert email to lowercase
-      password: encryptedPassword,
-    },function(err,result){
-        if (err) { res.status(err.status).send(err.message); }
+        // Create user in our database
+        users.addUser({
+          first_name,
+          last_name,
+          username,
+          access_type,      
+          email: email.toLowerCase(), // sanitize: convert email to lowercase
+          password: encryptedPassword,
+        },function(err,result){
+            if (err) { 
+              res.status(err.status).send(err.message); 
+            }
             else {
                 const user = result;
                 // Create token
                 const token = jwt.sign(
-                { user_id: user._id, email },
+                { 
+                  user_id: user._id, email 
+                },
                 process.env.TOKEN_KEY,
                 {
-                expiresIn: "30d",
+                  expiresIn: "30d",
                 });
                 // save user token
-                user.token = token;
-            
+                user.token = token          
                 // return new user
                 res.status(201).json(user);
-             }
-    });
-
+            }
+        });
+     }
+  });
     
-  } catch (err) {
+  }catch (err) {
     console.log(err);
   }
   
@@ -82,8 +87,8 @@ router.route('/registerAdmin')
 
 try {
     // Get user input
-    const { first_name, last_name, email, password, appSecret } = req.body;
-    registerAdmin(first_name, last_name, email, password, appSecret, function (err, result){
+    const { first_name,username, last_name, email, password, appSecret } = req.body;
+    registerAdmin(first_name, last_name,username, email, password, appSecret, function (err, result){
         if (err) { res.status(err.status).send(err.message); }
         else {
             const user = result;
@@ -113,9 +118,9 @@ try {
 
 
 
-function registerAdmin  (first_name, last_name, email, password, appSecret, callback) {
+function registerAdmin  (first_name, last_name,username, email, password, appSecret, callback) {
         
-        if (!(email && password && first_name && last_name)) {
+        if (!(email && password && first_name && last_name&&username)) {
             var error1 = new Error("All input is required");
             error1.status = 400;
             callback (error1);
@@ -125,7 +130,7 @@ function registerAdmin  (first_name, last_name, email, password, appSecret, call
           }
           if(appSecret!==process.env.APP_SECRET){
             var error1 = new Error("Please contact administrator to register as an Admin");
-            error1.status = 400;
+            error1.status = 403;
             callback (error1);
             return;
             
@@ -133,20 +138,21 @@ function registerAdmin  (first_name, last_name, email, password, appSecret, call
           // check if user already exist
           // Validate if user exist in our database
           
-          users.getUser(email, function (err, record) {       
+          users.getUser(email, async function (err, record) {       
               if (record) {
                 var error1 = new Error("User Already Exist. Please Login");
-                error1.status = 400;
+                error1.status = 409;
                 callback (error1,null);
                 return;
                 
               } else {
-                  var encryptedPassword = bcrypt.hash(password, 10);
+                  var encryptedPassword = await bcrypt.hash(password, 10);
                   
                   // Create user in our database
                   users.addAdmin({
                     first_name,
-                    last_name,                    
+                    last_name, 
+                    username,                   
                     email: email.toLowerCase(), // sanitize: convert email to lowercase
                     password: encryptedPassword,
                   }, function(err,result){
@@ -198,21 +204,22 @@ router.route('/login')
 // our login logic goes here
 try {
     // Get user input
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     // Validate user input
-    if (!(email && password)) {
+    if (!(username && password)) {
       res.status(400).send("All input is required");
     }
     // Validate if user exist in our database
-    users.getUser( email ,function(err,record){
+    users.getUserbyUsername( username ,async function(err,record){
         if (err) { res.status(err.status).send(err.message); 
         }
         else {
-            if (record && ( bcrypt.compare(password, record.password))) {
+            if (record && ( await bcrypt.compare(password, record.password))) {
                 // Create token
+                const {password,...user} = record;
                 const token = jwt.sign(
-                  { user_id: record._id, email },
+                  { user_id: record._id, username },
                   process.env.TOKEN_KEY,
                   {
                     expiresIn: "30d",
@@ -223,13 +230,12 @@ try {
                 record.token = token;
           
                 // user
-                res.status(200).json(record);
+                res.status(201).json(user);
               }
               else
-                res.status(400).send("Invalid Credentials");
+                res.status(401).send("Invalid Credentials");
         }
-    });
-    
+    });    
     
   } catch (err) {
     console.log(err);

@@ -4,5 +4,5 @@ var userRouter = require("./routes/user-endpoint");
 
 module.exports = function(app) {
   app.use(express.json());
-  app.use("/user", userRouter);  
+  app.use("/api/user", userRouter);  
 };

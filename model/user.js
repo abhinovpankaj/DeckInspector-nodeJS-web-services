@@ -4,8 +4,8 @@ var mongo = require('../database/mongo');
 const Role = require('./role');
 
 var addUser = function (user, callback) {
-    mongo.Users.insert({last_name: user.last_name,first_name:user.first_name,email:user.email,
-    password:user.password,role:Role.User,access:"mobile"}, {w: 1}, function (err, result) {
+    mongo.Users.insertOne({username:user.username,last_name: user.last_name,first_name:user.first_name,email:user.email,
+    password:user.password,role:Role.User,access_type:user.access_type}, {w: 1}, function (err, result) {
         if (err) {
             var error = new Error("addUser()." + err.message);
             error.status = err.status;
@@ -16,8 +16,8 @@ var addUser = function (user, callback) {
     });
 };
 var addAdmin = function (user, callback) {
-    mongo.Users.insert({last_name: user.last_name,first_name:user.first_name,email:user.email,
-    password:user.password,role:Role.Admin,access:"both"}, {w: 1}, function (err, result) {
+    mongo.Users.insertOne({last_name: user.last_name,first_name:user.first_name,email:user.email,
+    password:user.password,username:user.username,role:Role.Admin,access_type:"both"}, {w: 1}, function (err, result) {
         if (err) {
             var error = new Error("addAdmin()." + err.message);
             error.status = err.status;
@@ -27,13 +27,10 @@ var addAdmin = function (user, callback) {
         callback(null, result);
     });
 };
-var getUser = function (emailId, callback) {
+var getUser = async function (emailId, callback) {
     
-    mongo.Users.findOne({ email: emailId }, function (err, result) {
-        if (err) {
-            callback (err);
-            return;
-        }
+    var result = await mongo.Users.findOne({ email: emailId });    
+        
         if (result === null) {
             var error1 = new Error("getUser(). \nMessage: No User Found. One Requested.");
             error1.status = 404;
@@ -41,7 +38,21 @@ var getUser = function (emailId, callback) {
             return; 
         }
         callback(null, result);
-    });
+    
+};
+
+var getUserbyUsername = async function (username, callback) {
+    
+    var result = await mongo.Users.findOne({ username: username });    
+        
+        if (result === null) {
+            var error1 = new Error("getUser(). \nMessage: No User Found. One Requested.");
+            error1.status = 404;
+            callback (error1);
+            return; 
+        }
+        callback(null, result);
+    
 };
 
 var getAllUser = function  (callback) {
@@ -89,5 +100,6 @@ module.exports = {
     getUser: getUser,
     addAdmin:addAdmin,
     getAllUser: getAllUser,
-    removeUser: removeUser
+    removeUser: removeUser,
+    getUserbyUsername
 };

@@ -1,0 +1,141 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: User registration API
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - username
+      properties:
+        first_name:
+          type: string
+          description: The user's first name          
+        last_name:
+          type: string
+          description: The user's last name
+        username:
+          type: string
+          description: unique username for registration, required for login.
+        access_type:
+          type: string
+          description: The user's access 'both' or 'mobile'
+        email:
+          type: string
+          format: email
+          description: The user's email address
+        password:
+          type: string
+          format: password
+          description: The user's password
+    AdminRegistration:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - username
+        - appsecret
+      properties:
+        first_name:
+          type: string
+          description: The user's first name          
+        last_name:
+          type: string
+          description: The user's last name
+        username:
+          type: string
+          description: unique username for registration, required for login.
+        access_type:
+          type: string
+          description: The user's accee 'both' or 'mobile'
+        email:
+          type: string
+          format: email
+          description: The user's email address
+        password:
+          type: string
+          format: password
+          description: The user's password
+        appsecret:
+          type: string
+          format: string
+          description: app secret for creating admins.
+    Login:
+      type: object
+      required:
+        - username        
+        - password      
+        
+      properties:
+        username:
+          type: string
+          description: The user's username          
+        password:
+          type: string
+          description: The user's password
+paths:
+  /api/user/register:
+    
+    post:
+      tags:
+        [Users]
+      summary: Register a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRegistration'
+      responses:
+        201:
+          description: User successfully registered
+        400:
+          description: Invalid input, all inputs are required
+        409:
+          description: User Already Exist
+
+  /api/user/registerAdmin:
+    
+    post:
+      tags:
+        [Users]
+      summary: Register an admin user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRegistration'
+      responses:
+        201:
+          description: Admin user successfully registered
+        400:
+          description: Invalid input, all inputs are required
+        409:
+          description: User Already Exists
+        402:
+          description: Please contact administrator to register as an Admin
+          
+  /api/user/login:
+    
+    post:
+      tags:
+        [Users]
+      summary: Login a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        201:
+          description: User Logged in successfully
+        400:
+          description: Invalid input, all inputs are required
+        401:
+          description: Invalid credentials
