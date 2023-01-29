@@ -55,6 +55,26 @@ var getUserbyUsername = async function (username, callback) {
     
 };
 
+var updateUser = async function (user, callback) {
+    
+    var result = await mongo.Users.updateOne({ username: user.username }, { $set: user });    
+    
+    if(result.matchedCount<1){
+        var error = new Error("No User found, please register user.");
+        error.status = 401;  
+        callback(error);
+        
+    } else{
+      if(result.modifiedCount==1){
+        callback(null,{status:201,message:"User details updated successfully."});
+        }           
+      else
+        callback(null,{status:409,message:"Failed to update the user details."});
+        
+    }   
+};
+
+
 var getAllUser = function  (callback) {
     mongo.Users.find({}).toArray(function (err, result) {
         if (err) {
@@ -101,5 +121,6 @@ module.exports = {
     addAdmin:addAdmin,
     getAllUser: getAllUser,
     removeUser: removeUser,
-    getUserbyUsername
+    getUserbyUsername,
+    updateUser
 };
