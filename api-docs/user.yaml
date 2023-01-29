@@ -80,6 +80,32 @@ components:
         password:
           type: string
           description: The user's password
+    UserModification:
+      type: object
+      required:
+        - username
+        - access_type
+      properties:
+        first_name:
+          type: string
+          description: The user's first name          
+        last_name:
+          type: string
+          description: The user's last name
+        username:
+          type: string
+          description: unique username for registration, required for login.
+        access_type:
+          type: string
+          description: The user's access 'both' or 'mobile'
+        email:
+          type: string
+          format: email
+          description: The user's email address
+        password:
+          type: string
+          format: password
+          description: The user's password
 paths:
   /api/user/register:
     
@@ -91,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminRegistration'
+              $ref: '#/components/schemas/UserRegistration'
       responses:
         201:
           description: User successfully registered
@@ -139,3 +165,22 @@ paths:
           description: Invalid input, all inputs are required
         401:
           description: Invalid credentials
+  /api/user/update:    
+    post:
+      tags:
+        [Users]
+      summary: Update a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserModification'
+      responses:
+        201:
+          description: User details updated successfully.
+        409:
+          description: Failed to update the user details.
+        401:
+          description: No User found, please register user.
+        500:
+          description: Internal server error.

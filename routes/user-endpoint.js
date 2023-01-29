@@ -7,15 +7,10 @@ const users = require("../model/user");
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
 const Role=require('../model/role');
-// const { nextTick } = require('process');
-// const { RSA_NO_PADDING } = require('constants');
-
 
 require("dotenv").config();
 
-//User registration + Login
-
-// Register user
+//#region Register user
 
 router.route('/register')
 .get(function(req,res){
@@ -80,8 +75,55 @@ try {
   }
   
 });
+//#endregion
 
-//register admin
+//#region Login
+router.route('/login')
+.post(async function (req, res)  {
+// our login logic goes here
+try {
+    // Get user input
+    const { username, password } = req.body;
+
+    // Validate user input
+    if (!(username && password)) {
+      res.status(400).send("All input is required");
+    }
+    // Validate if user exist in our database
+    users.getUserbyUsername( username ,async function(err,record){
+        if (err) { res.status(err.status).send(err.message); 
+        }
+        else {
+            if (record && ( await bcrypt.compare(password, record.password))) {
+                // Create token
+                const {password,...user} = record;
+                const token = jwt.sign(
+                  { user_id: record._id, username },
+                  process.env.TOKEN_KEY,
+                  {
+                    expiresIn: "30d",
+                  }
+                );
+          
+                // save user token
+                record.token = token;
+          
+                // user
+                res.status(201).json(user);
+              }
+              else
+                res.status(401).send("Invalid Credentials");
+        }
+    });    
+    
+  } catch (err) {
+    console.log(err);
+  }
+
+});
+//#endregion
+
+//#region registerAdmin
 router.route('/registerAdmin')
 .post( function(req, res)  {
 
@@ -116,7 +158,32 @@ try {
   
 });
 
+//#endregion
 
+//#region Update user
+router.route('/update')
+.post(async function(req,res){
+  try {
+      // Get user input
+      const user = req.body; 
+      users.updateUser(user,function(err,result){
+        if(err){
+          res.status(err.status).send(err.message);
+        }
+        else{
+          res.status(result.status).send(result.message);      
+        }
+      })          
+      
+     }     
+  catch (err) {    
+    console.log(err);
+    res.status(500).send(`Internal server error ${err}`)
+  }
+});
+//#endregion
+
+//#region Private functions
 
 function registerAdmin  (first_name, last_name,username, email, password, appSecret, callback) {
         
@@ -196,51 +263,8 @@ function verifyToken (req, res, next)  {
     }
     return next();
   };
-
+//#endregion
   
-// Login
-router.route('/login')
-.post(async function (req, res)  {
-// our login logic goes here
-try {
-    // Get user input
-    const { username, password } = req.body;
 
-    // Validate user input
-    if (!(username && password)) {
-      res.status(400).send("All input is required");
-    }
-    // Validate if user exist in our database
-    users.getUserbyUsername( username ,async function(err,record){
-        if (err) { res.status(err.status).send(err.message); 
-        }
-        else {
-            if (record && ( await bcrypt.compare(password, record.password))) {
-                // Create token
-                const {password,...user} = record;
-                const token = jwt.sign(
-                  { user_id: record._id, username },
-                  process.env.TOKEN_KEY,
-                  {
-                    expiresIn: "30d",
-                  }
-                );
-          
-                // save user token
-                record.token = token;
-          
-                // user
-                res.status(201).json(user);
-              }
-              else
-                res.status(401).send("Invalid Credentials");
-        }
-    });    
-    
-  } catch (err) {
-    console.log(err);
-  }
-
-});
 
 module.exports = router ;
