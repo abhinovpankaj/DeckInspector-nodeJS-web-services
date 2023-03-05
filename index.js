@@ -43,38 +43,14 @@ const options = {
   };
   
   
-  const specs = swaggerJsdoc(options);
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+const specs = swaggerJsdoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-  // Initialize SERVER & DB connection once
+// Initialize SERVER & DB connection once
 mongo.Connect();
 app.set('port', process.env.PORT || 3000);
 var server = app.listen(app.get('port'), async function () {
         
-    console.log('Express server listening on port ' + server.address().port);
-//    try{
-//         registerAdmin("Super", "Admin", "jabez@zeptoint.com", "Zeptoint@2022", process.env.APP_SECRET,function(err,result){
-//             if (err) { console.log(err.status +":"+ err.message); }
-//     else {
-//         const user = result;
-//             // Create token
-//             const token = jwt.sign(
-//             { user_id: user._id, email },
-//             process.env.TOKEN_KEY,
-//             {
-//             expiresIn: "30d",
-//             });
-//             // save user token
-//             user.token = token;
-        
-//             // return new user
-//             console.log(json(user));
-//     }
-//         });
-        
-//    }catch(err){
-//        console.log(err);
-//    }
-
-    });
+console.log('Express server listening on port ' + server.address().port);
+});
 

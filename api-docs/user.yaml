@@ -184,3 +184,15 @@ paths:
           description: No User found, please register user.
         500:
           description: Internal server error.
+  /api/user/allusers:    
+    get:
+      tags:
+        [Users]
+      summary: get all users      
+      responses:
+        201:
+          description: User details updated successfully.        
+        401:
+          description: No User founds.
+        500:
+          description: Internal server error.

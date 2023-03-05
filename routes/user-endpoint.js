@@ -183,6 +183,90 @@ router.route('/update')
 });
 //#endregion
 
+//#region delete user
+router.route('/delete')
+.post(async function(req,res){
+  try {
+      // Get user input
+      const user = req.body; 
+      users.removeUser(user,function(err,result){
+        if(err){
+          res.status(err.status).send(err.message);
+        }
+        else{
+          res.status(result.status).send(result.message);      
+        }
+      })          
+      
+     }     
+  catch (err) {    
+    console.log(err);
+    res.status(500).send(`Internal server error ${err}`)
+  }
+});
+//#endregion
+
+//#region getAllUsers
+router.route('/allusers')
+.get(async function(req,res){
+  
+try{
+  users.getAllUser(function(err,result){
+    if(err){
+      res.status(err.status).send(err.message);
+    }
+    else{
+      console.debug(result);
+      res.status(result.status).json(result.users);
+    }
+  });
+}
+catch(exception){
+  res.status(500).send(`Intenal server error.${exception}"`);
+}
+});
+//#endregion
+router.route('/:username')
+.get(async function(req,res){
+  try{
+    const username = req.params.username;
+    users.getUserbyUsername( username ,async function(err,record){
+      if (err) { res.status(err.status).send(err.message); 
+      }
+      else {
+          if (record){
+            const {password,...user} = record;
+            res.status(201).json(user); 
+          }                     
+            else
+              res.status(401).send("user not found.");
+      }
+  });    
+  }
+  catch{
+    res.status(500).send("Internal server error.");
+  }
+})
+.delete(async function(req,res){
+  try{
+    const username = req.params.username;
+    users.removeUser( username ,async function(err,record){
+      if (err) { res.status(err.status).send(err.message); 
+      }
+      else {
+          if (record){
+            
+            res.status(201).send("user delete successfully"); 
+          }                     
+            else
+              res.status(401).send("user not found.");
+      }
+  });    
+  }
+  catch{
+    res.status(500).send("Internal server error.Failed to delete user.");
+  }
+});
 //#region Private functions
 
 function registerAdmin  (first_name, last_name,username, email, password, appSecret, callback) {
@@ -253,10 +337,10 @@ function verifyToken (req, res, next)  {
     req.body.token || req.query.token || req.headers["x-access-token"];
   
     if (!token) {
-      return res.status(403).send("A token is required for authentication");
+      return res.status(403).send("A token is required for accessing this resource");
     }
     try {
-      const decoded = jwt.verify(token, "secret");
+      const decoded = jwt.verify(token, process.env.TOKEN_KEY);
       req.user = decoded;
     } catch (err) {
       return res.status(401).send("Invalid Token");
@@ -265,6 +349,4 @@ function verifyToken (req, res, next)  {
   };
 //#endregion
   
-
-
 module.exports = router ;
