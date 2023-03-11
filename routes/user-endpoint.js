@@ -13,11 +13,7 @@ require("dotenv").config();
 //#region Register user
 
 router.route('/register')
-.get(function(req,res){
-  res.send("in get user endpoint");
-})
-.post( function(req, res)  {
-
+.post( function(req, res)  {  
 try {
     // Get user input
     const { first_name, last_name, email, password,username,access_type } = req.body;
@@ -124,7 +120,7 @@ try {
 //#endregion
 
 //#region registerAdmin
-router.route('/registerAdmin')
+router.route('/registeradmin')
 .post( function(req, res)  {
 
 try {

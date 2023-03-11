@@ -1,0 +1,56 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Project API
+components:
+  schemas:
+    project:
+      type: object
+      required:
+        - name             
+      properties:
+        name:
+          type: string
+          description: project name         
+        address:
+          type: string
+          description: project address
+        filePath:
+          type: string
+          description: local full filepath.        
+    uploadOtions:
+      type: object
+
+      
+paths:
+  /api/project/add:
+    
+    post:
+      tags:
+        [Project]
+      summary: add Project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/project'
+      responses:
+        201:
+          description: project uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+  
+  /api/project/allprojects:    
+    get:
+      tags:
+        [Project]
+      summary: get all projects      
+      responses:
+        201:
+          description: All projects retrieved.        
+        401:
+          description: No projects founds.
+        500:
+          description: Internal server error.

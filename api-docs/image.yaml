@@ -1,0 +1,45 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: image upload API
+components:
+  schemas:
+    image:
+      type: object
+      required:
+        - blobName
+        - containerName
+        - filePath        
+      properties:
+        blobName:
+          type: string
+          description: image name         
+        containerName:
+          type: string
+          description: containerName
+        filePath:
+          type: string
+          description: local full filepath.        
+    uploadOtions:
+      type: object
+
+      
+paths:
+  /api/image/upload:
+    
+    post:
+      tags:
+        [Image]
+      summary: upload images/files
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/image'
+      responses:
+        201:
+          description: image uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
