@@ -12,7 +12,8 @@ var addProject = async function (project) {
         response = {
             "data" :{
                 "id": result.insertedId,
-                "message":"Project inserted successfully."
+                "message":"Project inserted successfully.",
+                "code":201
             }   
         }
     }
@@ -24,7 +25,7 @@ var addProject = async function (project) {
               }
         } 
     }
-    return JSON.parse(response);
+    return response;
 };
 
 var getAllProjects = async function () {   
@@ -35,7 +36,8 @@ var getAllProjects = async function () {
             response = {
                 "data": {
                     "projects": [],
-                    "message": "No Projects found."
+                    "message": "No Projects found.",
+                    "code":401
                   }
             } 
         }
@@ -43,7 +45,8 @@ var getAllProjects = async function () {
             response = {
                 "data" :{
                     "projects": [],
-                    "message": "Projects found."
+                    "message": "Projects found.",
+                    "code":201
                 }   
             };
             const projects = result.map(item=>{
@@ -69,14 +72,17 @@ var getAllProjects = async function () {
       
 };
 
-var getProjectById = async function (id) {    
+var getProjectById = async function (id) { 
+    var response ={};   
     try{
         const result = await mongo.Projects.findOne({ _id:  new ObjectId(id) },{files:0});
+        
         if (result) {
-            var response = {
+            response = {
                 "data" :{
                     "item": result,
-                    "message": "Project found."
+                    "message": "Project found.",
+                    "code":201
                 }   
             };
             return response;
@@ -102,6 +108,384 @@ var getProjectById = async function (id) {
     }    
 };
 
+
+var assignProjectToUser = async function (id,username) {
+    var response ={};      
+    try {
+        var result = await mongo.Projects.updateOne({_id:new ObjectId(id)},{ $addToSet: { assignedto: username  }});
+        
+        if (result.matchedCount==0){
+            response = {
+                "error": {
+                    "code": 409,
+                    "message": "No project found."
+                }
+            }
+            return response;   
+        }
+        if(result.modifiedCount==1){
+            response = {
+                "data" :{                
+                    "message": "Project assigned successfully.",
+                    "code":201
+                }   
+            };
+            return response;        
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 409,
+                    "message": "Error updating the project assignment,user already added"
+                }
+            }
+            return response;       
+        }
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error assigning project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
+var unassignUserFromProject = async function (id,username) {      
+    var response ={};
+    try {
+        var result = await mongo.Projects.updateOne({_id:new ObjectId(id)},{ $pull: { assignedto: username  }});
+        
+        if (result.matchedCount==0){
+            response = {
+                "error": {
+                    "code": 409,
+                    "message": "No project found."
+                }
+            }
+            return response;   
+        }
+        
+        if(result.modifiedCount==1){
+            response = {
+                "data" :{                
+                    "message": "User removed from project assignment successfully.",
+                    "code":201
+                }   
+            };
+            return response;        
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "Error updating the project assignment/or user not assigned."
+                }
+            }
+            return response;       
+        }
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error assigning project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
+var getProjectsByNameCreatedOnIsCompletedAndDeleted= async function({
+    name = "",
+    createdon = "",
+    iscomplete = false,
+    isdeleted =false
+} = {}){
+    var response ={};
+    try {
+        
+        var query = { $and: [] };
+        if (name !== "") { query.$and.push({name: name}); }
+        if (createdon !== "") { query.$and.push({createdon: createdon}); }                
+    
+        query.$and.push({iscomplete: iscomplete});
+        query.$and.push({isdeleted: isdeleted});
+
+        const cursor = mongo.Projects.find(query)
+        .sort({ editedat: -1 })
+        .limit(25);
+
+        const result = await cursor.toArray();
+        if(result.length==0){
+            response = {
+                "data": {
+                    "projects": [],
+                    "message": "No Projects matching the filter found.",
+                    "code":401
+                  }
+            } 
+        }
+        else{
+            response = {
+                "data" :{
+                    "projects": [],
+                    "message": "Projects found matching the criteria.",
+                    "code":201
+                }   
+            };
+            const projects = result.map(item=>{
+                delete item.isdeleted;        
+                delete item.files;                
+                response.data.projects.push(item);
+                return item;
+              });             
+                        
+            return response;
+        }    
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching project.",
+                "errordata": error
+              }
+        }
+        return response;
+    }
+   
+}
+
+var updateProject = async function (project) {
+    var response ={};
+    try{
+        var result = await mongo.Projects.updateOne({ _id: new ObjectId(project.id) }, { $set: {
+            name:project.name,
+            address:project.address,
+            description:project.description,
+            url:project.url,
+            lasteditedby:project.lasteditedby,
+            editedat:project.editedat
+        } });    
+        
+        if(result.matchedCount<1){
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Project found."
+                  }
+            }
+            return response;
+        } else{
+            if(result.modifiedCount==1){
+                response = {
+                    "data" :{                   
+                        "message": "Project updated successfully.",
+                        "code":201
+                    }   
+                };
+                return response;
+            }           
+            else{
+                response = {
+                    "data" :{                    
+                        "message": "Failed to update the project details.",
+                        "code":409
+                    }   
+                };
+                return response;
+            }                   
+        }   
+    }
+    catch(err){
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
+
+var updateProjectVisibilityStatus = async function (id,isVisible) {
+    var response ={};
+    try {
+        var result = await mongo.Projects.updateOne({_id:new ObjectId(id)},{$set:{isdeleted:isVisible}});
+        if(result.matchedCount==0){
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "No project found, invalid id."                    
+                }
+            }
+            return response;
+        }
+        if(result.modifiedCount==1){
+            var message = `Project state updated successfully,is Visible:${isVisible}.`;
+            response = {
+                "data" :{                
+                    "message": message,
+                    "code":201
+                }   
+            };
+            return response; 
+            
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "No project modified, try with changed visibility state."                    
+                }
+            }
+            return response;           
+        }
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error changing visibility of project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }    
+};
+var updateProjectOfflineAvailabilityStatus = async function (id,isavailableoffline) {
+    var response ={};
+    try {
+        
+        var result = await mongo.Projects.updateOne({_id:new ObjectId(id)},{$set:{isavailableoffline:isavailableoffline}});
+        if(result.matchedCount==0){
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "No project found, invalid id."                    
+                }
+            }
+            return response;
+        }
+        if(result.modifiedCount==1){
+            var message = `Project state updated successfully,can download offline:${isavailableoffline}.`;
+            response = {
+                "data" :{                
+                    "message": message,
+                    "code":201
+                }   
+            };
+            return response; 
+            
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "No project modified, try with changed state."                    
+                }
+            }
+            return response;           
+        }
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error assigning project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }   
+    
+};
+
+var updateProjectStatus = async function (id,iscomplete) {
+    var response ={};
+    try {
+        
+        var result = await mongo.Projects.updateOne({_id:new ObjectId(id)},{$set:{iscomplete:iscomplete}});
+        if(result.matchedCount==0){
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "No project found, invalid id."                    
+                }
+            }
+            return response;
+        }
+        if(result.modifiedCount==1){
+            var message = `Project state updated successfully,is project complete:${isavailableoffline}.`;
+            response = {
+                "data" :{                
+                    "message": message,
+                    "code":201
+                }   
+            };
+            return response; 
+            
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 405,
+                    "message": "No project modified, try with changed state."                    
+                }
+            }
+            return response;           
+        }
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error updating completion state of the project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }   
+    
+};
+
+var deleteProjectPermanently = async function (id) {
+    try{
+        var result = await mongo.Projects.deleteOne({_id: new ObjectId(id)});
+
+        if(result.deletedCount==1){
+           
+            var response = {
+                "data" :{                    
+                    "message": "Project deleted successfully.",
+                    "code":201
+                }   
+            };
+            return response;
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Project found."
+                  }
+            }
+            return response;  
+        }            
+    }
+    catch(err){
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error deleting project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
 var getAllFilesOfProject = async function (id) {    
     const result = await mongo.Projects.findOne({ _id:  new ObjectId(id) },{files:1});
 
@@ -113,114 +497,53 @@ var getAllFilesOfProject = async function (id) {
         return JSON.stringify(error);
     }    
 };
-var assignProjectToUser = async function (id,username) {  
-    var newAssingee = {"username":username}
-    
-    var result = await mongo.Projects.updateOne({_id:id},[{ $addFields: { assignedto: newAssingee }}]);
-    if(result.modifiedCount==1){
-        return JSON.stringify({status:201,message:"Project assigned successfully."});
-    }
-    else{
-        var error2 = new Error("Error occurred.Project assignment failed. " + err.message);
-        error2.status = err.status;
+
+var addRemoveChildren = async function(projectId,isAdd,{id,name,type}){
+    var response = {};
+    try {
+        if(isAdd)
+            var result = await mongo.Projects.updateOne({_id:new ObjectId(projectId)},{ $push: { children: {"id":id,"name":name,"type":type}}});
+        else
+            var result = await mongo.Projects.updateOne({_id:new ObjectId(projectId)},{ $pull: { children: {"id":id,"name":name,"type":type}}});
         
-        return JSON.stringify(error2);
+        if (result.matchedCount==0){
+            response = {
+                "error": {
+                    "code": 409,
+                    "message": "No project found."
+                }
+            }
+            return response;   
+        }
+        if(result.modifiedCount==1){
+            response = {
+                "data" :{                                   
+                    "message": "Common location added/removed to/from the project successfully.",
+                    "code":201
+                }   
+            };
+            return response;        
+        }
+        else{
+            response = {
+                "error": {
+                    "code": 409,
+                    "message": "Error adding/removing common location to/from the project."
+                }
+            }
+            return response;       
+        }
+    } catch (error) {
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error adding common location to the project.",
+                "errordata": err
+              }
+        }
+        return response;
     }
-};
-
-var getProjectsByNameCreatedOnIsCompletedAndDeleted= async function({
-    name = "",
-    createdon = "",
-    iscomplete = false,
-    isdeleted =false
-} = {}){
-    var query ="";
-    if(name!="")
-        query=query+ `name:${name}`;
-    if(createdon!="")
-        query=query + `createdon:${createdon}`;          
-    
-    query = query + `,iscomplete:${iscomplete},isdeleted=${isdeleted}`  ;  
-    const cursor = mongo.Projects.find({query})
-    .sort({createdon})
-    .limit(25);
-
-    const result = await cursor.toArray();
-    const projects = result.map(item=>{
-        delete item.isdeleted;        
-        delete item.files;
-        return item;
-      });    
-      return JSON.stringify(projects);
 }
-
-var updateProject = async function (project) {
-    
-    var result = await mongo.Projects.updateOne({ _id: project._id }, { $set: project });    
-    
-    if(result.matchedCount<1){
-        var error = new Error("No project found.");
-        error.status = 401;    
-        return JSON.stringify(error);
-    } else{
-      if(result.modifiedCount==1){
-        return JSON.stringify({status:201,message:"project details updated successfully."});
-        }           
-      else
-        return JSON.stringify({status:409,message:"Failed to update the project details."});       
-    }   
-};
-
-var updateProjectVisibilityStatus = async function (id,isdeleted) {
-    var result = await mongo.Projects.updateOne({_id:id},{$set:{isdeleted:isdeleted}});
-    if(result.modifiedCount==1){
-        return JSON.stringify({status:201,message:"Project deleted successfully."});
-    }
-    else{
-        var error2 = new Error("Error occurred.No project was deleted. " + err.message);
-        error2.status = err.status;
-        
-        return JSON.stringify(error2);
-    }
-    
-};
-var updateProjectOfflineAvailabilityStatus = async function (id,isavailableoffline) {
-    var result = await mongo.Projects.updateOne({_id:id},{$set:{isavailableoffline:isavailableoffline}});
-    if(result.modifiedCount==1){
-        return JSON.stringify({status:201,message:"Project state updated successfully."});
-    }
-    else{
-        var error2 = new Error("Error occurred.project state was not updated. " + err.message);
-        error2.status = err.status;
-        
-        return JSON.stringify(error2);
-    }
-    
-};
-var updateProjectStatus = async function (id,iscomplete) {
-    var result = await mongo.Projects.updateOne({_id:id},{$set:{iscomplete:iscomplete}});
-    if(result.modifiedCount==1){
-        return JSON.stringify({status:201,message:"Project status updated successfully."});
-    }
-    else{
-        var error2 = new Error("Error occurred.Project was status not updated. " + err.message);
-        error2.status = err.status;
-        
-        return JSON.stringify(error2);
-    }
-    
-};
-var deleteProjectPermanently = async  function (id) {
-    var result = await mongo.Projects.deleteOne({_id:id});
-    if(result.deletedCount==1){
-        return JSON.stringify({status:201,message:"Project deleted permanently."});
-    }
-    else{
-        var error2 = new Error("Error occurred. Didn't remove project. " + err.message);
-        error2.status = err.status;
-        return JSON.stringify(error2);        
-    }    
-};
 
 module.exports = {
     addProject,
@@ -232,6 +555,7 @@ module.exports = {
     getProjectById,
     getProjectsByNameCreatedOnIsCompletedAndDeleted,
     getAllProjects,assignProjectToUser,
-    getAllFilesOfProject
+    getAllFilesOfProject,unassignUserFromProject,
+    addRemoveChildren
 
 };

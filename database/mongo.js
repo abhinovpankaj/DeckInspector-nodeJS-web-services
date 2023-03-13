@@ -14,6 +14,7 @@ var Connect = async function () {
         await client.connect();
         // // module.exports.Software = db.collection('software');
         module.exports.Projects = client.db(dbName).collection('projects');
+        module.exports.SubProjects = client.db(dbName).collection('subprojects');
         module.exports.Users = client.db(dbName).collection('users');
         // //module.exports.ClientInfo = db.collection('clientInfo');       
         console.log('Connected to MongoDB');

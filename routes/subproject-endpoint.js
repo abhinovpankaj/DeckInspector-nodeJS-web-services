@@ -1,7 +1,7 @@
 "use strict";
 var express = require('express');
 var router = express.Router();
-const projects = require("../model/project");
+const projects = require("../model/subproject");
 
 require("dotenv").config();
 
