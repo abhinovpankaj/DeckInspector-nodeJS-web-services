@@ -1,7 +1,7 @@
 "use strict";
 var express = require('express');
 var router = express.Router();
-const projects = require("../model/subproject");
+const subprojects = require("../model/subproject");
 
 require("dotenv").config();
 
@@ -10,27 +10,24 @@ router.route('/add')
 try{
 
 // Get user input
-const { name, description, address, createdby,url } = req.body;
+const { name, description, createdby,url,parentId } = req.body;
 
 // Validate user input
-if (!(name)) {
-  res.status(400).send("Name is required");
+if (!(name&&parentId)) {
+  res.status(400).send("Name and parentid is required");
 }
 var creationtime= (new Date(Date.now())).toISOString();
-var newProject = {
+var newSubProject = {
     "name":name,
-    "description":description,
-    "address":address,
+    "description":description,    
     "createdby":createdby,
-    "url":url,
-    "isavailableoffline":false,
-    "iscomplete":false,
+    "url":url,    
     "isdeleted":false,
     "createdat":creationtime,
-    "assignedto":[]
-    
+    "assignedto":[] ,
+    "parentId":parentId   
 } 
-var result = await projects.addProject(newProject);    
+var result = await subprojects.addSubProject(newSubProject);    
 if(result.error){
     res.status(result.error.code).send(result.error);
   }
@@ -41,84 +38,48 @@ if(result.error){
  
 }catch (err) {
     console.log(err);
+    res.status(500).send(`Intenal server error.${err}"`);
 }
 });
 
-router.route('/allprojects')
-.get(async function(req,res){  
-try{
-    var result = await projects.getAllProjects();
-    if(result.error){
-      res.status(result.error.code).send(result.error);
-    }
-    if(result.data){
-      console.debug(result);
-      res.status(201).json(result.data);
-    }
-    
-}
-catch(exception){
-  res.status(500).send(`Intenal server error.${exception}"`);
-}
-});
-
-router.route('/filterprojects')
-.post(async function(req,res){  
-try{
-    const {name,isdeleted,iscomplete,createdon}=req.body;
-
-    var result = await projects.getProjectsByNameCreatedOnIsCompletedAndDeleted({name,isdeleted,iscomplete,createdon});
-    if(result.error){
-      res.status(result.error.code).send(result.error);
-    }
-    if(result.data){
-      //console.debug(result);
-      res.status(result.data.code).json(result.data);
-    }
-    
-}
-catch(exception){
-  res.status(500).send(`Intenal server error.${exception}"`);
-}
-});
 
 router.route('/:id')
 .get(async function(req,res){
   try{
-    const projectId = req.params.id;
-    var result = await projects.getProjectById( projectId);
+    const subprojectId = req.params.id;
+    var result = await subprojects.getSubProjectById( subprojectId);
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
     if(result.data){
-      console.debug(result);                                          
+      //console.debug(result);                                          
       res.status(201).json(result.data);
     }
   }
-  catch{
-    res.status(500).send("Internal server error.");
+  catch(ex){
+    res.status(500).send(`Internal server error.${ex}`);
   }
 })
 .put(async function(req,res){
   try{
-    const { name, description, address,url,lasteditedby} = req.body;
-    const projectId = req.params.id;
+    const { name, description,url,lasteditedby,parentId} = req.body;
+    const subprojectId = req.params.id;
     // Validate user input
-    if (!(name&&description&&address&&url&&lasteditedby)) {
+    if (!(name&&description&&url&&lasteditedby)) {
       res.status(400).send("all inputs are required");
     }
     var editedat=(new Date(Date.now())).toISOString();
     var editedProject = {
         "name":name,
-        "id":projectId,
-        "description":description,
-        "address":address,    
+        "id": subprojectId,
+        "description":description,            
         "url":url,  
         "lasteditedby":lasteditedby,
-        "editedat":editedat
+        "editedat":editedat,
+        "parentId":parentId
     }
   
-    var result = await projects.updateProject(editedProject);
+    var result = await subprojects.updateSubProject(editedProject);
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
@@ -129,13 +90,13 @@ router.route('/:id')
   }
 
   catch(err){
-    res.status(500).send("Internal server error.");
+    res.status(500).send(`Intenal server error.${err}"`);
   }
 })
 .delete(async function(req,res){
   try{
-    const projectId = req.params.id;
-    var result = await projects.deleteProjectPermanently(projectId);
+    const subprojectId = req.params.id;
+    var result = await subprojects.deleteSubProjectPermanently(subprojectId);
     if (result.error) { 
       res.status(result.error.code).send(result.error); 
     }
@@ -152,9 +113,9 @@ router.route('/:id')
 router.route('/:id/assign')
 .post(async function(req,res){
   try {
-    const projectId = req.params.id;
+    const subprojectId = req.params.id;
     const {username} = req.body;
-    var result = await projects.assignProjectToUser(projectId,username);
+    var result = await subprojects.assignSubProjectToUser(subprojectId,username);
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
@@ -166,31 +127,13 @@ router.route('/:id/assign')
     res.status(500).send("Internal server error.");
   }
 });
-router.route('/:id/toggleOfflineState/:state')
-.post(async function(req,res){
-  try {
-    const projectId = req.params.id;
-    const state = req.params.state;
-    const isavailableoffline = state==1?true:false;
-    var result = await projects.updateProjectOfflineAvailabilityStatus(projectId,isavailableoffline);
-    if(result.error){
-        res.status(result.error.code).send(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    res.status(500).send("Internal server error.");
-  }
-});
 
 router.route('/:id/unassign')
 .post(async function(req,res){
   try {
-    const projectId = req.params.id;
+    const subprojectId = req.params.id;
     const {username} = req.body;
-    var result = await projects.unassignUserFromProject(projectId,username);
+    var result = await subprojects.unassignUserFromSubProject(subprojectId,username);
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
@@ -206,9 +149,9 @@ router.route('/:id/unassign')
 router.route('/:id/addchild')
 .post(async function(req,res){
   try {
-    const projectId = req.params.id;
-    const {id,name,type} = req.body;
-    var result = await projects.addRemoveChildren(projectId,true,{id,name,type});
+    const subprojectId = req.params.id;
+    const {id,name} = req.body;//type=location always
+    var result = await subprojects.addRemoveChildren(subprojectId,true,{id,name,type:"location"});
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
@@ -224,9 +167,9 @@ router.route('/:id/addchild')
 router.route('/:id/removechild')
 .post(async function(req,res){
   try {
-    const projectId = req.params.id;
+    const subprojectId = req.params.id;
     const {id,name,type} = req.body;
-    var result = await projects.addRemoveChildren(projectId,false,{id,name,type});
+    var result = await subprojects.addRemoveChildren(subprojectId,false,{id,name,type:"location"});
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
@@ -239,13 +182,13 @@ router.route('/:id/removechild')
   }
 });
 
-router.route('/:id/toggleVisibility/:state')
+router.route('/:id/toggleVisibility/')
 .post(async function(req,res){
   try {
-    const projectId = req.params.id;
-    const state = req.params.state;
-    const isVisible = state==1?true:false;
-    var result = await projects.updateProjectVisibilityStatus(projectId,isVisible);
+    const subprojectId = req.params.id;
+    const {parentId,isVisible,name} = req.body;
+    
+    var result = await subprojects.updateSubProjectVisibilityStatus(subprojectId,name,parentId,isVisible);
     if(result.error){
         res.status(result.error.code).send(result.error);
     }
@@ -258,23 +201,5 @@ router.route('/:id/toggleVisibility/:state')
   }
 });
 
-router.route('/:id/toggleprojectstatus/:state')
-.post(async function(req,res){
-  try {
-    const projectId = req.params.id;
-    const state = req.params.state;
-    const iscomplete = state==1?true:false;
-    var result = await projects.updateProjectVisibilityStatus(projectId,iscomplete);
-    if(result.error){
-        res.status(result.error.code).send(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    res.status(500).send("Internal server error.");
-  }
-});
 
 module.exports = router ;

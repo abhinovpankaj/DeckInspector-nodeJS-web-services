@@ -52,7 +52,7 @@ try{
       res.status(result.error.code).send(result.error);
     }
     if(result.data){
-      console.debug(result);
+      //console.debug(result);
       res.status(201).json(result.data);
     }
     

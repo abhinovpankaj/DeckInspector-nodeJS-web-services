@@ -11,8 +11,8 @@ var addSubProject = async function (subproject) {
         var result = await mongo.SubProjects.insertOne(subproject);
     
         if(result.insertedId){   
-            var result = await mongo.Projects.updateOne({_id:new ObjectId(subproject.parentId)},{ $push: { children: {"id":result.insertedId,"name":subproject.name,"type":"subproject"}}});     
-            if (result.modifiedCount>0)
+            var projresult = await mongo.Projects.updateOne({_id:new ObjectId(subproject.parentId)},{ $push: { children: {"id":result.insertedId,"name":subproject.name,"type":"subproject"}}});     
+            if (projresult.modifiedCount>0)
             {
                 var msg = "SubProject inserted successfully,parent project updated successfully."
             }
@@ -192,6 +192,13 @@ var updateSubProject = async function (subproject) {
             return response;
         } else{
             if(result.modifiedCount==1){
+                //update project children , currently not working
+                var projresult=await mongo.Projects.updateOne(
+                    {                        
+                        "children.id":new ObjectId(subproject.id)
+                    },
+                {$set:{"children.$.name":subproject.name}},
+                { upsert: false });
                 response = {
                     "data" :{                   
                         "message": "SubProject updated successfully.",
@@ -212,10 +219,10 @@ var updateSubProject = async function (subproject) {
         }   
     }
     catch(err){
-        response = {
+            response = {
             "error": {
                 "code": 500,
-                "message": "Error fetching subproject.",
+                "message": "Error processing subproject updates.",
                 "errordata": err
               }
         }
@@ -224,11 +231,11 @@ var updateSubProject = async function (subproject) {
     
 };
 //Soft Delete/undelete
-var updateSubProjectVisibilityStatus = async function (id,parentId,isVisible) {
+var updateSubProjectVisibilityStatus = async function (id,name,parentId,isVisible) {
     var response ={};
     try {
         //update the Projects collection as well.        
-        var result = await mongo.SubProjects.updateOne({_id:new ObjectId(id)},{$set:{isdeleted:isVisible}});
+        var result = await mongo.SubProjects.updateOne({_id:new ObjectId(id)},{$set:{isdeleted:!isVisible}});
         if(result.matchedCount==0){
             response = {
                 "error": {
@@ -239,8 +246,11 @@ var updateSubProjectVisibilityStatus = async function (id,parentId,isVisible) {
             return response;
         }
         if(result.modifiedCount==1){
-            var result = await mongo.Projects.updateOne({_id:new ObjectId(parentId)},{ $pull: { children: {"id":id}}});     
-            if (result.modifiedCount>0)
+            if(!isVisible)
+                var projresult = await mongo.Projects.updateOne({_id:new ObjectId(parentId)},{ $pull: { children: {"id":new ObjectId(parentId)}}});     
+            else
+                var projresult = await mongo.Projects.updateOne({_id:new ObjectId(parentId)},{ $push: { children: {"id":new ObjectId(parentId),"name":name,"type":"subproject"}}});
+            if (projresult.modifiedCount>0)
             {
                 var message = `SubProject state updated successfully,is Visible:${isVisible}.parent project updated successfully.`;                
             }
