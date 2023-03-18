@@ -192,7 +192,7 @@ var updateSubProject = async function (subproject) {
             return response;
         } else{
             if(result.modifiedCount==1){
-                //update project children , currently not working
+                
                 var projresult=await mongo.Projects.updateOne(
                     {                        
                         "children.id":new ObjectId(subproject.id)
