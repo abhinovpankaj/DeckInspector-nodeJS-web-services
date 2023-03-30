@@ -104,7 +104,7 @@ router.route('/:id')
     const { name, description, address,url,lasteditedby} = req.body;
     const projectId = req.params.id;
     // Validate user input
-    if (!(name&&description&&address&&url&&lasteditedby)) {
+    if (!(name&&description&&address&&lasteditedby)) {
       res.status(400).send("all inputs are required");
     }
     var editedat=(new Date(Date.now())).toISOString();
