@@ -102,7 +102,7 @@ try {
                 );
           
                 // save user token
-                record.token = token;
+                user.token = token;
           
                 // user
                 res.status(201).json(user);

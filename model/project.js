@@ -146,7 +146,7 @@ var assignProjectToUser = async function (id,username) {
             "error": {
                 "code": 500,
                 "message": "Error assigning project.",
-                "errordata": err
+                "errordata": error
               }
         }
         return response;
