@@ -31,7 +31,7 @@ var addProject = async function (project) {
 var getAllProjects = async function () {   
     var response ={};
     try{
-        var result = await mongo.Projects.find({}).limit(50).toArray();
+        var result = await mongo.Projects.find({}).limit(50).sort({"_id":-1}).toArray();
         if(result.length==0){
             response = {
                 "data": {
