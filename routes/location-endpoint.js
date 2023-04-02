@@ -11,11 +11,11 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdby,url,parentId } = req.body;
+const { name, description, createdby,url,parentid,parenttype } = req.body;
 
 // Validate user input
-if (!(name&&parentId)) {
-  errResponse = new ErrorResponse(400,"Name and parentid is required","");
+if (!(name&&parentid)) {
+  errResponse = new ErrorResponse(400,"Name,parenttype and parentid is required","");
   res.status(400).json(errResponse);
   return;
 }
@@ -27,7 +27,8 @@ var newLocation = {
     "url":url,    
     "isdeleted":false,
     "createdat":creationtime,    
-    "parentId":parentId   
+    "parentid":parentid,
+    "parenttype": parenttype
 } 
 var result = await locations.addLocation(newLocation);    
 if(result.error){
