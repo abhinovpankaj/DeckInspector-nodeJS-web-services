@@ -15,10 +15,10 @@ var addSection = async function (section) {
             
             if (projresult.modifiedCount>0)
             {
-                var msg = "Section inserted successfully,parent  updated successfully."
+                var msg = "Section inserted successfully,parent updated successfully."
             }
             else
-                var msg = "Section inserted successfully,parent  failed to updated."
+                var msg = "Section inserted successfully,parent failed to updated."
             
             response = {
                 "data" :{

@@ -1,7 +1,7 @@
 "use strict";
 var express = require('express');
 var router = express.Router();
-const subprojects = require("../model/subproject");
+const locations = require("../model/location");
 const ErrorResponse = require('../model/error');
 
 require("dotenv").config();
@@ -20,17 +20,16 @@ if (!(name&&parentId)) {
   return;
 }
 var creationtime= (new Date(Date.now())).toISOString();
-var newSubProject = {
+var newLocation = {
     "name":name,
     "description":description,    
     "createdby":createdby,
     "url":url,    
     "isdeleted":false,
-    "createdat":creationtime,
-    "assignedto":[] ,
+    "createdat":creationtime,    
     "parentId":parentId   
 } 
-var result = await subprojects.addSubProject(newSubProject);    
+var result = await locations.addLocation(newLocation);    
 if(result.error){
     res.status(result.error.code).json(result.error);
   }
@@ -50,8 +49,8 @@ router.route('/:id')
 .get(async function(req,res){
   try{
     var errResponse;
-    const subprojectId = req.params.id;
-    var result = await subprojects.getSubProjectById( subprojectId);
+    const locationId = req.params.id;
+    var result = await locations.getLocationById( locationId);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -69,7 +68,7 @@ router.route('/:id')
   try{
     var errResponse;
     const { name, description,url,lasteditedby,parentId} = req.body;
-    const subprojectId = req.params.id;
+    const locationId = req.params.id;
     // Validate user input
     if (!(name&&description&&url&&lasteditedby)) {
       errResponse = new ErrorResponse(500, "name,description,url,lasteditedby are required", "");
@@ -77,17 +76,17 @@ router.route('/:id')
       return;
     }
     var editedat=(new Date(Date.now())).toISOString();
-    var editedProject = {
-        "name":name,
-        "id": subprojectId,
+    var editedLocation = {
+        "name":name,        
         "description":description,            
-        "url":url,  
+        "url":url,
+        "id"  :locationId,
         "lasteditedby":lasteditedby,
         "editedat":editedat,
         "parentId":parentId
     }
   
-    var result = await subprojects.updateSubProject(editedProject);
+    var result = await subprojects.updateSubProject(editedLocation);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -105,8 +104,8 @@ router.route('/:id')
 .delete(async function(req,res){
   try{
     var errResponse;
-    const subprojectId = req.params.id;
-    var result = await subprojects.deleteSubProjectPermanently(subprojectId);
+    const locationId = req.params.id;
+    var result = await locations.deleteLocationPermanently(locationId);
     if (result.error) { 
       res.status(result.error.code).json(result.error); 
     }
@@ -121,53 +120,13 @@ router.route('/:id')
   }
 });
 
-router.route('/:id/assign')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const subprojectId = req.params.id;
-    const {username} = req.body;
-    var result = await subprojects.assignSubProjectToUser(subprojectId,username);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-    res.status(500).json(errResponse);
-  }
-});
-
-router.route('/:id/unassign')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const subprojectId = req.params.id;
-    const {username} = req.body;
-    var result = await subprojects.unassignUserFromSubProject(subprojectId,username);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
-
 router.route('/:id/addchild')
 .post(async function(req,res){
   try {
     var errResponse;
-    const subprojectId = req.params.id;
+    const locationId = req.params.id;
     const {id,name} = req.body;//type=location always
-    var result = await subprojects.addRemoveChildren(subprojectId,true,{id,name,type:"location"});
+    var result = await locations.addRemoveSections(locationId,true,{id,name,type:"location"});
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -185,9 +144,9 @@ router.route('/:id/removechild')
 .post(async function(req,res){
   try {
     var errResponse;
-    const subprojectId = req.params.id;
+    const locationId = req.params.id;
     const {id,name,type} = req.body;
-    var result = await subprojects.addRemoveChildren(subprojectId,false,{id,name,type:"location"});
+    var result = await locations.addRemoveSections(locationId,false,{id,name,type:"location"});
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -205,10 +164,10 @@ router.route('/:id/toggleVisibility/')
 .post(async function(req,res){
   try {
     var errResponse;
-    const subprojectId = req.params.id;
+    const locationId = req.params.id;
     const {parentId,isVisible,name} = req.body;
     
-    var result = await subprojects.updateSubProjectVisibilityStatus(subprojectId,name,parentId,isVisible);
+    var result = await locations.updateLocationVisibilityStatus(locationId,name,parentId,isVisible);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }

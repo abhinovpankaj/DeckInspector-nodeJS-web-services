@@ -11,7 +11,17 @@ var addSubProject = async function (subproject) {
         var result = await mongo.SubProjects.insertOne(subproject);
     
         if(result.insertedId){   
-            var projresult = await mongo.Projects.updateOne({_id:new ObjectId(subproject.parentId)},{ $push: { children: {"id":result.insertedId,"name":subproject.name,"type":"subproject"}}});     
+            var projresult = await mongo.Projects.updateOne({_id:new ObjectId(subproject.parentId)},{ $push: 
+                { 
+                    children: 
+                    {"id":result.insertedId,
+                    "description":subproject.description,
+                    "name":subproject.name,
+                    "type":"subproject",
+                    "url": subproject.url
+                }
+            }
+        });     
             if (projresult.modifiedCount>0)
             {
                 var msg = "SubProject inserted successfully,parent project updated successfully."

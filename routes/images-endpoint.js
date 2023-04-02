@@ -23,7 +23,9 @@ router.route('/upload')
         var result= await uploadBlob.uploadImage(containerName,blobName,filePath,uploadOptions);
         var response = JSON.parse(result);
         if(response.error){
-            res.status(500).send(`Internal server error ${result.error}`);
+            var responseError = ErrorResponse(500,'Internal server error',result.error);              
+            
+            res.status(500).send(responseError);
         }
         if(response.message)
         {
