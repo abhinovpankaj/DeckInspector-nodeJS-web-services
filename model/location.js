@@ -63,7 +63,13 @@ var addLocation = async function (location) {
         }
         return response;
     } catch (error) {
-
+        response = {
+            "error": {
+                "code": 500,
+                "message": "No Location inserted.",
+                "err":error
+            }
+        }
     }
 
 };
