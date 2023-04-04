@@ -164,7 +164,7 @@ var updateSectionVisibilityStatus = async function (id,name,parentId,isVisible) 
             }                
             else{
                 
-                var projresult = await mongo.Projects.updateOne({_id:new ObjectId(parentId)},{ $push: { sections: {"id":new ObjectId(parentId),"name":name}}});
+                var projresult = await mongo.Locations.updateOne({_id:new ObjectId(parentId)},{ $push: { sections: {"id":new ObjectId(parentId),"name":name}}});
             }
                 
             if (projresult.modifiedCount>0)
@@ -241,13 +241,13 @@ var deleteSectionPermanently = async function (id) {
     
 };
 
-var addRemoveSections = async function(sectionId,isAdd,{id,name}){
+var addRemoveImages = async function(sectionId,isAdd,url){
     var response = {};
     try {
         if(isAdd)
-            var result = await mongo.Sections.updateOne({_id:new ObjectId(sectionId)},{ $push: { sections: {"id":id,"name":name}}});
+            var result = await mongo.Sections.updateOne({_id:new ObjectId(sectionId)},{ $push: { images: url}});
         else
-            var result = await mongo.Sections.updateOne({_id:new ObjectId(sectionId)},{ $pull: { sections: {"id":id,"name":name}}});
+            var result = await mongo.Sections.updateOne({_id:new ObjectId(sectionId)},{ $pull: { images: url}});
         
         if (result.matchedCount==0){
             response = {
@@ -261,7 +261,7 @@ var addRemoveSections = async function(sectionId,isAdd,{id,name}){
         if(result.modifiedCount==1){
             response = {
                 "data" :{                                   
-                    "message": "Section added/removed to/from the Section successfully.",
+                    "message": "image added/removed to/from the Section successfully.",
                     "code":201
                 }   
             };
@@ -294,5 +294,5 @@ module.exports = {
     deleteSectionPermanently,    
     updateSection,  
     getSectionById,        
-    addRemoveSections
+    addRemoveImages
 };

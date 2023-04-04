@@ -1,7 +1,7 @@
 "use strict";
 var express = require('express');
 var router = express.Router();
-const locations = require("../model/location");
+const locations = require("../model/sections");
 const ErrorResponse = require('../model/error');
 
 require("dotenv").config();
@@ -11,26 +11,37 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdby,url,parentid,parenttype } = req.body;
+
+const { name, exteriorelements, waterproofingelements,additionalconsiderations,
+  thumbnail,visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
+awe,eee,lbc,images,createdby,parentid } = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
-  errResponse = new ErrorResponse(400,"Name,parenttype and parentid is required","");
+  errResponse = new ErrorResponse(400,"Name and parentid is required","");
   res.status(400).json(errResponse);
   return;
 }
 var creationtime= (new Date(Date.now())).toISOString();
-var newLocation = {
+var newSection = {
     "name":name,
-    "description":description,    
-    "createdby":createdby,
-    "url":url,    
-    "isdeleted":false,
-    "createdat":creationtime,    
+    "exteriorelements":exteriorelements,    
+    "waterproofingelements":waterproofingelements,
+    "additionalconsiderations":additionalconsiderations,    
+    "thumbnail":thumbnail,
+    "visualreview":visualreview,   
+    "isdeleted":false, 
     "parentid":parentid,
-    "parenttype": parenttype
+    "visualsignsofleak": visualsignsofleak,
+    "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
+    "conditionalassessment":conditionalassessment,   
+    "awe":awe, 
+    "eee":eee,
+    "lbc": lbc,
+    "images":images,
+    "createdby":createdby
 } 
-var result = await locations.addLocation(newLocation);    
+var result = await sections.addSection(newSection);    
 if(result.error){
     res.status(result.error.code).json(result.error);
   }
@@ -50,8 +61,8 @@ router.route('/:id')
 .get(async function(req,res){
   try{
     var errResponse;
-    const locationId = req.params.id;
-    var result = await locations.getLocationById( locationId);
+    const sectionId = req.params.id;
+    var result = await sections.getSectionById( sectionId);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -68,26 +79,39 @@ router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
-    const { name, description,url,lasteditedby,parentId} = req.body;
+    const { name, exteriorelements, waterproofingelements,additionalconsiderations,
+      thumbnail,visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
+    awe,eee,lbc,lasteditedby,parentid } = req.body;
     const locationId = req.params.id;
     // Validate user input
-    if (!(name&&description&&url&&lasteditedby)) {
-      errResponse = new ErrorResponse(500, "name,description,url,lasteditedby are required", "");
+    if (!(name&&lasteditedby&&parentid)) {
+      errResponse = new ErrorResponse(500, "name,parentid,lasteditedby are required", "");
       res.status(500).json(errResponse);
       return;
     }
     var editedat=(new Date(Date.now())).toISOString();
-    var editedLocation = {
-        "name":name,        
-        "description":description,            
-        "url":url,
-        "id"  :locationId,
-        "lasteditedby":lasteditedby,
-        "editedat":editedat,
-        "parentId":parentId
-    }
+    
+    var editedSection = {
+      "name":name,
+      "exteriorelements":exteriorelements,    
+      "waterproofingelements":waterproofingelements,
+      "additionalconsiderations":additionalconsiderations,    
+      "thumbnail":thumbnail,
+      "visualreview":visualreview,   
+      "isdeleted":false, 
+      "parentid":parentid,
+      "visualsignsofleak": visualsignsofleak,
+      "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
+      "conditionalassessment":conditionalassessment,   
+      "awe":awe, 
+      "eee":eee,
+      "lbc": lbc,
+      "images":images,
+      "lasteditedby":lasteditedby,
+      "editedat":editedat,
+  } 
   
-    var result = await locations.updateLocation(editedLocation);
+    var result = await sections.updateSection(editedSection);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -105,8 +129,8 @@ router.route('/:id')
 .delete(async function(req,res){
   try{
     var errResponse;
-    const locationId = req.params.id;
-    var result = await locations.deleteLocationPermanently(locationId);
+    const sectionId = req.params.id;
+    var result = await sections.deleteLocationPermanently(sectionId);
     if (result.error) { 
       res.status(result.error.code).json(result.error); 
     }
@@ -121,13 +145,13 @@ router.route('/:id')
   }
 });
 
-router.route('/:id/addchild')
+router.route('/:id/addimage')
 .post(async function(req,res){
   try {
     var errResponse;
-    const locationId = req.params.id;
-    const {id,name} = req.body;//type=location always
-    var result = await locations.addRemoveSections(locationId,true,{id,name,type:"location"});
+    const sectionId = req.params.id;
+    const {url} = req.body;
+    var result = await locations.addRemoveImages(sectionId,true,url);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -141,13 +165,13 @@ router.route('/:id/addchild')
   }
 });
 
-router.route('/:id/removechild')
+router.route('/:id/removeimage')
 .post(async function(req,res){
   try {
     var errResponse;
-    const locationId = req.params.id;
-    const {id,name,type} = req.body;
-    var result = await locations.addRemoveSections(locationId,false,{id,name,type:"location"});
+    const sectionId = req.params.id;
+    const {url} = req.body
+    var result = await sections.addRemoveImages(sectionId,false,url);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -168,7 +192,7 @@ router.route('/:id/toggleVisibility/')
     const locationId = req.params.id;
     const {parentId,isVisible,name} = req.body;
     
-    var result = await locations.updateLocationVisibilityStatus(locationId,name,parentId,isVisible);
+    var result = await sections.updateSectionVisibilityStatus(locationId,name,parentId,isVisible);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
