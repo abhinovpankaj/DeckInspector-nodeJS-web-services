@@ -68,7 +68,7 @@ router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
-    const { name, description,url,lasteditedby,parentId} = req.body;
+    const { name, description,url,lasteditedby,parentid} = req.body;
     const locationId = req.params.id;
     // Validate user input
     if (!(name&&description&&url&&lasteditedby)) {
@@ -84,7 +84,7 @@ router.route('/:id')
         "id"  :locationId,
         "lasteditedby":lasteditedby,
         "editedat":editedat,
-        "parentId":parentId
+        "parentId":parentid
     }
   
     var result = await locations.updateLocation(editedLocation);

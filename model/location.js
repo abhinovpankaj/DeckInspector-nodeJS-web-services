@@ -11,7 +11,7 @@ var addLocation = async function (location) {
         
         if (result.insertedId) {
             if (location.parenttype == "subproject")
-                var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(location.parentId) }, {
+                var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(location.parentid) }, {
                     $push:
                     {
                         children:
