@@ -1,7 +1,7 @@
 "use strict";
 var express = require('express');
 var router = express.Router();
-const locations = require("../model/sections");
+const sections = require("../model/sections");
 const ErrorResponse = require('../model/error');
 
 require("dotenv").config();
@@ -39,7 +39,8 @@ var newSection = {
     "eee":eee,
     "lbc": lbc,
     "images":images,
-    "createdby":createdby
+    "createdby":createdby,
+    "createdat":creationtime
 } 
 var result = await sections.addSection(newSection);    
 if(result.error){
@@ -92,6 +93,7 @@ router.route('/:id')
     var editedat=(new Date(Date.now())).toISOString();
     
     var editedSection = {
+      "id":locationId,
       "name":name,
       "exteriorelements":exteriorelements,    
       "waterproofingelements":waterproofingelements,
@@ -105,8 +107,7 @@ router.route('/:id')
       "conditionalassessment":conditionalassessment,   
       "awe":awe, 
       "eee":eee,
-      "lbc": lbc,
-      "images":images,
+      "lbc": lbc,      
       "lasteditedby":lasteditedby,
       "editedat":editedat,
   } 

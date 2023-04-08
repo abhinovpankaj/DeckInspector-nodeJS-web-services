@@ -72,7 +72,7 @@ router.route('/:id')
     const locationId = req.params.id;
     // Validate user input
     if (!(name&&description&&url&&lasteditedby)) {
-      errResponse = new ErrorResponse(500, "name,description,url,lasteditedby are required", "");
+      errResponse = new ErrorResponse(500, "name,description,url and lasteditedby are required", "");
       res.status(500).json(errResponse);
       return;
     }
@@ -83,8 +83,7 @@ router.route('/:id')
         "url":url,
         "id"  :locationId,
         "lasteditedby":lasteditedby,
-        "editedat":editedat,
-        "parentId":parentid
+        "editedat":editedat        
     }
   
     var result = await locations.updateLocation(editedLocation);
