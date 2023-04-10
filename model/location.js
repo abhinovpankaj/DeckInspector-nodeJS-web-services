@@ -8,7 +8,7 @@ var addLocation = async function (location) {
     var response = {};
     try {
         var result = await mongo.Locations.insertOne(location);
-        
+
         if (result.insertedId) {
             if (location.parenttype == "subproject")
                 var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(location.parentid) }, {
@@ -19,7 +19,7 @@ var addLocation = async function (location) {
                             "id": result.insertedId,
                             "name": location.name,
                             "description": location.description,
-                            "url": location.url,                            
+                            "url": location.url,
                             "type": "location"
                         }
                     }
@@ -28,12 +28,12 @@ var addLocation = async function (location) {
                 var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(location.parentid) }, {
                     $push:
                     {
-                        children: 
+                        children:
                         {
                             "id": result.insertedId,
                             "name": location.name,
                             "description": location.description,
-                            "url": location.url,                            
+                            "url": location.url,
                             "type": "location"
                         }
                     }
@@ -67,7 +67,7 @@ var addLocation = async function (location) {
             "error": {
                 "code": 500,
                 "message": "No Location inserted.",
-                "err":error
+                "err": error
             }
         }
     }
@@ -139,7 +139,14 @@ var updateLocation = async function (location) {
                         {
                             "children.id": new ObjectId(location.id)
                         },
-                        { $set: { "children.$.name": location.name } },
+                        {
+                            $set:
+                            {
+                                "children.$.name": location.name,
+                                "children.$.description": location.description,
+                                "children.$.url": location.url,
+                            }
+                        },
                         { upsert: false });
                 }
                 else {
@@ -147,7 +154,14 @@ var updateLocation = async function (location) {
                         {
                             "children.id": new ObjectId(location.id)
                         },
-                        { $set: { "children.$.name": location.name } },
+                        {
+                            $set:
+                            {
+                                "children.$.name": location.name,
+                                "children.$.description": location.description,
+                                "children.$.url": location.url,
+                            }
+                        },
                         { upsert: false });
                 }
 
@@ -200,16 +214,41 @@ var updateLocationVisibilityStatus = async function (id, name, parentId, parentT
         if (result.modifiedCount == 1) {
             if (!isVisible) {
                 if (parentType == "subproject")
-                    var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(parentId) }, { $pull: { children: { "id": new ObjectId(parentId) } } });
+                    var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(parentId) }, { $pull: { children: { "id": new ObjectId(id) } } });
                 else
-                    var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, { $pull: { children: { "id": new ObjectId(parentId) } } });
+                    var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, { $pull: { children: { "id": new ObjectId(id) } } });
             }
 
             else {
+                const result = await mongo.Locations.findOne({ _id: new ObjectId(id) });
                 if (parentType == "subproject")
-                    var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(parentId) }, { $push: { children: { "id": new ObjectId(parentId), "name": name, "type": "location" } } });
+                    var projresult = await mongo.SubProjects.updateOne({ _id: new ObjectId(parentId) },
+                        {
+                            $push: {
+                                children:
+                                {
+                                    "id": new ObjectId(id),
+                                    "name": name,
+                                    "type": "location",
+                                    "description": result.description,
+                                    "url": result.url
+                                }
+                            }
+                        });
                 else
-                    var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, { $push: { children: { "id": new ObjectId(parentId), "name": name, "type": "location" } } });
+                    var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) },
+                        {
+                            $push: {
+                                children:
+                                {
+                                    "id": new ObjectId(id),
+                                    "name": name,
+                                    "type": "location",
+                                    "description": result.description,
+                                    "url": result.url
+                                }
+                            }
+                        });
             }
 
             if (projresult.modifiedCount > 0) {

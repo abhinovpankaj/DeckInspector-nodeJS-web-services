@@ -11,7 +11,7 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdby,url,parentId } = req.body;
+const { name, description, createdby,url,parentid } = req.body;
 
 // Validate user input
 if (!(name&&parentId)) {
@@ -28,7 +28,7 @@ var newSubProject = {
     "isdeleted":false,
     "createdat":creationtime,
     "assignedto":[] ,
-    "parentId":parentId   
+    "parentid": parentid   
 } 
 var result = await subprojects.addSubProject(newSubProject);    
 if(result.error){
@@ -68,7 +68,7 @@ router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
-    const { name, description,url,lasteditedby,parentId} = req.body;
+    const { name, description,url,lasteditedby,parentid} = req.body;
     const subprojectId = req.params.id;
     // Validate user input
     if (!(name&&description&&url&&lasteditedby)) {
@@ -84,7 +84,7 @@ router.route('/:id')
         "url":url,  
         "lasteditedby":lasteditedby,
         "editedat":editedat,
-        "parentId":parentId
+        "parentid":parentid
     }
   
     var result = await subprojects.updateSubProject(editedProject);
