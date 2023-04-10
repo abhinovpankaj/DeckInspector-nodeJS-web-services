@@ -14,7 +14,7 @@ var errResponse;
 const { name, description, createdby,url,parentid } = req.body;
 
 // Validate user input
-if (!(name&&parentId)) {
+if (!(name&&parentid)) {
   errResponse = new ErrorResponse(400,"Name and parentid is required","");
   res.status(400).json(errResponse);
   return;
