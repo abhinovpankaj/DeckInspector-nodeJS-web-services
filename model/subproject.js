@@ -267,7 +267,7 @@ var updateSubProjectVisibilityStatus = async function (id, name, parentId, isVis
         }
         if (result.modifiedCount == 1) {
             if (!isVisible)
-                var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, { $pull: { children: { "id": new ObjectId(parentId) } } });
+                var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, { $pull: { children: { "id": new ObjectId(id) } } });
             else{
                 const result = await mongo.SubProjects.findOne({ _id: new ObjectId(id) });
                 var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, {
@@ -322,12 +322,13 @@ var updateSubProjectVisibilityStatus = async function (id, name, parentId, isVis
     }
 };
 
-var deleteSubProjectPermanently = async function (id) {
+var deleteSubProjectPermanently = async function (id,parentId) {
     try {
         var result = await mongo.SubProjects.deleteOne({ _id: new ObjectId(id) });
 
         if (result.deletedCount == 1) {
-
+            var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) },
+             { $pull: { children: { "id": new ObjectId(id) } } });
             var response = {
                 "data": {
                     "message": "SubProject deleted successfully.",

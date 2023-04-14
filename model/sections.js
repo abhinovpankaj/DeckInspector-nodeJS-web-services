@@ -104,16 +104,16 @@ var updateSection = async function (section) {
                 waterproofingelements: section.waterproofingelements,
                 lasteditedby: section.lasteditedby,
                 editedat: section.editedat,
-                additionalconsiderations:section.additionalconsiderations,
-                visualreview:section.visualreview,
+                additionalconsiderations: section.additionalconsiderations,
+                visualreview: section.visualreview,
                 visualsignsofleak: section.visualsignsofleak,
-                furtherinvasivereviewrequired:section.furtherinvasivereviewrequired,
-                conditionalassessment:section.conditionalassessment,
-                eee:section.eee,
-                lbc:section.lbc,
-                awe:section.awe,
-                parentid:section.parentid
-                
+                furtherinvasivereviewrequired: section.furtherinvasivereviewrequired,
+                conditionalassessment: section.conditionalassessment,
+                eee: section.eee,
+                lbc: section.lbc,
+                awe: section.awe,
+                parentid: section.parentid
+
             }
         });
 
@@ -132,19 +132,22 @@ var updateSection = async function (section) {
                     {
                         "sections.id": new ObjectId(section.id)
                     },
-                    { $set: { 
-                        "sections.$.name": section.name ,                        
-                        "sections.$.visualsignsofleak": section.visualsignsofleak,
-                        "sections.$.furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
-                        "sections.$.conditionalassessment": section.conditionalassessment,
-                        "sections.$.visualreview": section.visualreview
-                    } },
+                    {
+                        $set: {
+                            "sections.$.name": section.name,
+                            "sections.$.visualsignsofleak": section.visualsignsofleak,
+                            "sections.$.furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
+                            "sections.$.conditionalassessment": section.conditionalassessment,
+                            "sections.$.visualreview": section.visualreview,
+                            //"sections.$.count":section.images.length
+                        }
+                    },
                     { upsert: false });
-                    if (projresult.modifiedCount > 0) {
-                        var msg = "Section updated successfully,parent updated successfully."
-                    }
-                    else
-                        var msg = "Section udated successfully,parent failed to updated."
+                if (projresult.modifiedCount > 0) {
+                    var msg = "Section updated successfully,parent updated successfully."
+                }
+                else
+                    var msg = "Section udated successfully,parent failed to updated."
                 response = {
                     "data": {
                         "message": msg,
@@ -181,7 +184,8 @@ var updateSectionVisibilityStatus = async function (id, name, parentId, isVisibl
     var response = {};
     try {
         //update the Projects collection as well.        
-        var result = await mongo.Sections.updateOne({ _id: new ObjectId(id) }, { $set: { isdeleted: !isVisible } });
+        var result = await mongo.Sections.updateOne({ _id: new ObjectId(id) },
+            { $set: { isdeleted: !isVisible } });
         if (result.matchedCount == 0) {
             response = {
                 "error": {
@@ -192,13 +196,29 @@ var updateSectionVisibilityStatus = async function (id, name, parentId, isVisibl
             return response;
         }
         if (result.modifiedCount == 1) {
+            const sectionDetails = await mongo.Sections.findOne({ _id: new ObjectId(id) });
             if (!isVisible) {
 
-                var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) }, { $pull: { sections: { "id": new ObjectId(parentId) } } });
+                var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) },
+                    { $pull: { sections: { "id": new ObjectId(id) } } });
             }
             else {
 
-                var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) }, { $push: { sections: { "id": new ObjectId(parentId), "name": name } } });
+                var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) },
+                    {
+                        $push:
+                        {
+                            sections:
+                            {
+                                "id": new ObjectId(id),
+                                "name": name,
+                                "visualsignsofleak": sectionDetails.visualsignsofleak,
+                                "furtherinvasivereviewrequired": sectionDetails.furtherinvasivereviewrequired,
+                                "conditionalassessment": sectionDetails.conditionalassessment,
+                                "visualreview": sectionDetails.visualreview,
+                            }
+                        }
+                    });
             }
 
             if (projresult.modifiedCount > 0) {
@@ -242,7 +262,8 @@ var deleteSectionPermanently = async function (id) {
         var result = await mongo.Sections.deleteOne({ _id: new ObjectId(id) });
 
         if (result.deletedCount == 1) {
-
+            var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) },
+            { $pull: { sections: { "id": new ObjectId(id) } } });
             var response = {
                 "data": {
                     "message": "Section deleted successfully.",
@@ -274,13 +295,38 @@ var deleteSectionPermanently = async function (id) {
 
 };
 
-var addRemoveImages = async function (sectionId, isAdd, url) {
+var addRemoveImages = async function (sectionId,count, isAdd, url) {
     var response = {};
     try {
-        if (isAdd)
-            var result = await mongo.Sections.updateOne({ _id: new ObjectId(sectionId) }, { $push: { images: url } });
-        else
-            var result = await mongo.Sections.updateOne({ _id: new ObjectId(sectionId) }, { $pull: { images: url } });
+        if (isAdd){
+            var result = await mongo.Sections.updateOne({ _id: new ObjectId(sectionId) }, 
+            { $push: { images: url } });
+
+            var projresult = await mongo.Locations.updateOne(
+                {
+                    "sections.id": new ObjectId(sectionId)
+                },
+                {
+                    $set: {
+                        "sections.$.count":++count
+                    }
+                });
+        
+        }
+        else{
+            var result = await mongo.Sections.updateOne({ _id: new ObjectId(sectionId) }, 
+            { $pull: { images: url } });
+            var projresult = await mongo.Locations.updateOne(
+                {
+                    "sections.id": new ObjectId(sectionId)
+                },
+                {
+                    $set: {
+                        "sections.$.count":--count
+                    }
+                });
+        }
+            
 
         if (result.matchedCount == 0) {
             response = {

@@ -197,7 +197,7 @@ var updateLocation = async function (location) {
 
 };
 //Soft Delete/undelete
-var updateLocationVisibilityStatus = async function (id, name, parentId, parentType, isVisible) {
+var updateLocationVisibilityStatus = async function (id,type, name, parentId, parentType, isVisible) {
     var response = {};
     try {
         //update the Projects collection as well.        
@@ -229,7 +229,7 @@ var updateLocationVisibilityStatus = async function (id, name, parentId, parentT
                                 {
                                     "id": new ObjectId(id),
                                     "name": name,
-                                    "type": "location",
+                                    "type": type,
                                     "description": result.description,
                                     "url": result.url
                                 }
