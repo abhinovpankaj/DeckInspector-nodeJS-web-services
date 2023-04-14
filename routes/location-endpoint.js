@@ -166,9 +166,9 @@ router.route('/:id/toggleVisibility/')
   try {
     var errResponse;
     const locationId = req.params.id;
-    const {parentId,isVisible,name} = req.body;
+    const {type,parentId,parentType,isVisible,name} = req.body;
     
-    var result = await locations.updateLocationVisibilityStatus(locationId,name,parentId,isVisible);
+    var result = await locations.updateLocationVisibilityStatus(locationId,type,name,parentId,parentType,isVisible);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
