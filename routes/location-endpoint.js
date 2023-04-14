@@ -11,7 +11,7 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdby,url,parentid,parenttype } = req.body;
+const { name, description, createdby,url,parentid,parenttype,type } = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -28,7 +28,8 @@ var newLocation = {
     "isdeleted":false,
     "createdat":creationtime,    
     "parentid":parentid,
-    "parenttype": parenttype
+    "parenttype": parenttype,
+    "type":type
 } 
 var result = await locations.addLocation(newLocation);    
 if(result.error){
