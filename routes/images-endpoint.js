@@ -43,7 +43,7 @@ router.route('/upload')
             var response = JSON.parse(result);
             if (response.error) {
                 responseError = new ErrorResponse(500, 'Internal server error', result.error);
-
+                console.log(response);
                 res.status(500).json(responseError);
                 return;
             }
@@ -55,6 +55,7 @@ router.route('/upload')
             return;
 
         } catch (err) {
+            console.log(err);
             errResponse = new ErrorResponse(500, "Internal server error", err);
             res.status(500).json(errResponse);
         }
