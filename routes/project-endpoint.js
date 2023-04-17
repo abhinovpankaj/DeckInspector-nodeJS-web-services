@@ -78,6 +78,7 @@ router.route('/filterprojects')
       var result = await projects.getProjectsByNameCreatedOnIsCompletedAndDeleted({ name, isdeleted, iscomplete, createdon });
       if (result.error) {
         res.status(result.error.code).json(result.error);
+        
       }
       if (result.data) {
         //console.debug(result);
@@ -117,7 +118,9 @@ router.route('/:id')
       const projectId = req.params.id;
       // Validate user input
       if (!(name && description && address && lasteditedby)) {
-        res.status(400).send("all inputs are required");
+        errResponse = new ErrorResponse(400, "name,description,address and lasteditedby is required", "");
+        res.status(400).json(errResponse);
+        return;
       }
       var editedat = (new Date(Date.now())).toISOString();
       var editedProject = {
@@ -133,10 +136,12 @@ router.route('/:id')
       var result = await projects.updateProject(editedProject);
       if (result.error) {
         res.status(result.error.code).json(result.error);
+        return;
       }
       if (result.data) {
         //console.debug(result);                                          
         res.status(201).json(result.data);
+        return;
       }
     }
 
