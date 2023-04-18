@@ -8,6 +8,7 @@ const ErrorResponse = require('../model/error');
 var multer = require('multer');
 var upload = multer({ dest: 'uploads/' });
 const bodyParser = require('body-parser');
+var image = require('../model/image');
 
 require("dotenv").config();
 
@@ -22,12 +23,13 @@ router.route('/upload')
     .post(upload.single("picture"), async function (req, res) {
         var errResponse;
         try {
-            const { containerName, uploader, entityName } = req.body;
+            const { containerName, uploader, entityName,id,
+                  lasteditedby, editedat, 
+                 type, parentType} = req.body;
             const filetoUpload = req.file;
             const uploadOptions = {
                 metadata: {
                     'uploader': uploader,
-
                 },
                 tags: {
                     'project': containerName,
@@ -49,6 +51,10 @@ router.route('/upload')
             }
             if (response.message) {
                 res.status(201).json(response);
+                //Update images Url
+                image.updateImageURL(id,
+                    response.url, lasteditedby, editedat, 
+                    type, parentType);
             }
             else
                 res.status(409).json(response);

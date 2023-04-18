@@ -3,7 +3,7 @@ var ObjectId = require('mongodb').ObjectId;
 const { QueryCollectionFormat } = require('@azure/core-http');
 const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
-const user = require('./user');
+
 
 var addProject = async function (project) {
     var result = await mongo.Projects.insertOne(project);
@@ -257,6 +257,8 @@ var getProjectsByNameCreatedOnIsCompletedAndDeleted= async function({
     }
    
 }
+
+
 
 var updateProject = async function (project) {
     var response ={};
@@ -557,5 +559,5 @@ module.exports = {
     getAllProjects,assignProjectToUser,
     getAllFilesOfProject,unassignUserFromProject,
     addRemoveChildren
-
+    
 };
