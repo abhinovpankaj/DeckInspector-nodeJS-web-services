@@ -23,8 +23,9 @@ router.route('/upload')
     .post(upload.single("picture"), async function (req, res) {
         var errResponse;
         try {
+            var editedat = (new Date(Date.now())).toISOString();
             const { containerName, uploader, entityName,id,
-                  lasteditedby, editedat, 
+                  lasteditedby, 
                  type, parentType} = req.body;
             const filetoUpload = req.file;
             const uploadOptions = {
