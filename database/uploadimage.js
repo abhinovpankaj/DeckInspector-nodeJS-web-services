@@ -11,6 +11,7 @@ require("dotenv").config();
 async function uploadFile(containerName, blobName, localFileWithPath, uploadOptions) {
 
   try {
+    console.log(containerName+ blobName+ localFileWithPath+ uploadOptions);
     const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
     if (!accountName) return ('{"error":"Azure Storage accountName not found"}');
 
@@ -22,13 +23,13 @@ async function uploadFile(containerName, blobName, localFileWithPath, uploadOpti
         access: 'blob'
       };
       var response = await containerClient.createIfNotExists(options);   
-
+      console.log(response);
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     //blockBlobClient.createIfNotExists();
     // upload file to blob storage
     var uploadResult = await blockBlobClient.uploadFile(localFileWithPath, uploadOptions);
     return (`{"message":"${blobName} succeeded","url":"${blockBlobClient.url}"}`);
-
+    console.log(uploadResult);
   } catch (err) {
     return (`{"error": "${err.message}"}`);
   }
