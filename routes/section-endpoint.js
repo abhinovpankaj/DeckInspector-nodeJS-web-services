@@ -40,7 +40,8 @@ var newSection = {
     "lbc": lbc,
     "images":images,
     "createdby":createdby,
-    "createdat":creationtime
+    "createdat":creationtime,
+    "images":[]
 } 
 var result = await sections.addSection(newSection);    
 if(result.error){
@@ -110,6 +111,7 @@ router.route('/:id')
       "lbc": lbc,      
       "lasteditedby":lasteditedby,
       "editedat":editedat,
+      
   } 
   
     var result = await sections.updateSection(editedSection,count);
