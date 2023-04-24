@@ -82,10 +82,33 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
                             { upsert: false });
                     }                        
                 break;
+                case 'section':
+                var result = await mongo.Sections.updateOne({ _id: new ObjectId(id) },
+                    {
+                        $addToSet: { images: imageUrl },
+
+                        $set:
+                        {
+                            lasteditedby: lasteditedby,
+                            editedat: editedat
+                        }
+                    });
+                    var projresult = await mongo.Locations.updateOne(
+                        {
+                            "children.id": new ObjectId(id)
+                        },
+                        {
+                            $set:
+                            {                                
+                                "children.$.url": imageUrl,                               
+                            }
+                        },
+                        { upsert: false });
+                break;
             default:
                 break;
         }
-
+        
 
         if (result.matchedCount < 1) {
             response = {

@@ -82,7 +82,7 @@ router.route('/:id')
     var errResponse;
     const { name, exteriorelements, waterproofingelements,additionalconsiderations,
       thumbnail,visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
-    awe,eee,lbc,lasteditedby,parentid } = req.body;
+    awe,eee,lbc,lasteditedby,parentid,count } = req.body;
     const locationId = req.params.id;
     // Validate user input
     if (!(name&&lasteditedby&&parentid)) {
@@ -112,7 +112,7 @@ router.route('/:id')
       "editedat":editedat,
   } 
   
-    var result = await sections.updateSection(editedSection);
+    var result = await sections.updateSection(editedSection,count);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }

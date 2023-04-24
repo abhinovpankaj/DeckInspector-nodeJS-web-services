@@ -94,7 +94,7 @@ var getSectionById = async function (id) {
 };
 //details will be a flexible structure of the form.
 //images: array of image urls
-var updateSection = async function (section) {
+var updateSection = async function (section,count) {
     var response = {};
     try {
         var result = await mongo.Sections.updateOne({ _id: new ObjectId(section.id) }, {
@@ -139,7 +139,7 @@ var updateSection = async function (section) {
                             "sections.$.furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
                             "sections.$.conditionalassessment": section.conditionalassessment,
                             "sections.$.visualreview": section.visualreview,
-                            //"sections.$.count":section.images.length
+                            "sections.$.count":count
                         }
                     },
                     { upsert: false });
