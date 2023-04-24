@@ -95,12 +95,12 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
                     });
                     var projresult = await mongo.Locations.updateOne(
                         {
-                            "children.id": new ObjectId(id)
+                            "sections.id": new ObjectId(id)
                         },
                         {
                             $set:
                             {                                
-                                "children.$.url": imageUrl,                               
+                                "sections.$.url": imageUrl,                               
                             }
                         },
                         { upsert: false });
@@ -114,7 +114,7 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
             response = {
                 "error": {
                     "code": 401,
-                    "message": "No Project found."
+                    "message": "No matching entity found"
                 }
             }
             return response;
@@ -122,7 +122,7 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
             if (result.modifiedCount == 1) {
                 response = {
                     "data": {
-                        "message": "Project image updated successfully.",
+                        "message": "Image url updated successfully.",
                         "code": 201
                     }
                 };
@@ -131,7 +131,7 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
             else {
                 response = {
                     "data": {
-                        "message": "Failed to update the project image.",
+                        "message": "Failed to update the entity image.",
                         "code": 409
                     }
                 };
@@ -143,7 +143,7 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
         response = {
             "error": {
                 "code": 500,
-                "message": "Error fetching project.",
+                "message": "Error fetching entity or applying changes.",
                 "errordata": err
             }
         }
