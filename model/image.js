@@ -96,13 +96,9 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
                         {
                             "sections.id": new ObjectId(id)
                         },
-                        {
-                            $set:
-                            {                                
-                                "sections.$.url": imageUrl, 
-                                                            
-                            }
-                        }, {$inc:"sections.$.count"} ,
+                        
+                        { $set:{ "sections.$.url": imageUrl}, $inc: { "sections.$.count": 1 }}
+                        , 
                         { upsert: false });
                 break;
             default:
