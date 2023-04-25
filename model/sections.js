@@ -140,7 +140,7 @@ var updateSection = async function (section,count) {
                             "sections.$.furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
                             "sections.$.conditionalassessment": section.conditionalassessment,
                             "sections.$.visualreview": section.visualreview,
-                            "sections.$.count":count
+                            
                         }
                     },
                     { upsert: false });
