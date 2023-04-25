@@ -21,7 +21,8 @@ var addSection = async function (section) {
                         "visualsignsofleak": section.visualsignsofleak,
                         "furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
                         "conditionalassessment": section.conditionalassessment,
-                        "visualreview": section.visualreview
+                        "visualreview": section.visualreview,
+                        "count":0
                     }
                 }
             }

@@ -13,7 +13,6 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
                     {
                         $set:
                         {
-
                             url: imageUrl,
                             lasteditedby: lasteditedby,
                             editedat: editedat
@@ -100,9 +99,10 @@ var updateImageURL = async function (id, imageUrl, lasteditedby, editedat, type,
                         {
                             $set:
                             {                                
-                                "sections.$.url": imageUrl,                               
+                                "sections.$.url": imageUrl, 
+                                                            
                             }
-                        },
+                        }, {$inc:"sections.$.count"} ,
                         { upsert: false });
                 break;
             default:
