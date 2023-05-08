@@ -1,0 +1,13 @@
+<table style="page-break-after: always;">  
+    <tbody>
+      <% for (var i = 0; i < images.length; i +=5) { %>
+        <tr style="font-size: 12px; border: 1px solid #E3F1D5;">
+          <% for (var j = i; j < Math.min(i + 5, images.length); j++) { %>
+            <td style="width: <%= (100 / factor) %>% ; text-align: center; border: thin;">
+              <img style="display: block; width: <%= (750 / factor) %>px; height: <%= Math.round(750 / factor * 1.25) %>px; margin: 0px;" src="<%= images[j].compressedUrl %>" />
+            </td>
+          <% } %>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
