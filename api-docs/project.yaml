@@ -54,3 +54,26 @@ paths:
           description: No projects founds.
         500:
           description: Internal server error.
+
+  /api/project/{id}/generatereport:
+    get:
+      tags:
+        [Project]
+      summary: Generate Project Report
+      description: Generates a PDF report for a specific project.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the project.
+      responses:
+        '200':
+          description: Successful operation. The PDF report is generated and returned.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
