@@ -10,11 +10,9 @@ const template = fs.readFileSync(filePath, 'utf8');
 
 const replaceSectionInTemplate = async function name(sectionId) {
     try {
-        const section =  await sections.getSectionById( sectionId);
-        //console.log(section);
-        const html_section = ejs.render(template, section);
-        const images_html = await replaceImagesInTemplate(section.images);
-        //console.log(images.html);
+        const sectionData =  await sections.getSectionById( sectionId);
+        const html_section = ejs.render(template, sectionData.data.item);
+        const images_html = await replaceImagesInTemplate(sectionData.data.item.images);
         return html_section + images_html;
       } catch (err) {
         console.error(err);

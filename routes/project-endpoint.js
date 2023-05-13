@@ -3,6 +3,10 @@ var express = require('express');
 var router = express.Router();
 const projects = require("../model/project");
 const ErrorResponse = require('../model/error');
+const path = require('path');
+const fs = require('fs'); 
+const {generateProjectReport}= require('../service/projectreportgeneration.js');
+
 
 require("dotenv").config();
 
@@ -31,7 +35,6 @@ router.route('/add')
         "isdeleted": false,
         "createdat": creationtime,
         "assignedto": []
-
       }
       var result = await projects.addProject(newProject);
       if (result.error) {
@@ -48,7 +51,7 @@ router.route('/add')
     }
   });
 
-router.route('/allprojects')
+  router.route('/allprojects')
   .get(async function (req, res) {
     try {
       var errResponse;
@@ -312,5 +315,29 @@ router.route('/:id/toggleprojectstatus/:state')
       res.status(500).json(errResponse);
     }
   });
+
+
+router.route('/:id/generatereport')
+.get(async function (req, res) {
+  try {
+    const projectId = req.params.id;
+    console.log(projectId);
+    const pdfFilePath = await generateProjectReport(projectId);
+    const absolutePath = path.resolve(pdfFilePath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="example.pdf"');
+    res.sendFile(absolutePath, {}, (err) => {
+      if (err) {
+        console.error('Error sending file:', err);
+      } else {
+        console.log('PDF sent successfully');
+        fs.unlinkSync(absolutePath);
+      }
+    });
+  } catch (err) {
+    console.error('Error generating PDF:', err);
+    res.status(500).send('Error generating PDF');
+  }
+});
 
 module.exports = router;
