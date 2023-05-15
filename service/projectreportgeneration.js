@@ -30,7 +30,6 @@ const generateProjectReport = async function generate(projectId)
         for (let key in locsHtmls) {
             projectHtml += locsHtmls[key];
         }
-        fs.writeFileSync('project.html', projectHtml);
         const path = await generatePdfFile(project.data.item.name,projectId,projectHtml);
         return path;
         }
