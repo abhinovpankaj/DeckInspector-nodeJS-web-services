@@ -1,13 +1,58 @@
-<table style="page-break-after: always;">  
-    <tbody>
-      <% for (var i = 0; i < images.length; i +=5) { %>
-        <tr style="font-size: 12px; border: 1px solid #E3F1D5;">
-          <% for (var j = i; j < Math.min(i + 5, images.length); j++) { %>
-            <td style="width: <%= (100 / factor) %>% ; text-align: center; border: thin;">
-              <img style="display: block; width: <%= (750 / factor) %>px; height: <%= Math.round(750 / factor * 1.25) %>px; margin: 0px;" src="<%= images[j].compressedUrl %>" />
-            </td>
+<style>
+  body {
+      font-family: Nunito, sans-serif;
+      color: darkslategray;
+  }
+  
+  table {
+      width: 750px;
+      margin: 5px auto;
+      border-collapse: collapse;
+      border: 1px solid #E3F1D5;
+      background-color: #F0F0F0;
+  }
+  
+  th {
+      font-size: 14px;
+      border: 1px solid #E3F1D5;
+      background-color: #888888;
+      padding: 8px;
+      margin: 10px;
+      text-align: center;
+      color: white;
+  }
+  
+  td {
+      font-size: 12px;
+      border: 1px solid #E3F1D5;
+      text-align: center;
+      padding: 8px;
+  }
+  
+  img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 250px;
+      margin: 0 auto;
+  }
+</style>
+
+<table>
+  <thead>
+      <tr>
+          <th colspan="4" >Visual Photos</th>
+      </tr>
+  </thead>
+  <tbody>
+      <% for (var i = 0; i < images.length; i += 4) { %>
+      <tr>
+          <% for (var j = i; j < Math.min(i + 4, images.length); j++) { %>
+          <td>
+              <img src="<%= images[j].compressedUrl %>" />
+          </td>
           <% } %>
-        </tr>
+      </tr>
       <% } %>
-    </tbody>
-  </table>
+  </tbody>
+</table>

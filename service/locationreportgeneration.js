@@ -7,8 +7,6 @@ const path = require('path');
 const generateReportForLocation = async function(locationId) {
     try {
         var location = await locations.getLocationById(locationId);
-        console.log("Location Data : " ,location );
-
         const sectionHtmls = await getSectionhtmls(location.data.item.sections);
         let locationhtml = '';
         for (let key in sectionHtmls) {
