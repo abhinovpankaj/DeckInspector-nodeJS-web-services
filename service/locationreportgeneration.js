@@ -3,11 +3,12 @@ const {replaceSectionInTemplate} = require("./sectionreportgeneration.js");
 const fs = require('fs');
 const { Worker } = require('worker_threads');
 const path = require('path');
+const { getSectionHeader } = require("./getSectionHeader");
 
 const generateReportForLocation = async function(locationId) {
     try {
         var location = await locations.getLocationById(locationId);
-        const sectionHtmls = await getSectionhtmls(location.data.item.sections);
+        const sectionHtmls = await getSectionhtmls(location,location.data.item.sections);
         let locationhtml = '';
         for (let key in sectionHtmls) {
           locationhtml += sectionHtmls[key];
@@ -18,15 +19,16 @@ const generateReportForLocation = async function(locationId) {
       }
   }
 
-  const getSectionhtmls = async function(sections)
+  const getSectionhtmls = async function(location,sections)
   {
     try{
         const promises = [];
         const sectionhtmls = [];
         for (let key in sections) {
+            sectionhtmls[key] = await getSectionHeader(location,sections[key].name);
             const promise = replaceSectionInTemplate(sections[key].id)
               .then((section_html) => {
-               sectionhtmls[key] = section_html;
+               sectionhtmls[key] += section_html;
               });
             promises.push(promise);
           }
@@ -36,4 +38,5 @@ const generateReportForLocation = async function(locationId) {
         console.log(error);
     }
   }
+
 module.exports = {generateReportForLocation};

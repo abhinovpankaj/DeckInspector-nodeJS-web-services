@@ -17,8 +17,9 @@ const generateProjectReport = async function generate(projectId)
         const promises = [];
         const locsHtmls = []; 
         let projectHtml = ejs.render(template, project.data.item);
-        for (let key in project.data.item.children) {
-            const promise = getReport(project.data.item.children[key])
+        const orderedProjects = reOrderProjects(project.data.item.children);
+        for (let key in orderedProjects) {
+            const promise = getReport(orderedProjects[key])
             .then((loc_html) => {
              locsHtmls[key] = loc_html;
             });
@@ -29,13 +30,32 @@ const generateProjectReport = async function generate(projectId)
         for (let key in locsHtmls) {
             projectHtml += locsHtmls[key];
         }
+        fs.writeFileSync('project.html', projectHtml);
         const path = await generatePdfFile(project.data.item.name,projectId,projectHtml);
-        console.log("Path : " ,path);
         return path;
         }
     catch(err){
         console.log(err);
     }
+}
+
+const reOrderProjects = function(projects){
+
+    const orderedProjects = [];
+    const subProjects = [];
+    const locations = [];
+    for(let key in projects)
+    {
+        if(projects[key].type === "subproject")
+        {
+            subProjects.push(projects[key]);
+        }else if(projects[key].type === "location"){
+            locations.push(projects[key]);
+        }
+    }
+    orderedProjects.push(...subProjects);
+    orderedProjects.push(...locations);
+    return orderedProjects;
 }
 
 

@@ -4,12 +4,11 @@ const {generateReportForLocation} = require("./locationreportgeneration.js")
 const generateReportForSubProject = async function generateReportForSubProject(subProjectId)
 {
     const subProjectData = await subProject.getSubProjectById(subProjectId);
-    console.log("Sub Project Data : " ,subProjectData );
     const promises = [];
     const locsHtmls = [];
-    for (let key in subProjectData.data.item.children) {
-
-        const promise = generateReportForLocation(subProjectData.data.item.children[key].id)
+    const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
+    for (let key in orderdLocationsInSubProject) {
+        const promise = generateReportForLocation(orderdLocationsInSubProject[key].id)
             .then((loc_html) => {
              locsHtmls[key] = loc_html;
             });
@@ -21,9 +20,26 @@ const generateReportForSubProject = async function generateReportForSubProject(s
     for (let key in locsHtmls) {
         subProjectHtml += locsHtmls[key];
     }
-
-       
     return subProjectHtml;
+}
+
+const reordersubProjectLocations = function(locations){
+    const orderedlocationsInSubProjects = [];
+    const subProjectApartments = [];
+    const subProjectLocations = [];
+    for(let key in locations)
+    {
+        if(locations[key].type === "apartment")
+        {
+            subProjectApartments.push(locations[key]);
+        }
+        else if(locations[key].type === "location"){
+            subProjectLocations.push(locations[key]);
+        }
+    }
+    orderedlocationsInSubProjects.push(...subProjectApartments);
+    orderedlocationsInSubProjects.push(...subProjectLocations);
+    return orderedlocationsInSubProjects;
 }
 
 exports.generateReportForSubProject = generateReportForSubProject;
