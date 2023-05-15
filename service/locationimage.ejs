@@ -1,18 +1,17 @@
 <style>
-  body {
+    body {
       font-family: Nunito, sans-serif;
       color: darkslategray;
-  }
+    }
   
-  table {
+    .image-table {
       width: 750px;
       margin: 5px auto;
       border-collapse: collapse;
       border: 1px solid #E3F1D5;
-      background-color: #F0F0F0;
-  }
+    }
   
-  th {
+    .image-table th {
       font-size: 14px;
       border: 1px solid #E3F1D5;
       background-color: #888888;
@@ -20,39 +19,47 @@
       margin: 10px;
       text-align: center;
       color: white;
-  }
+    }
   
-  td {
+    .image-table td {
       font-size: 12px;
       border: 1px solid #E3F1D5;
       text-align: center;
       padding: 8px;
-  }
+    }
   
-  img {
+    .image {
       display: block;
       width: 100%;
       height: auto;
       max-height: 250px;
       margin: 0 auto;
-  }
-</style>
-
-<table>
-  <thead>
-      <tr>
-          <th colspan="4" >Visual Photos</th>
-      </tr>
-  </thead>
-  <tbody>
-      <% for (var i = 0; i < images.length; i += 4) { %>
-      <tr>
-          <% for (var j = i; j < Math.min(i + 4, images.length); j++) { %>
-          <td>
-              <img src="<%= images[j].compressedUrl %>" />
-          </td>
-          <% } %>
-      </tr>
+    }
+  </style>
+  
+  <% var tableCounter = 0; %>
+  <table class="image-table">
+    <% for (var i = 0; i < images.length; i += 4) { %>
+      <% if (i === 0) { %>
+        <thead>
+          <tr>
+            <th colspan="4">Visual Photos</th>
+          </tr>
+        </thead>
       <% } %>
-  </tbody>
-</table>
+      <tbody>
+        <tr>
+          <% for (var j = i; j < Math.min(i + 4, images.length); j++) { %>
+            <td>
+              <img class="image" src="<%= images[j].compressedUrl %>" />
+            </td>
+          <% } %>
+        </tr>
+      </tbody>
+      <% if ((i + 4) % 16 === 0 && i + 4 < images.length) { %>
+        </table>
+        <div style="page-break-before: always;"></div>
+        <table class="image-table">
+      <% } %>
+    <% } %>
+  </table>
