@@ -9,7 +9,13 @@ const generatePdfFile = async function (prefixName, id, htmlString) {
         const browserInstance = await puppeteer.launch();
         const page = await browserInstance.newPage();
         await page.setContent(htmlString);
-        await page.pdf({ path: pdfFilePath, format: 'A4' });
+        await page.pdf({ 
+        path: pdfFilePath, 
+        format: 'A4' ,
+        printBackground: true,
+        preferCSSPageSize: true,
+        colorProfile: 'sRGB',});
+        
         await browserInstance.close();
         console.log("PDF File Path : " + pdfFilePath);
         return pdfFilePath;

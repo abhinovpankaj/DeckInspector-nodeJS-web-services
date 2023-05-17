@@ -325,7 +325,7 @@ router.route('/:id/generatereport')
     const pdfFilePath = await generateProjectReport(projectId);
     const absolutePath = path.resolve(pdfFilePath);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="example.pdf"');
+    res.setHeader('Content-Disposition', `attachment; filename="${pdfFilePath}"`);
     res.sendFile(absolutePath, {}, (err) => {
       if (err) {
         console.error('Error sending file:', err);
