@@ -4,8 +4,6 @@ const generatePdfFile = async function (prefixName, id, htmlString) {
     try {
         const pdfFilePath = prefixName + " - " + id + ".pdf";
         console.log("PDF File Path : " + pdfFilePath);
-        //const puppeteerSingleton = new PuppeteerSingleton();
-        //const browserInstance = await puppeteerSingleton.getBrowserInstance();
         const browserInstance = await puppeteer.launch();
         const page = await browserInstance.newPage();
         await page.setContent(htmlString);
@@ -15,7 +13,7 @@ const generatePdfFile = async function (prefixName, id, htmlString) {
         printBackground: true,
         preferCSSPageSize: true,
         colorProfile: 'sRGB',});
-        
+
         await browserInstance.close();
         console.log("PDF File Path : " + pdfFilePath);
         return pdfFilePath;

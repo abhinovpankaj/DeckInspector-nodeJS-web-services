@@ -11,6 +11,14 @@
         color: darkslategray;
         font-family: Nunito, sans-serif;
     }
+
+    .bad{
+        color:red;
+    }
+
+    .good{
+        color:green;
+    }
 </style>
 
 <table class="MsoTableGrid" align="center">
@@ -41,7 +49,7 @@
             <td  style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Visual Review</strong></p>
             </td>
-            <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td  class="<%= visualreview === 'Bad' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= visualreview %>
             </td>
         </tr>
@@ -49,15 +57,15 @@
             <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Any Visual Signs of leaks</strong></p>
             </td>
-            <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td  class="<%= visualsignsofleak === 'False' ? 'good' : 'bad' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove; ">
                 <%= visualsignsofleak %>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
-            <td  style="width: 50%; text-align: left; padding: 8px; ">
+            <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Further Invasive Review Required</strong></p>
             </td>
-            <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td class="<%= furtherinvasivereviewrequired === 'False' ? 'good' : 'bad' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= furtherinvasivereviewrequired %>
             </td>
         </tr>
@@ -65,7 +73,7 @@
             <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Condition Assessment</strong></p>
             </td>
-            <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td class="<%= conditionalassessment === 'Fail' ? 'bad' : 'good' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= conditionalassessment %>
             </td>
         </tr>
@@ -81,7 +89,7 @@
             <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Life Expectancy (EEE)</strong></p>
             </td>
-            <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td  class="<%= eee === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= eee %>
             </td>
         </tr>
@@ -89,7 +97,7 @@
             <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Life Expectancy (LBC)</strong></p>
             </td>
-            <td style="width: 50%; text-align: left; padding: 8px; border-left: groove; ">
+            <td class="<%= lbc === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px; border-left: groove; ">
                 <%= lbc %>
             </td>
         </tr>
@@ -97,7 +105,7 @@
             <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p><strong>Life Expectancy (AWE)</strong></p>
             </td>
-            <td style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td class="<%= awe === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= awe %>
             </td>            
         </tr>

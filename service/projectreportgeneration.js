@@ -71,7 +71,6 @@ const getReport = async function(child){
     }catch(error){
         console.log(error);
     }
-    //console.log("Project Child : " ,child )
 }
 
 
