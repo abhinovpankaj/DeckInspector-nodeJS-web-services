@@ -8,12 +8,18 @@ const { getSectionHeader } = require("./getSectionHeader");
 const generateReportForLocation = async function(locationId) {
     try {
         var location = await locations.getLocationById(locationId);
-        const sectionHtmls = await getSectionhtmls(location,location.data.item.sections);
-        let locationhtml = '';
-        for (let key in sectionHtmls) {
-          locationhtml += sectionHtmls[key];
+        if(!(location.data))
+        {
+          return  "";
         }
-        return locationhtml;
+        else{
+          const sectionHtmls = await getSectionhtmls(location,location.data.item.sections);
+          let locationhtml = '';
+          for (let key in sectionHtmls) {
+            locationhtml += sectionHtmls[key];
+          }
+          return locationhtml;
+        }
       } catch (error) {
         console.log("Error is " + error);
       }
@@ -26,7 +32,7 @@ const generateReportForLocation = async function(locationId) {
         const sectionhtmls = [];
         for (let key in sections) {
             sectionhtmls[key] = await getSectionHeader(location,sections[key].name);
-            const promise = replaceSectionInTemplate(sections[key].id)
+            const promise = replaceSectionInTemplate(sections[key]._id)
               .then((section_html) => {
                sectionhtmls[key] += section_html;
               });

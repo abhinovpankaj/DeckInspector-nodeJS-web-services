@@ -8,7 +8,7 @@ const generateReportForSubProject = async function generateReportForSubProject(s
     const locsHtmls = [];
     const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
     for (let key in orderdLocationsInSubProject) {
-        const promise = generateReportForLocation(orderdLocationsInSubProject[key].id)
+        const promise = generateReportForLocation(orderdLocationsInSubProject[key]._id)
             .then((loc_html) => {
              locsHtmls[key] = loc_html;
             });
@@ -33,7 +33,7 @@ const reordersubProjectLocations = function(locations){
         {
             subProjectApartments.push(locations[key]);
         }
-        else if(locations[key].type === "location"){
+        else if(locations[key].type === "buildinglocation"){
             subProjectLocations.push(locations[key]);
         }
     }

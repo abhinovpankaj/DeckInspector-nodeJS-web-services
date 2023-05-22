@@ -48,7 +48,7 @@ const reOrderProjects = function(projects){
         if(projects[key].type === "subproject")
         {
             subProjects.push(projects[key]);
-        }else if(projects[key].type === "location"){
+        }else if(projects[key].type === "projectlocation"){
             locations.push(projects[key]);
         }
     }
@@ -60,12 +60,12 @@ const reOrderProjects = function(projects){
 
 const getReport = async function(child){
     try{
-        if(child.type === "location")
+        if(child.type === "projectlocation")
         {
-            const loc_html =  await generateReportForLocation(child.id);
+            const loc_html =  await generateReportForLocation(child._id);
             return loc_html;
         }else if(child.type === "subproject"){
-            const subProjectHtml = await generateReportForSubProject(child.id);
+            const subProjectHtml = await generateReportForSubProject(child._id);
             return subProjectHtml;
         }
     }catch(error){

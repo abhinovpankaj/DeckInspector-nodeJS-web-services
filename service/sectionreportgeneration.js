@@ -7,6 +7,14 @@ const {replaceImagesInTemplate} = require("./imagesreportgeneration.js");
 const filePath = path.join(__dirname, 'section.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 
+
+const mapping = {
+  one: '0-1 Years',
+  four: '1-4 Years',
+  seven: '4-7 Years',
+  sevenplus: '7+ Years'
+};
+
 const replaceSectionInTemplate = async function name(sectionId) {
     try {
         const sectionData =  await sections.getSectionById(sectionId);
@@ -25,13 +33,16 @@ function changeSectionFields(section)
   section.visualsignsofleak = capitalizeWords(section.visualsignsofleak.toString());
   section.furtherinvasivereviewrequired = capitalizeWords(section.furtherinvasivereviewrequired.toString());
   section.conditionalassessment = capitalizeWords(section.conditionalassessment.toString());
+  section.eee = mapping[section.eee];
+  section.lbc = mapping[section.lbc];
+  section.awe = mapping[section.awe];
 }
 
 function capitalizeWords(word) {
   if(word)
   {
-    var finalWorld = word[0].toUpperCase() + word.slice(1);
-    return finalWorld;
+    var finalWord = word[0].toUpperCase() + word.slice(1);
+    return finalWord;
   }
   return word;
 }
