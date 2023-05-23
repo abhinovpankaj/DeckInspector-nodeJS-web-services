@@ -321,7 +321,6 @@ router.route('/:id/generatereport')
 .get(async function (req, res) {
   try {
     const projectId = req.params.id;
-    console.log(projectId);
     const pdfFilePath = await generateProjectReport(projectId);
     const absolutePath = path.resolve(pdfFilePath);
     res.setHeader('Content-Type', 'application/pdf');

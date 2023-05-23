@@ -13,10 +13,10 @@ var Connect = async function () {
         // Connect to the MongoDB cluster
         await client.connect();
         // // module.exports.Software = db.collection('software');
-        module.exports.Projects = client.db(dbName).collection('projects');
-        module.exports.SubProjects = client.db(dbName).collection('subprojects');
-        module.exports.Locations = client.db(dbName).collection('locations');
-        module.exports.Sections = client.db(dbName).collection('sections');
+        module.exports.Projects = client.db(dbName).collection('LocalProject');
+        module.exports.SubProjects = client.db(dbName).collection('LocalSubProject');
+        module.exports.Locations = client.db(dbName).collection('LocalLocation');
+        module.exports.Sections = client.db(dbName).collection('LocalVisualSection');
         module.exports.Users = client.db(dbName).collection('users');
         // //module.exports.ClientInfo = db.collection('clientInfo');       
         console.log('Connected to MongoDB');

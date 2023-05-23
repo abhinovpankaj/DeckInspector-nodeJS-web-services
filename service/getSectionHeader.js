@@ -22,7 +22,7 @@ const getSubprojectSectionHeader = async function (location, sectionName, factor
     };
     const strategy = factory.getLocationStrategy("buildingapartment");
     return strategy.getLocationHeaderhtml(requiredObj);
-  } else if (location.data.item.type === "location") {
+  } else if (location.data.item.type === "buildinglocation") {
     const requiredObj = {
       buildingName: subProjectData.data.item.name,
       BuildingCommonLocation: location.data.item.name,
