@@ -15,12 +15,12 @@ const mapping = {
   sevenplus: '7+ Years'
 };
 
-const replaceSectionInTemplate = async function name(sectionId) {
+const replaceSectionInTemplate = async function name(sectionId,sectionImageProperties) {
     try {
         const sectionData =  await sections.getSectionById(sectionId);
         changeSectionFields(sectionData.data.item);
         const html_section = ejs.render(template, sectionData.data.item);
-        const images_html = await replaceImagesInTemplate(sectionData.data.item.images);
+        const images_html = await replaceImagesInTemplate(sectionData.data.item.images,sectionImageProperties);
         return html_section + images_html;
       } catch (err) {
         console.error(err);

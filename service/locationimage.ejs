@@ -9,6 +9,7 @@
       margin: 5px auto;
       border-collapse: collapse;
       border: 1px solid #E3F1D5;
+      table-layout: fixed;
     }
   
     .image-table th {
@@ -38,28 +39,28 @@
   </style>
   
   <% var tableCounter = 0; %>
-  <table class="image-table">
-    <% for (var i = 0; i < images.length; i += 4) { %>
-      <% if (i === 0) { %>
-        <thead>
-          <tr>
-            <th colspan="4">Visual Photos</th>
-          </tr>
-        </thead>
-      <% } %>
-      <tbody>
+<table class="image-table">
+  <% for (var i = 0; i < images.length; i += factor) { %>
+    <% if (i === 0) { %>
+      <thead>
         <tr>
-          <% for (var j = i; j < Math.min(i + 4, images.length); j++) { %>
-            <td>
-              <img class="image" src="<%= images[j].compressedUrl %>" />
-            </td>
-          <% } %>
+          <th colspan="<%= Math.min(factor, images.length) %>">Visual Photos</th>
         </tr>
-      </tbody>
-      <% if ((i + 4) % 16 === 0 && i + 4 < images.length) { %>
-        </table>
-        <div style="page-break-before: always;"></div>
-        <table class="image-table">
-      <% } %>
+      </thead>
     <% } %>
-  </table>
+    <tbody>
+      <tr>
+        <% for (var j = i; j < Math.min(i + factor, images.length); j++) { %>
+          <td>
+            <img class="image" src="<%= images[j].compressedUrl %>" />
+          </td>
+        <% } %>
+      </tr>
+    </tbody>
+    <% if ((i + factor) % (16 * factor) === 0 && i + factor < images.length) { %>
+      </table>
+      <div style="page-break-before: always;"></div>
+      <table class="image-table">
+    <% } %>
+  <% } %>
+</table>

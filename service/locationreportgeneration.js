@@ -5,7 +5,7 @@ const { Worker } = require('worker_threads');
 const path = require('path');
 const { getSectionHeader } = require("./getSectionHeader");
 
-const generateReportForLocation = async function(locationId) {
+const generateReportForLocation = async function(locationId,sectionImageProperties) {
     try {
         var location = await locations.getLocationById(locationId);
         if(!(location.data))
@@ -13,7 +13,7 @@ const generateReportForLocation = async function(locationId) {
           return  "";
         }
         else{
-          const sectionHtmls = await getSectionhtmls(location,location.data.item.sections);
+          const sectionHtmls = await getSectionhtmls(location,location.data.item.sections,sectionImageProperties);
           let locationhtml = '';
           for (let key in sectionHtmls) {
             locationhtml += sectionHtmls[key];
@@ -25,14 +25,14 @@ const generateReportForLocation = async function(locationId) {
       }
   }
 
-  const getSectionhtmls = async function(location,sections)
+  const getSectionhtmls = async function(location,sections,sectionImageProperties)
   {
     try{
         const promises = [];
         const sectionhtmls = [];
         for (let key in sections) {
             sectionhtmls[key] = await getSectionHeader(location,sections[key].name);
-            const promise = replaceSectionInTemplate(sections[key]._id)
+            const promise = replaceSectionInTemplate(sections[key]._id,sectionImageProperties)
               .then((section_html) => {
                sectionhtmls[key] += section_html;
               });
