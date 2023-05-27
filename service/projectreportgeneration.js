@@ -10,7 +10,7 @@ const fs = require('fs');
 const filePath = path.join(__dirname, 'projectfile.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 
-const generateProjectReport = async function generate(projectId)
+const generateProjectReport = async function generate(projectId,sectionImageProperties)
 {
     try{
         const project  = await projects.getProjectById(projectId);
@@ -19,7 +19,7 @@ const generateProjectReport = async function generate(projectId)
         let projectHtml = ejs.render(template, project.data.item);
         const orderedProjects = reOrderProjects(project.data.item.children);
         for (let key in orderedProjects) {
-            const promise = getReport(orderedProjects[key])
+            const promise = getReport(orderedProjects[key],sectionImageProperties)
             .then((loc_html) => {
              locsHtmls[key] = loc_html;
             });
@@ -58,14 +58,14 @@ const reOrderProjects = function(projects){
 }
 
 
-const getReport = async function(child){
+const getReport = async function(child,sectionImageProperties){
     try{
         if(child.type === "projectlocation")
         {
-            const loc_html =  await generateReportForLocation(child._id);
+            const loc_html =  await generateReportForLocation(child._id,sectionImageProperties);
             return loc_html;
         }else if(child.type === "subproject"){
-            const subProjectHtml = await generateReportForSubProject(child._id);
+            const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties);
             return subProjectHtml;
         }
     }catch(error){

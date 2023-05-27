@@ -317,26 +317,33 @@ router.route('/:id/toggleprojectstatus/:state')
   });
 
 
-router.route('/:id/generatereport')
-.get(async function (req, res) {
-  try {
-    const projectId = req.params.id;
-    const pdfFilePath = await generateProjectReport(projectId);
-    const absolutePath = path.resolve(pdfFilePath);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${pdfFilePath}"`);
-    res.sendFile(absolutePath, {}, (err) => {
-      if (err) {
-        console.error('Error sending file:', err);
-      } else {
-        console.log('PDF sent successfully');
-        fs.unlinkSync(absolutePath);
-      }
-    });
-  } catch (err) {
-    console.error('Error generating PDF:', err);
-    res.status(500).send('Error generating PDF');
-  }
+
+/** UMESH TODO  -- REFACTOR this code 
+ *  Add request Validation
+ * */
+router.route('/generatereport')
+.post(async function (req, res) {
+  try{
+  const projectId = req.body.id;
+  const sectionImageProperties = req.body.sectionImageProperties;
+  const pdfFilePath = await generateProjectReport(projectId,sectionImageProperties);
+  console.log(pdfFilePath);
+  const absolutePath = path.resolve(pdfFilePath);
+  console.log(absolutePath);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${pdfFilePath}"`);
+  res.sendFile(absolutePath, {}, (err) => {
+    if (err) {
+      console.error('Error sending file:', err);
+    } else {
+      console.log('PDF sent successfully');
+      fs.unlinkSync(absolutePath);
+    }
+  });
+} catch (err) {
+  console.error('Error generating PDF:', err);
+  res.status(500).send('Error generating PDF');
+}
 });
 
 module.exports = router;
