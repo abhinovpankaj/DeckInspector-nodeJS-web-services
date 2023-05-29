@@ -326,7 +326,9 @@ router.route('/generatereport')
   try{
   const projectId = req.body.id;
   const sectionImageProperties = req.body.sectionImageProperties;
-  const pdfFilePath = await generateProjectReport(projectId,sectionImageProperties);
+  const companyName = req.body.companyName;
+  const pdfFilePath = await generateProjectReport(projectId,sectionImageProperties,companyName);
+
   console.log(pdfFilePath);
   const absolutePath = path.resolve(pdfFilePath);
   console.log(absolutePath);
