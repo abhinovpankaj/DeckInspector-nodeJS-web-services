@@ -10,7 +10,7 @@ const fs = require('fs');
 const filePath = path.join(__dirname, 'projectfile.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 
-const generateProjectReport = async function generate(projectId,sectionImageProperties)
+const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName)
 {
     try{
         const project  = await projects.getProjectById(projectId);
@@ -30,7 +30,7 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
         for (let key in locsHtmls) {
             projectHtml += locsHtmls[key];
         }
-        const path = await generatePdfFile(project.data.item.name,projectId,projectHtml);
+        const path = await generatePdfFile(project.data.item.name,projectId,projectHtml,companyName);
         return path;
         }
     catch(err){
