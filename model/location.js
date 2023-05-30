@@ -121,7 +121,7 @@ var updateLocation = async function (location) {
                 url: location.url,
                 lasteditedby: location.lasteditedby,
                 editedat: location.editedat
-            }
+            },
         });
 
         if (result.matchedCount < 1) {
