@@ -18,6 +18,8 @@ const replaceImagesInTemplate =  async function(images,sectionImageProperties){
 
   async function compressImages(images, quality) {
     const compressedImages = [];
+    try {
+      
   
     for (const image of images) {
       const jimpImage = await Jimp.read(image);
@@ -28,6 +30,11 @@ const replaceImagesInTemplate =  async function(images,sectionImageProperties){
         .getBufferAsync(Jimp.MIME_JPEG);
       const compressedUrl = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
       compressedImages.push({ compressedUrl, description: image.description });
+    }
+    
+    } catch (error) {
+      console.error('Error compressing images:', error);
+
     }
     return compressedImages;
   }
