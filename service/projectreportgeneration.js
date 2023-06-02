@@ -12,7 +12,9 @@ const template = fs.readFileSync(filePath, 'utf8');
 
 const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName)
 {
+    
     try{
+        console.log( Date.now());
         const project  = await projects.getProjectById(projectId);
         const promises = [];
         const locsHtmls = []; 
@@ -30,6 +32,8 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
         for (let key in locsHtmls) {
             projectHtml += locsHtmls[key];
         }
+        
+        console.log(Date.now());
         const path = await generatePdfFile(project.data.item.name,projectId,projectHtml,companyName);
         return path;
         }

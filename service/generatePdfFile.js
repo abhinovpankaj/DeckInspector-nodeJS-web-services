@@ -1,11 +1,12 @@
 const puppeteer = require('puppeteer');
+
 const ReportHeaderAndFooterFactoryImpl = require('./reportheaderandfooterstrategy/reportHeaderAndFooterFactoryImpl');
 
 //TODO Add code to monitor performance
 const generatePdfFile = async function (prefixName, id, htmlString,companyName) {
     try {
         const pdfFilePath = prefixName + " - " + id + ".pdf";
-        const browserInstance = await puppeteer.launch({ args: ['--allow-file-access-from-files'] });
+        const browserInstance = await puppeteer.launch({headless: 'new', args: ['--allow-file-access-from-files'] });
         const page = await browserInstance.newPage();
         await page.setContent(htmlString);
 
@@ -26,7 +27,9 @@ const generatePdfFile = async function (prefixName, id, htmlString,companyName) 
           colorProfile: 'sRGB',
         });
         await browserInstance.close();
+        
         return pdfFilePath;
+            
     } catch (error) {
         console.log("Error is " + error);
     }

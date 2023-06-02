@@ -18,23 +18,30 @@ const replaceImagesInTemplate =  async function(images,sectionImageProperties){
 
   async function compressImages(images, quality) {
     const compressedImages = [];
-    try {
-      
-  
-    for (const image of images) {
-      const jimpImage = await Jimp.read(image);
-      const orientation = jimpImage._exif.tags.Orientation; // Assume orientation property exists for each image
-      const rotatedImage  = await rotateImage(jimpImage, orientation);
-      const compressedBuffer = await rotatedImage
-        .quality(quality)
-        .getBufferAsync(Jimp.MIME_JPEG);
-      const compressedUrl = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
-      compressedImages.push({ compressedUrl, description: image.description });
-    }
     
-    } catch (error) {
-      console.error('Error compressing images:', error);
-
+    for (const image of images) {
+      try{
+        var compressedBuffer;
+        const jimpImage = await Jimp.read(image);
+        if (jimpImage._exif!=null) {
+          const orientation = jimpImage._exif.tags.Orientation; // Assume orientation property exists for each image
+          const rotatedImage  = await rotateImage(jimpImage, orientation);
+          compressedBuffer= await rotatedImage
+          .quality(quality)
+          .getBufferAsync(Jimp.MIME_JPEG);
+        }else{
+          compressedBuffer= await jimpImage
+          .quality(quality)
+          .getBufferAsync(Jimp.MIME_JPEG);
+        }
+        
+        const compressedUrl = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
+        compressedImages.push({ compressedUrl, description: image.description });
+      }
+      catch (error) {
+        
+        console.error('Error compressing images:', error); 
+      }
     }
     return compressedImages;
   }
