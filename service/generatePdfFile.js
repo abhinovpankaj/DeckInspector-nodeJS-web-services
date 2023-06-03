@@ -9,7 +9,7 @@ const generatePdfFile = async function (prefixName, id, htmlString,companyName) 
         const pdfFilePath = prefixName + " - " + id + ".pdf";
         const browserInstance = await puppeteer.launch({
             headless: true,
-            args: ['--allow-file-access-from-files'],// Use the 'cacheDirectory' value from the imported configuration
+            args: ['--no-sandbox', '--disable-setuid-sandbox','--allow-file-access-from-files'],
             userDataDir: puppeteerConfig.cacheDirectory,
           });
         const page = await browserInstance.newPage();
