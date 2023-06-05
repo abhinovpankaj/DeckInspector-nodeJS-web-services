@@ -1,6 +1,6 @@
 const subProject = require("../model/subproject");
 const {generateReportForLocation} = require("./locationreportgeneration.js")
-
+const LocationType = require("../model/locationType.js");
 const generateReportForSubProject = async function generateReportForSubProject(subProjectId,sectionImageProperties)
 {
     const subProjectData = await subProject.getSubProjectById(subProjectId);
@@ -29,11 +29,11 @@ const reordersubProjectLocations = function(locations){
     const subProjectLocations = [];
     for(let key in locations)
     {
-        if(locations[key].type === "apartment")
+        if(locations[key].type === LocationType.APARTMENT)
         {
             subProjectApartments.push(locations[key]);
         }
-        else if(locations[key].type === "buildinglocation"){
+        else if(locations[key].type === LocationType.BUILDINGLOCATION){
             subProjectLocations.push(locations[key]);
         }
     }
