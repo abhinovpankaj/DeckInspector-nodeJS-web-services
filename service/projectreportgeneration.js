@@ -5,6 +5,7 @@ const { generatePdfFile } = require("./generatePdfFile");
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
+const ProjectChildType = require("../model/projectChildType.js");
 
 //const projectId = "6455fe4a84fe43439af11094";
 const filePath = path.join(__dirname, 'projectfile.ejs');
@@ -49,10 +50,10 @@ const reOrderProjects = function(projects){
     const locations = [];
     for(let key in projects)
     {
-        if(projects[key].type === "subproject")
+        if(projects[key].type === ProjectChildType.SUBPROJECT)
         {
             subProjects.push(projects[key]);
-        }else if(projects[key].type === "projectlocation"){
+        }else if(projects[key].type === ProjectChildType.PROJECTLOCATION){
             locations.push(projects[key]);
         }
     }
@@ -64,11 +65,11 @@ const reOrderProjects = function(projects){
 
 const getReport = async function(child,sectionImageProperties){
     try{
-        if(child.type === "projectlocation")
+        if(child.type === ProjectChildType.PROJECTLOCATION)
         {
             const loc_html =  await generateReportForLocation(child._id,sectionImageProperties);
             return loc_html;
-        }else if(child.type === "subproject"){
+        }else if(child.type ===  ProjectChildType.SUBPROJECT){
             const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties);
             return subProjectHtml;
         }

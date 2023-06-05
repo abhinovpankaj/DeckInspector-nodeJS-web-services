@@ -1,14 +1,15 @@
+const LocationType = require ('../../model/locationType');
 class LocationStrategyFactoryImpl{
     getLocationStrategy(type){
-       if(type === "buildingapartment"){
+       if(type === LocationType.APARTMENT){
            const BuildingApartment = require('../locationheaderstrategy/buildingApartment');
            return new BuildingApartment();
        }
-       else if(type === "buildingcommon"){
+       else if(type === LocationType.BUILDINGLOCATION){
            const BuildingCommonLocation = require('../locationheaderstrategy/buildingCommonLocation');
            return new BuildingCommonLocation();
        }
-       else if(type==="projectcommon"){
+       else if(type===LocationType.PROJECTLOCATION){
            const ProjectCommonLocation = require('../locationheaderstrategy/projectCommonLocation');
            return new ProjectCommonLocation();
        }
