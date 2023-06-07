@@ -1,14 +1,14 @@
 const subProject = require("../model/subproject");
-const {generateReportForLocation} = require("./locationreportgeneration.js")
+const {generateReportForLocation} = require("./sectionParts/util/locationGeneration/locationreportgeneration.js")
 const LocationType = require("../model/locationType.js");
-const generateReportForSubProject = async function generateReportForSubProject(subProjectId,sectionImageProperties)
+const generateReportForSubProject = async function generateReportForSubProject(subProjectId,sectionImageProperties,reportType)
 {
     const subProjectData = await subProject.getSubProjectById(subProjectId);
     const promises = [];
     const locsHtmls = [];
     const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
     for (let key in orderdLocationsInSubProject) {
-        const promise = generateReportForLocation(orderdLocationsInSubProject[key]._id,sectionImageProperties)
+        const promise = generateReportForLocation(orderdLocationsInSubProject[key]._id,sectionImageProperties,reportType)
             .then((loc_html) => {
              locsHtmls[key] = loc_html;
             });

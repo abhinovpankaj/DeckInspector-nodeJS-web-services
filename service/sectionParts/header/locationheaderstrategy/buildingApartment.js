@@ -10,6 +10,7 @@ class BuildingApartment extends LocationStrategyInterface{
 
     async getLocationHeaderhtml(requiredObj){
         const tempObj = {
+            headerTitle : requiredObj.headerTitle,
             buildingName : requiredObj.buildingName,
             apartmentName : requiredObj.apartmentName,
             locationName : requiredObj.sectionName
