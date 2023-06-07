@@ -10,7 +10,7 @@ const ProjectReportType = require("../../model/projectReportType.js");
 const filePath = path.join(__dirname, 'projectfile.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 
-const reportType = ProjectReportType.INVASIVEVISUAL;
+const reportType = ProjectReportType.VISUALREPORT;
 
 class VisualReportGenerationStrategy extends HtmlReportGenerationStrategy{
 
