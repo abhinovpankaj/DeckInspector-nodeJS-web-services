@@ -11,6 +11,7 @@ class ProjectCommonLocation extends locationStrategyInterface {
 
     async getLocationHeaderhtml(requiredObj) {
         const tempObj = {
+            headerTitle : requiredObj.headerTitle,
             projectcommonLocationName : requiredObj.ProjectCommonLocation,
             locationName : requiredObj.sectionName
         }

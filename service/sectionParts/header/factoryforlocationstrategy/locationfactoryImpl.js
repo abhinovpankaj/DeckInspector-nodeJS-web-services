@@ -1,4 +1,4 @@
-const LocationType = require ('../../model/locationType');
+const LocationType = require ('../../../../model/locationType');
 class LocationStrategyFactoryImpl{
     getLocationStrategy(type){
        if(type === LocationType.APARTMENT){

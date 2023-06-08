@@ -1,10 +1,8 @@
 const ProjectReportType = require('../../model/projectReportType.js');
-const VisualReportGenerationStrategy = require('./visualReportGeneration.js');
+const VisualReportGenerationStrategy = require('./visualReportGenerationStrategy.js');
 
 
 class ReportGenerationStartegyFactoryImpl {
-    
-
     getReportGenerationStartegy(reportType) {
 
         if(reportType === ProjectReportType.VISUALREPORT)

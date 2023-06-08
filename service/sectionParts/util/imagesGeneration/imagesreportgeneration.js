@@ -5,11 +5,12 @@ const path = require('path');
 const filePath = path.join(__dirname, 'locationimage.ejs');
 const imageTemplate = fs.readFileSync(filePath, 'utf8');
 
-const replaceImagesInTemplate =  async function(images,sectionImageProperties){
+const replaceImagesInTemplate =  async function(images,sectionImageProperties,header){
     try {
       const quality = Number(sectionImageProperties.compressionQuality);
       const compressedImages = await compressImages(images, quality);
-      const html_images = ejs.render(imageTemplate, { images: compressedImages, factor: sectionImageProperties.imageFactor });
+      const html_images = ejs.render(imageTemplate,  
+        {images: compressedImages, factor: sectionImageProperties.imageFactor ,imagesHeader:header});
       return html_images;
     } catch (err) {
       console.error('Error generating HTML:', err);

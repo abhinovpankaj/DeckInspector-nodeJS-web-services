@@ -1,19 +1,17 @@
 const HtmlReportGenerationStrategy = require("./reportGenerationStrategy");
 const projects = require("../../model/project");
-const {generateReportForSubProject} = require("./../subprojectreportgeneration.js");
-const {generateReportForLocation} = require("./../locationreportgeneration.js")
+const {generateReportForSubProject} = require("../subprojectreportgeneration.js");
+const {generateReportForLocation} = require("../sectionParts/util/locationGeneration/locationreportgeneration.js")
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
 const ProjectChildType = require("../../model/projectChildType.js");
-
-
+const ProjectReportType = require("../../model/projectReportType.js");
 const filePath = path.join(__dirname, 'projectfile.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 
-class VisualReportGenerationStrategy extends HtmlReportGenerationStrategy{
-
-    async generateReportHtml(project,sectionImageProperties){
+class ReportGeneration{
+    async generateReportHtml(project,sectionImageProperties,reportType){
         try{
             console.time("generateReportHtml");
             const promises = [];
@@ -21,11 +19,11 @@ class VisualReportGenerationStrategy extends HtmlReportGenerationStrategy{
             let projectHtml = ejs.render(template, project.data.item);
             const orderedProjects = this.reOrderProjects(project.data.item.children);
             for (let key in orderedProjects) {
-                const promise = this.getReport(orderedProjects[key],sectionImageProperties)
+                const promise = this.getReport(orderedProjects[key],sectionImageProperties,reportType)
                 .then((loc_html) => {
-                 locsHtmls[key] = loc_html;
+                locsHtmls[key] = loc_html;
                 });
-              promises.push(promise);
+            promises.push(promise);
             }
             await Promise.all(promises);
             
@@ -57,24 +55,22 @@ class VisualReportGenerationStrategy extends HtmlReportGenerationStrategy{
         orderedProjects.push(...locations);
         return orderedProjects;
     }
-    
-    
-    async getReport(child,sectionImageProperties){
+
+
+    async getReport(child,sectionImageProperties,reportType){
         try{
             if(child.type === ProjectChildType.PROJECTLOCATION)
             {
-                const loc_html =  await generateReportForLocation(child._id,sectionImageProperties);
+                const loc_html =  await generateReportForLocation(child._id,sectionImageProperties,reportType);
                 return loc_html;
             }else if(child.type ===  ProjectChildType.SUBPROJECT){
-                const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties);
+                const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties,reportType);
                 return subProjectHtml;
             }
         }catch(error){
             console.log(error);
         }
     }
-    
 }
 
-module.exports = VisualReportGenerationStrategy;
-
+module.exports = ReportGeneration;

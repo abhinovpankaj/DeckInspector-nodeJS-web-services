@@ -8,9 +8,10 @@ const filePath = path.join(__dirname, 'buildingcommonlocation.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 
 class BuildingCommonLocation extends LocationStrategyInterface {
-    
+
         async getLocationHeaderhtml(requiredObj) {
             const tempObj = {
+                headerTitle : requiredObj.headerTitle,
                 buildingName: requiredObj.buildingName,
                 buildingLocationName : requiredObj.BuildingCommonLocation,
                 locationName: requiredObj.sectionName
