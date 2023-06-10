@@ -1,15 +1,13 @@
 const { generatePdfFile } = require("./generatePdfFile");
-const ReportGenerationStartegyFactoryImpl = require("./reportstrategy/reportGenerationStrategyFactory.js");
-const ProjectReportType = require("../model/projectReportType.js");
+const ReportGeneration = require("./reportstrategy/reportGeneration.js")
 const projects = require("../model/project");
 
 
-const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName)
+const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName,reportType)
 {
     try{
         const project  = await projects.getProjectById(projectId);
-        const reportGenerationStrategy  = ReportGenerationStartegyFactoryImpl.getReportGenerationStartegy(ProjectReportType.VISUALREPORT,sectionImageProperties);
-        const projectHtml = await reportGenerationStrategy.generateReportHtml(project,sectionImageProperties);
+        const projectHtml = await ReportGeneration.generateReportHtml(project,sectionImageProperties,reportType);
         const path = await generatePdfFile(project.data.item.name,projectId,projectHtml,companyName);
         return path;
         }

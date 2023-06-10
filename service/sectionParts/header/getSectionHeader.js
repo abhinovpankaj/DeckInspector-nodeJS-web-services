@@ -66,7 +66,7 @@ const getHeaderTitle = function(reportType,locationType)
       return LocationHeaderTitle.VISUAL_REPORT_BUILDING_APARTMENTS;
     }
   }
-  else if(reportType === ProjectReportType.INVASIVEVISUAL)
+  else if(reportType === ProjectReportType. INVASIVEVISUAL || reportType === ProjectReportType.INVASIVEONLY)
   {
     return LocationHeaderTitle.INVASIVE_REPORT_INSPECTION;
   }

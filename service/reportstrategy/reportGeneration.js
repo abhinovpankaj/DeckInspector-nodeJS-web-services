@@ -1,5 +1,3 @@
-const HtmlReportGenerationStrategy = require("./reportGenerationStrategy");
-const projects = require("../../model/project");
 const {generateReportForSubProject} = require("../subprojectreportgeneration.js");
 const {generateReportForLocation} = require("../sectionParts/util/locationGeneration/locationreportgeneration.js")
 const ejs = require('ejs');
@@ -16,14 +14,15 @@ class ReportGeneration{
             console.time("generateReportHtml");
             const promises = [];
             const locsHtmls = []; 
+            project.data.item.projectHeader = this.getProjectHeader(reportType);
             let projectHtml = ejs.render(template, project.data.item);
             const orderedProjects = this.reOrderProjects(project.data.item.children);
             for (let key in orderedProjects) {
                 const promise = this.getReport(orderedProjects[key],sectionImageProperties,reportType)
                 .then((loc_html) => {
-                locsHtmls[key] = loc_html;
+                 locsHtmls[key] = loc_html;
                 });
-            promises.push(promise);
+              promises.push(promise);
             }
             await Promise.all(promises);
             
@@ -55,8 +54,8 @@ class ReportGeneration{
         orderedProjects.push(...locations);
         return orderedProjects;
     }
-
-
+    
+    
     async getReport(child,sectionImageProperties,reportType){
         try{
             if(child.type === ProjectChildType.PROJECTLOCATION)
@@ -71,6 +70,21 @@ class ReportGeneration{
             console.log(error);
         }
     }
+
+     getProjectHeader(reportType){
+        if(ProjectReportType.VISUALREPORT === reportType)
+        {
+            return "Visual Inspection Report";
+        }
+        else if(ProjectReportType.INVASIVEONLY === reportType)
+        {
+            return "Invasive only Project Report";
+        }
+        else if(ProjectReportType.INVASIVEVISUAL === reportType)
+        {   
+            return "Invasive Project Report";
+        }
+     }
 }
 
-module.exports = ReportGeneration;
+module.exports = new ReportGeneration();
