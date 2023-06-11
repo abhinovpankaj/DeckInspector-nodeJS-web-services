@@ -83,6 +83,9 @@ paths:
               companyName:
                 type: string
                 description: The name of the company for which report is to be generated.
+              reportType:
+                type: string
+                description: The type of report to be generated.
     responses:
       '200':
         description: Successful operation. The PDF report is generated and returned.

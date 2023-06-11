@@ -1,9 +1,7 @@
 const ProjectReportType = {
-    VISUALREPORT : "visualReport",
-    INVASIVEONLY : "invasiveOnly",
-    INVASIVEVISUAL : "invasiveVisual",
-    CONCLUSIVE : "conclusive",
-    SINGLEPROJECT : "singleProject",
+    VISUALREPORT : "Visual",
+    INVASIVEONLY : "InvasiveOnly",
+    INVASIVEVISUAL : "Invasive",
 }
 
 module.exports = ProjectReportType;
