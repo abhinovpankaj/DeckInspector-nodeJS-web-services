@@ -5,7 +5,6 @@ const projectReportType = require("../../../../model/projectReportType.js");
 const generateReportForLocation = async function (locationId, sectionImageProperties, reportType) {
   try {
     const location = await locations.getLocationById(locationId);
-    
     if (!location.data) {
       return "";
     } else {
@@ -29,7 +28,11 @@ const generateReportForLocation = async function (locationId, sectionImageProper
 const getSectionshtmls = async function (location, sections, sectionImageProperties, reportType) {
   try {
     const sectionHtmls = {};
-    const newSections = sections.filter(section => isSectionIncluded(reportType, section));
+    if(!sections)
+    {
+      return "";
+    }
+    const newSections = sections.filter(section =>  isSectionIncluded(reportType, section));
 
     await Promise.all(newSections.map(async (section, index) => {
       const processExecutor = SectionPartProcessExecutorFactory.getProcessExecutorChain(location, section.name, section._id, sectionImageProperties, reportType);

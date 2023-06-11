@@ -4,9 +4,10 @@ const puppeteerConfig = require('../puppeteer.config.cjs');
 const ReportHeaderAndFooterFactoryImpl = require('./reportheaderandfooterstrategy/reportHeaderAndFooterFactoryImpl');
 
 //TODO Add code to monitor performance
-const generatePdfFile = async function (prefixName, id, htmlString,companyName) {
+const generatePdfFile = async function (pdfFileName ,htmlString,companyName) {
     try {
-        const pdfFilePath = prefixName + " - " + id + ".pdf";
+        console.time("generatePdfFile");
+        const pdfFilePath = pdfFileName + ".pdf";
         const browserInstance = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox','--allow-file-access-from-files'],
@@ -32,7 +33,7 @@ const generatePdfFile = async function (prefixName, id, htmlString,companyName) 
           colorProfile: 'sRGB',
         });
         await browserInstance.close();
-        
+        console.timeEnd("generatePdfFile");
         return pdfFilePath;
             
     } catch (error) {
