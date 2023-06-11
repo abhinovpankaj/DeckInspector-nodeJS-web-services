@@ -1,5 +1,6 @@
 const { generatePdfFile } = require("./generatePdfFile");
 const ReportGeneration = require("./reportstrategy/reportGeneration.js")
+const SingleProjectReportGeneration = require("./reportstrategy/singleProjectReportGeneration.js")
 const projects = require("../model/project");
 
 
@@ -7,7 +8,7 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
 {
     try{
         const project  = await projects.getProjectById(projectId);
-        const projectHtml = await ReportGeneration.generateReportHtml(project,sectionImageProperties,reportType);
+        const projectHtml =  await getProjectHtml(project, sectionImageProperties, reportType);
         const path = await generatePdfFile(project.data.item.name,projectId,projectHtml,companyName);
         return path;
         }
@@ -17,4 +18,15 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
 }
 
 
+async function getProjectHtml(project, sectionImageProperties, reportType) {
+    if (project.data.item.projecttype === "singlelevel") {
+       return await SingleProjectReportGeneration.generateReportHtml(project, sectionImageProperties, reportType);
+    }
+    else if (project.data.item.projecttype  === "multilevel") {
+       return await ReportGeneration.generateReportHtml(project, sectionImageProperties, reportType);
+    }
+}
+
 module.exports = { generateProjectReport};
+
+
