@@ -407,6 +407,43 @@ var addRemoveChildren = async function (subprojectId, isAdd, { id, name, type })
     }
 }
 
+var getSubProjectsByParentId = async function(parentId)
+{
+    try{
+        var response = {};
+        var result = await mongo.SubProjects.find(
+            {parentid:new ObjectId(parentId)}
+            ).toArray();
+            if (result.length>0) {
+                response = {
+                    "data": {
+                        "item": result,
+                        "message": "SubProjects found.",
+                        "code": 201
+                    }
+                };
+                return response;
+            } else {
+                response = {
+                    "error": {
+                        "code": 401,
+                        "message": "No SubProjects found."
+                    }
+                }
+                return response;
+            }    
+    }catch(error){
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching SubProjects.",
+                "errordata": error
+            }
+        }
+        return response;
+    }
+}
+
 module.exports = {
     addSubProject,
     updateSubProjectVisibilityStatus,
@@ -415,5 +452,6 @@ module.exports = {
     getSubProjectById,
     assignSubProjectToUser,
     unassignUserFromSubProject,
-    addRemoveChildren
+    addRemoveChildren,
+    getSubProjectsByParentId
 };

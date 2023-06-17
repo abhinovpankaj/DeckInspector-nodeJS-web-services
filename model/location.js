@@ -371,11 +371,49 @@ var addRemoveSections = async function (locationId, isAdd, { id, name }) {
     }
 }
 
+var getLocationByParentId = async function(parentId){
+    try{
+        var response = {};
+        var result = await mongo.Locations.find(
+            {parentid:new ObjectId(parentId)}
+            ).toArray();
+            console.log(result);
+            if (result.length>0) {
+                response = {
+                    "data": {
+                        "item": result,
+                        "message": "locations found.",
+                        "code": 201
+                    }
+                };
+                return response;
+            } else {
+                response = {
+                    "error": {
+                        "code": 401,
+                        "message": "No locations found."
+                    }
+                }
+                return response;
+            }    
+    }catch(error){
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching locations.",
+                "errordata": error
+            }
+        }
+        return response;
+    }
+}
+
 module.exports = {
     addLocation,
     updateLocationVisibilityStatus,
     deleteLocationPermanently,
     updateLocation,
     getLocationById,
-    addRemoveSections
+    addRemoveSections,
+    getLocationByParentId
 };

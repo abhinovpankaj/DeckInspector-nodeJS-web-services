@@ -329,7 +329,7 @@ var addRemoveImages = async function (sectionId,count, isAdd, url) {
         }
             
 
-        if (result.matchedCount == 0) {
+        if (result.matchedCount == 0) {  
             response = {
                 "error": {
                     "code": 409,
@@ -368,11 +368,47 @@ var addRemoveImages = async function (sectionId,count, isAdd, url) {
     }
 }
 
+var getSectionMetaDataForLocationId = async function(locationId){
+    try{
+        var response = {};
+        const sectionDetails = await mongo.Sections.find(
+            {parentid:new ObjectId(locationId)}
+            ).toArray();
+        if (sectionDetails.length>0) {
+                response = {
+                    "data": {
+                        "item": sectionDetails,
+                        "message": "Section found.",
+                        "code": 201
+                    }
+                };
+                return response;
+            } else {
+                response = {
+                    "error": {
+                        "code": 401,
+                        "message": "No Section found."
+                    }
+                }
+                return response;
+            }    
+    }catch(error){
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching Section.",
+                "errordata": error
+            }
+        }
+        return response;
+    }
+}
 module.exports = {
     addSection,
     updateSectionVisibilityStatus,
     deleteSectionPermanently,
     updateSection,
     getSectionById,
-    addRemoveImages
+    addRemoveImages,
+    getSectionMetaDataForLocationId
 };

@@ -1,0 +1,32 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: subproject API
+
+paths:
+  /api/subproject/getSubprojectsDataByProjectId:
+    post:
+      tags:
+        - SubProject
+      summary: Get subproject by project Id
+      description: Get subproject by project Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectid:
+                  type: string
+                  description: The ID of the projectid.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: subproject retrieved.
+        '401':
+          description: No subproject found.
+        '500':
+          description: Internal server error.

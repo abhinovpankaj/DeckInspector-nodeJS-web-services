@@ -316,6 +316,27 @@ router.route('/:id/toggleprojectstatus/:state')
     }
   });
 
+router.route('/getProjectsByUser/:username')
+.get(async function(req,res){
+  try{
+    var errResponse;
+    const username = req.params.username;
+    var result = await projects.getProjectByAssignedToUserId(username);
+    if (result.error) {
+      res.status(result.error.code).json(result.error);
+    }
+    if (result.data) {
+      //console.debug(result);
+      res.status(201).json(result.data);
+    }
+  }catch(error)
+  {
+    console.log(error);
+    errResponse = new ErrorResponse(500, "Internal server error", error);
+    res.status(500).json(errResponse);
+  }
+})
+
 
 
 /** UMESH TODO  -- REFACTOR this code 
