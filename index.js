@@ -6,13 +6,17 @@ const express = require('express');
 const app =  express();
 var path = require('path');
 var bodyParser = require('body-parser');
+const cors = require('cors');
+
 //var router   = require('routes');
 var mongo = require('./database/mongo');
+
 
 
 require('./routes')(app);
 
 app.use(bodyParser.json());
+app.use(cors());
 //app.use('/api', router);
 
 // ERROR Handler 400
