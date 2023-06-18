@@ -74,6 +74,26 @@ paths:
           description: No projects founds.
         500:
           description: Internal server error.
+  
+  /api/project/getProjectsMetaDataByUserName/{username}:
+    get:
+      tags:
+        [Project]
+      summary: get all projects by user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          description: The username.
+          schema:
+            type: string
+      responses:
+        201:
+          description: projects retrieved.        
+        401:
+          description: No project founds.
+        500:
+          description: Internal server error.
 
 /api/project/generatereport:
   post:

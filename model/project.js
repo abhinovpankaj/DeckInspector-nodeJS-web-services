@@ -551,7 +551,6 @@ var getProjectByAssignedToUserId = async function(userId)
 {
     try {
         var result = await mongo.Projects.find({ assignedto: { $in: [userId] } }).toArray();
-        //console.log(result);
         var response ={};
         if(result.length==0){
             response = {
