@@ -2,6 +2,7 @@
 var express = require('express');
 var router = express.Router();
 const locations = require("../model/location");
+const sections = require("../model/sections");
 const ErrorResponse = require('../model/error');
 
 require("dotenv").config();
@@ -182,5 +183,67 @@ router.route('/:id/toggleVisibility/')
   }
 });
 
+router.route('/getLocationById').
+post(async function(req,res){
+  try{
+    var errResponse;
+    const locationId = req.body.locationid;
+    const userName = req.body.username;
+    var result = await locations.getLocationById( locationId);
+    if(result.error){
+        res.status(result.error.code).json(result.error);
+    }
+    if(result.data){
+      //console.debug(result);                                          
+      res.status(201).json(result.data);
+    }
+  }
+  catch(ex){
+    errResponse = new ErrorResponse(500, "Internal server error", ex);
+      res.status(500).json(errResponse);
+  }
+});
+
+router.route('/getLocationSectionsMetaData')
+.post(async function(req,res){
+  try{
+    var errResponse;
+    const locationId = req.body.locationid;
+    const userId = req.body.username;
+    const result = await sections.getSectionMetaDataForLocationId(locationId);
+    if (result.error) {
+      res.status(result.error.code).json(result.error);
+    } else if (result.data) {
+      res.status(201).json(result.data);
+    } else {
+      res.status(404).json({ message: 'Sections not found' }); // Add a response for the case when no data is returned
+    }
+  } catch (error) {
+    console.log(error);
+    errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+    res.status(500).json(errResponse);
+  }
+});
+
+router.route('/getLocationsByProjectId')
+.post(async function(req,res){
+try{
+  var errorResponse;
+  const projectId = req.body.projectid;
+  const username = req.body.username;
+  var result = await locations.getLocationByParentId(projectId);
+  if (result.error) {
+    res.status(result.error.code).json(result.error);
+  } else if (result.data) {
+    res.status(201).json(result.data);
+  } else {
+    res.status(404).json({ message: 'Sections not found' }); // Add a response for the case when no data is returned
+  }
+}catch(error){
+  console.log(error);
+  errorResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+  res.status(500).json(errorResponse);
+}
+});
 
 module.exports = router ;

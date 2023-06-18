@@ -9,7 +9,7 @@ require("dotenv").config();
 router.route('/add')
 .post(async function (req,res){
 try{
-var errResponse;
+var errResponse; 
 // Get user input
 
 const { name, exteriorelements, waterproofingelements,additionalconsiderations,
@@ -208,6 +208,29 @@ router.route('/:id/toggleVisibility/')
       res.status(500).json(errResponse);
   }
 });
+
+router.route('/getSectionById')
+  .post(async function(req, res) {
+    try {
+      const sectionId = req.body.sectionid; // Use req.body instead of req.params
+      const userName = req.body.username; // Use req.body instead of req.params
+
+      const result = await sections.getSectionById(sectionId);
+
+      if (result.error) {
+        res.status(result.error.code).json(result.error);
+      } else if (result.data) {
+        res.status(201).json(result.data);
+      } else {
+        res.status(404).json({ message: 'Section not found' }); // Add a response for the case when no data is returned
+      }
+    } catch (error) {
+      console.log(error);
+      const errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+      res.status(500).json(errResponse);
+    }
+  });
+
 
 
 module.exports = router ;

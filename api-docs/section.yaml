@@ -1,0 +1,32 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Sections API
+
+paths:
+  /api/section/getSectionById:
+    post:
+      tags:
+        - Section
+      summary: Get section by Id
+      description: Get section by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sectionid:
+                  type: string
+                  description: The ID of the section.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: Section retrieved.
+        '401':
+          description: No projects found.
+        '500':
+          description: Internal server error.

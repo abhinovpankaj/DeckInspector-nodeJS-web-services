@@ -2,6 +2,7 @@
 var express = require('express');
 var router = express.Router();
 const subprojects = require("../model/subproject");
+const locations = require("../model/location");
 const ErrorResponse = require('../model/error');
 
 require("dotenv").config();
@@ -217,6 +218,37 @@ router.route('/:id/toggleVisibility/')
       res.status(result.data.code).json(result.data);
     }
   } catch (error) {
+    errResponse = new ErrorResponse(500, "Internal server error", error);
+      res.status(500).json(errResponse);
+  }
+});
+
+router.route('/getSubprojectsDataByProjectId')
+.post(async function(req,res){
+  try {
+    var errResponse;
+    const projectId = req.body.projectid;
+    var result = await subprojects.getSubProjectsByParentId(projectId);
+    
+    const subprojectsData = result.data.item;
+    for(const subProject of subprojectsData){
+      const subProjectId = subProject._id;
+      const subProjectChildren = await locations.getLocationByParentId(subProjectId);
+      console.log("SubProjectDhildren " ,subProjectChildren);
+      if(subProjectChildren.data)
+      {
+        subProject.children = subProjectChildren.data.item;
+      }
+    }
+    if(result.error){
+        res.status(result.error.code).json(result.error);
+    }
+    if(result.data){
+      //console.debug(result);                                          
+      res.status(201).json(result.data);
+    }
+  } catch (error) {
+    console.log(error);
     errResponse = new ErrorResponse(500, "Internal server error", error);
       res.status(500).json(errResponse);
   }

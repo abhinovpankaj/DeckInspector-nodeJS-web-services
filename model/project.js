@@ -547,6 +547,53 @@ var addRemoveChildren = async function(projectId,isAdd,{id,name,type}){
     }
 }
 
+var getProjectByAssignedToUserId = async function(userId)
+{
+    try {
+        var result = await mongo.Projects.find({ assignedto: { $in: [userId] } }).toArray();
+        //console.log(result);
+        var response ={};
+        if(result.length==0){
+            response = {
+                "data": {
+                    "projects": [],
+                    "message": "No Projects found.",
+                    "code":401
+                  }
+            } 
+        }
+        else{
+            response = {
+                "data" :{
+                    "projects": [],
+                    "message": "Projects found.",
+                    "code":201
+                }   
+            };
+            const projects = result.map(item=>{
+                delete item.isdeleted;        
+                delete item.files;                
+                response.data.projects.push(item);
+                return item;
+              });               
+            }
+        //console.log("Response from getProjectByAssignedToUserId: ",response);
+        return response;
+    }  catch(err){
+        console.log("Error is : ",err);
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching projects.",
+                "errordata": err
+              }
+        }
+        return response;
+    }   
+}
+
+
+
 module.exports = {
     addProject,
     updateProjectOfflineAvailabilityStatus,
@@ -558,6 +605,7 @@ module.exports = {
     getProjectsByNameCreatedOnIsCompletedAndDeleted,
     getAllProjects,assignProjectToUser,
     getAllFilesOfProject,unassignUserFromProject,
-    addRemoveChildren
+    addRemoveChildren,
+    getProjectByAssignedToUserId
     
 };

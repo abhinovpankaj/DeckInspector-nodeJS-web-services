@@ -1,0 +1,87 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Locations API
+
+paths:
+  /api/location/getLocationById:
+    post:
+      tags:
+        - Locations
+      summary: Get Location by Id
+      description: Get Location by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                locationid:
+                  type: string
+                  description: The ID of the Location.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: Location retrieved.
+        '401':
+          description: No Location found.
+        '500':
+          description: Internal server error.
+  
+  /api/location/getLocationSectionsMetaData:
+    post:
+      tags:
+        - Locations
+      summary: Get Location Sections by Id
+      description: Get Location Sections by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                locationid:
+                  type: string
+                  description: The ID of the Location.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: Location retrieved.
+        '401':
+          description: No Location found.
+        '500':
+          description: Internal server error.
+
+  /api/location/getLocationsByProjectId:
+    post:
+      tags:
+        - Locations
+      summary: Get Locations by project Id
+      description: Get Location by project Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectid:
+                  type: string
+                  description: The ID of the projectid.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: Location retrieved.
+        '401':
+          description: No Location found.
+        '500':
+          description: Internal server error.
+
