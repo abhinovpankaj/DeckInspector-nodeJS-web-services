@@ -38,7 +38,7 @@ const options = {
   
       servers: [
         {
-          url: "http://localhost:3000",
+          url: "https://deckinspectors-dev.azurewebsites.net",
           description: "Deck Inspectors Documentation",
         },
       ],
