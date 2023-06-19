@@ -6,6 +6,7 @@ const ErrorResponse = require('../model/error');
 const path = require('path');
 const fs = require('fs'); 
 const {generateProjectReport}= require('../service/projectreportgeneration.js');
+const {getProjectHierarchyMetadata} = require('../service/projectmetadata/getProjectMetaData.js');
 
 
 require("dotenv").config();
@@ -337,6 +338,26 @@ router.route('/getProjectsByUser/:username')
   }
 })
 
+
+router.route('/getProjectsMetaDataByUserName/:username')
+.get(async function(req,res){
+  try{
+    var errResponse;
+    const username = req.params.username;
+    var result = await getProjectHierarchyMetadata(username);
+    if (result.error) {
+      res.status(result.error.code).json(result.error);
+    }
+    if (result.data) {
+      res.status(201).json(result.data);
+    }
+  }catch(error)
+  {
+    console.log(error);
+    errResponse = new ErrorResponse(500, "Internal server error", error);
+    res.status(500).json(errResponse);
+  }
+});
 
 
 /** UMESH TODO  -- REFACTOR this code 
