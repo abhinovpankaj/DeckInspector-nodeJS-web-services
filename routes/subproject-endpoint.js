@@ -65,6 +65,9 @@ try{
     } 
 }catch(ex){
   console.log(ex);
+  errResponse = new ErrorResponse(500, "Internal server error", ex);
+  res.status(500).json(errResponse);
+  return;
 }
 console.log(newSubProject);
 var result = await subprojects.addSubProject(newSubProject); 
