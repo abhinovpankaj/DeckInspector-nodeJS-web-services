@@ -5,52 +5,56 @@ const projects = require("../model/project");
 const ErrorResponse = require('../model/error');
 const path = require('path');
 const fs = require('fs'); 
-const {generateProjectReport}= require('../service/projectreportgeneration.js');
+const {generateProjectReport,getProjectHtml}= require('../service/projectreportgeneration.js');
 const {getProjectHierarchyMetadata} = require('../service/projectmetadata/getProjectMetaData.js');
 
 
 require("dotenv").config();
 
 router.route('/add')
-  .post(async function (req, res) {
-    try {
-      var errResponse ;
-      // Get user input
-      const { name, description, address, createdby, url } = req.body;
+.post(async function (req, res) {
+  try {
+    var errResponse;
+    // Get user input
+    const { name, description, address, createdBy, url, assignedTo , projecttype } = req.body;
 
-      // Validate user input
-      if (!(name)) {
-        errResponse = new ErrorResponse(400, "Name is required", "");
-        res.status(400).json(errResponse);
-        return;
-      }
-      var creationtime = (new Date(Date.now())).toISOString();
-      var newProject = {
-        "name": name,
-        "description": description,
-        "address": address,
-        "createdby": createdby,
-        "url": url,
-        "isavailableoffline": false,
-        "iscomplete": false,
-        "isdeleted": false,
-        "createdat": creationtime,
-        "assignedto": []
-      }
-      var result = await projects.addProject(newProject);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      }
-      if (result.data) {
-        //console.debug(result);
-        res.status(201).json(result.data);
-      }
-
-    } catch (err) {
-      errResponse = new ErrorResponse(500, "Internal server error, Exception occured while adding project", err);
-      res.status(500).json(errResponse);
+    // Validate user input
+    if (!name) {
+      errResponse = new ErrorResponse(400, "Name is required", "");
+      res.status(400).json(errResponse);
+      return;
     }
-  });
+
+    // Create a new project object
+    var newProject = {
+      "name": name,
+      "description": description,
+      "address": address,
+      "createdby": createdBy, // Correct the property name to "createdBy"
+      "url": url, // Correct the property name to "filePath"
+      "lasteditedby": createdBy, // Correct the property name to "lastEditedBy"
+      "assignedto": assignedTo,// Assign the array of assignedTo directly
+      "editedat":new Date().toISOString(),
+      "children": [],
+      "projecttype": projecttype,
+      "createdat": new Date().toISOString(), // Use the current date for createdat
+    }
+
+    // Save the new project to the database
+    var result = await projects.addProject(newProject);
+
+    if (result.error) {
+      res.status(result.error.code).json(result.error);
+    }
+    if (result.data) {
+      res.status(201).json(result.data);
+    }
+
+  } catch (err) {
+    errResponse = new ErrorResponse(500, "Internal server error, Exception occurred while adding project", err);
+    res.status(500).json(errResponse);
+  }
+});
 
   router.route('/allprojects')
   .get(async function (req, res) {
@@ -389,6 +393,21 @@ router.route('/generatereport')
   console.error('Error generating PDF:', err);
   res.status(500).send('Error generating PDF');
 }
+});
+
+router.route('/generatereporthtml').post(async function (req, res) {
+  try {
+    const projectId = req.body.id;
+    const sectionImageProperties = req.body.sectionImageProperties;
+    const reportType = req.body.reportType;
+    const project  = await projects.getProjectById(projectId);
+    const htmlContent = await getProjectHtml(project, sectionImageProperties, reportType);
+    res.setHeader('Content-Type', 'text/html');
+    res.send(htmlContent);
+  } catch (err) {
+    console.error('Error generating HTML:', err);
+    res.status(500).send('Error generating HTML');
+  }
 });
 
 module.exports = router;

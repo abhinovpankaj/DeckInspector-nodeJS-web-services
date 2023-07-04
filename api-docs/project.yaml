@@ -11,13 +11,27 @@ components:
       properties:
         name:
           type: string
-          description: project name         
+          description: project name
+        description:
+          type: string
+          description: project description
+        createdBy:
+          type: string
+          description: project created by    
         address:
           type: string
           description: project address
-        filePath:
+        url:
           type: string
-          description: local full filepath.        
+          description: local full filepath.
+        projecttype:
+          type: string
+          description: project type
+        assignedTo:
+          type: array
+          items:
+            type: string
+          description: project assigned to          
     uploadOtions:
       type: object
 
@@ -134,3 +148,43 @@ paths:
             schema:
               type: string
               format: binary
+    
+/api/project/generatereporthtml:
+  post:
+    tags:
+      - Project
+    summary: Generate Project Report
+    description: Generates an HTML report for a specific project.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the project.
+              sectionImageProperties:
+                type: object
+                properties:
+                  compressionQuality:
+                    type: integer
+                    description: Compression quality for images.
+                  imageFactor:
+                    type: integer
+                    description: Image factor for the report.
+              companyName:
+                type: string
+                description: The name of the company for which the report is to be generated.
+              reportType:
+                type: string
+                description: The type of report to be generated.
+    responses:
+      '200':
+        description: Successful operation. The HTML report is generated and returned.
+        content:
+          text/html:
+            schema:
+              type: string
+              example: "<html><body><h1>Project Report</h1><p>This is the project report content.</p></body></html>"
