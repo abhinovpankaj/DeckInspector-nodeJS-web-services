@@ -4,15 +4,32 @@ var router = express.Router();
 const subprojects = require("../model/subproject");
 const locations = require("../model/location");
 const ErrorResponse = require('../model/error');
+const Project = require('../model/project');
 
 require("dotenv").config();
 
+
+/**
+ * name
+ * description
+ * parentid
+ * parenttype
+ * isInvasive
+ * type:subproject
+ * url:
+ * createdat
+ * createdby
+ * editedat
+ * lasteditedby
+ * assignedto:
+ * children:[]
+ */
 router.route('/add')
 .post(async function (req,res){
 try{
 var errResponse;
 // Get user input
-const { name, description, createdby,url,parentid } = req.body;
+const { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy } = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -20,18 +37,38 @@ if (!(name&&parentid)) {
   res.status(400).json(errResponse);
   return;
 }
+
+const parentProject = await Project.getProjectById(parentid);
+if(!parentProject.data){
+  errResponse = new ErrorResponse(400,"Invalid Parent Id","");
+  res.status(400).json(errResponse);
+  return;
+}
+
 var creationtime= (new Date(Date.now())).toISOString();
-var newSubProject = {
-    "name":name,
-    "description":description,    
-    "createdby":createdby,
-    "url":url,    
-    "isdeleted":false,
-    "createdat":creationtime,
-    "assignedto":[] ,
-    "parentid": parentid   
-} 
-var result = await subprojects.addSubProject(newSubProject);    
+//console.log(creationtime);
+try{
+  var newSubProject = {
+      "name":name,
+      "description":description,
+      "parentid": parentid,  
+      "parenttype": parenttype,
+      "type": "subproject",
+      "url":url,    
+      "createdat":creationtime,
+      "createdby":createdBy,
+      "assignedto":assignedTo,
+      "editedat":creationtime,
+      "lasteditedby":createdBy,
+      "children":[],
+      "isInvasive": isInvasive
+    } 
+}catch(ex){
+  console.log(ex);
+}
+console.log(newSubProject);
+var result = await subprojects.addSubProject(newSubProject); 
+console.log(result);
 if(result.error){
     res.status(result.error.code).json(result.error);
   }
@@ -253,6 +290,7 @@ router.route('/getSubprojectsDataByProjectId')
       res.status(500).json(errResponse);
   }
 });
+
 
 
 module.exports = router ;
