@@ -28,6 +28,6 @@ async function getProjectHtml(project, sectionImageProperties, reportType) {
     }
 }
 
-module.exports = { generateProjectReport};
+module.exports = { generateProjectReport,getProjectHtml};
 
 

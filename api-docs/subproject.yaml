@@ -2,8 +2,62 @@ swagger: '2.0'
 info:
   version: '1.0.0'
   title: subproject API
+components:
+  schemas:
+    subproject:
+      type: object
+      required:
+        - name             
+      properties:
+        name:
+          type: string
+          description: subproject name
+        description:
+          type: string
+          description: subproject description
+        parentid:
+          type: string
+          description: subproject parentProjectId
+        parenttype:
+          type: string
+          description: subproject parentProjectType
+        isInvasive:
+          type: boolean
+          description: subproject isInvasive
+        createdBy:
+          type: string
+          description: subproject created by
+        url:
+          type: string
+          description: local full filepath.
+        assignedTo:
+          type: array
+          items:
+            type: string
+          description: subproject assigned to          
+    uploadOtions:
+      type: object
 
 paths:
+  /api/subproject/add:
+    
+    post:
+      tags:
+        [SubProject]
+      summary: add subproject
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/subproject'
+      responses:
+        201:
+          description: subproject uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+
   /api/subproject/getSubprojectsDataByProjectId:
     post:
       tags:

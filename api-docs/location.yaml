@@ -2,8 +2,60 @@ swagger: '2.0'
 info:
   version: '1.0.0'
   title: Locations API
+components:
+  schemas:
+    location:
+      type: object
+      required:
+        - name             
+      properties:
+        name:
+          type: string
+          description: location name
+        description:
+          type: string
+          description: location description
+        parentid:
+          type: string
+          description: location parentProjectId
+        parenttype:
+          type: string
+          description: location parentProjectType
+        isInvasive:
+          type: boolean
+          description: location isInvasive
+        createdBy:
+          type: string
+          description: location created by
+        url:
+          type: string
+          description: local full filepath.
+        type:
+          type: string
+          description: location type      
+    uploadOtions:
+      type: object
 
 paths:
+  /api/location/add:
+    
+    post:
+      tags:
+        [Locations]
+      summary: add location
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location'
+      responses:
+        201:
+          description: location uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+
   /api/location/getLocationById:
     post:
       tags:

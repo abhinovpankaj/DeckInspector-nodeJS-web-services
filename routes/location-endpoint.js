@@ -12,7 +12,7 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdby,url,parentid,parenttype,type } = req.body;
+const { name, description, createdBy,url,parentid,parenttype,type,isInvasive} = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -21,16 +21,26 @@ if (!(name&&parentid)) {
   return;
 }
 var creationtime= (new Date(Date.now())).toISOString();
-var newLocation = {
-    "name":name,
-    "description":description,    
-    "createdby":createdby,
-    "url":url,    
-    "isdeleted":false,
-    "createdat":creationtime,    
-    "parentid":parentid,
-    "parenttype": parenttype,
-    "type":type
+try{
+  var newLocation = {
+      "name":name,
+      "description":description,    
+      "createdby":createdBy,
+      "url":url,
+      "createdat":creationtime,    
+      "parentid":parentid,
+      "parenttype": parenttype,
+      "type":type,
+      "sections":[],
+      "lasteditedBy":createdBy,
+      "editedat":creationtime,
+      "isInvasive":isInvasive
+  }
+}catch(ex){
+  console.log(ex);
+  errResponse = new ErrorResponse(500, "Internal server error", ex);
+  res.status(500).json(errResponse);
+  return;
 } 
 var result = await locations.addLocation(newLocation);    
 if(result.error){
