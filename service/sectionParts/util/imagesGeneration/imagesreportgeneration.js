@@ -7,8 +7,18 @@ const imageTemplate = fs.readFileSync(filePath, 'utf8');
 
 const replaceImagesInTemplate =  async function(images,sectionImageProperties,header){
     try {
+      const compressedImages = [];
       const quality = Number(sectionImageProperties.compressionQuality);
-      const compressedImages = await compressImages(images, quality);
+      if (quality==100) {
+        
+      
+      for (const image of images) {
+        compressedImages.push({ compressedUrl:image, description: "not compressed" });
+      }
+    }else{
+      compressedImages.push( await compressImages(images, quality));
+    }
+      
       const html_images = ejs.render(imageTemplate,  
         {images: compressedImages, factor: sectionImageProperties.imageFactor ,imagesHeader:header});
       return html_images;

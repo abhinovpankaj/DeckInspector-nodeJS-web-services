@@ -39,7 +39,11 @@ const options = {
       servers: [
         {
           url: "https://deckinspectors-dev.azurewebsites.net",
-          description: "Deck Inspectors Documentation",
+          description: "Prod Deck Inspectors Documentation",
+        },
+        {
+          url: "http://localhost:3000",
+          description: "Local Deck Inspectors Documentation",
         },
       ],
     },
