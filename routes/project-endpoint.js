@@ -101,11 +101,11 @@ router.route('/filterprojects')
   });
 
   
-router.route('/:id')
-  .get(async function (req, res) {
+router.route('/getProjectById')
+  .post(async function (req, res) {
     try {
       var errResponse;
-      const projectId = req.params.id;
+      const projectId = req.body.projectid;
       var result = await projects.getProjectById(projectId);
       if (result.error) {
         res.status(result.error.code).json(result.error);

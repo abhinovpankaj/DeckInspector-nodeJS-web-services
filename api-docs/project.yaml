@@ -69,6 +69,33 @@ paths:
         500:
           description: Internal server error.
   
+  /api/project/getProjectById:
+     post:
+      tags:
+        - Project
+      summary: Get Project project Id
+      description: Get Project by project Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectid:
+                  type: string
+                  description: The ID of the projectid.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: Location retrieved.
+        '401':
+          description: No Location found.
+        '500':
+          description: Internal server error.
+  
   /api/project/getProjectsByUser/{userName}:
     get:
       tags:

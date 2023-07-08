@@ -13,8 +13,8 @@ var errResponse;
 // Get user input
 
 const { name, exteriorelements, waterproofingelements,additionalconsiderations,
-  thumbnail,visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
-awe,eee,lbc,images,createdby,parentid } = req.body;
+  visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
+awe,eee,lbc,images,createdby,parentid,parenttype } = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -24,24 +24,24 @@ if (!(name&&parentid)) {
 }
 var creationtime= (new Date(Date.now())).toISOString();
 var newSection = {
-    "name":name,
-    "exteriorelements":exteriorelements,    
-    "waterproofingelements":waterproofingelements,
-    "additionalconsiderations":additionalconsiderations,    
-    "thumbnail":thumbnail,
-    "visualreview":visualreview,   
-    "isdeleted":false, 
-    "parentid":parentid,
-    "visualsignsofleak": visualsignsofleak,
-    "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
-    "conditionalassessment":conditionalassessment,   
+    "additionalconsiderations":additionalconsiderations,
     "awe":awe, 
-    "eee":eee,
-    "lbc": lbc,
-    "images":images,
-    "createdby":createdby,
+    "conditionalassessment":conditionalassessment,
     "createdat":creationtime,
-    "images":[]
+    "createdby":createdby,
+    "editedat":creationtime,
+    "lasteditedby":createdby,
+    "eee":eee,
+    "exteriorelements":exteriorelements,
+    "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
+    "lbc": lbc,
+    "name":name,
+    "parentid":parentid,
+    "parenttype":parenttype,
+    "visualreview":visualreview,
+    "visualsignsofleak": visualsignsofleak,
+    "waterproofingelements":waterproofingelements,
+    "images":images
 } 
 var result = await sections.addSection(newSection);    
 if(result.error){
