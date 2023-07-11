@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 const sections = require("../model/sections");
 const ErrorResponse = require('../model/error');
+var ObjectId = require('mongodb').ObjectId;
 
 require("dotenv").config();
 
@@ -36,7 +37,7 @@ var newSection = {
     "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
     "lbc": lbc,
     "name":name,
-    "parentid":parentid,
+    "parentid": new ObjectId(parentid),
     "parenttype":parenttype,
     "visualreview":visualreview,
     "visualsignsofleak": visualsignsofleak,
