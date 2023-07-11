@@ -5,6 +5,7 @@ const subprojects = require("../model/subproject");
 const locations = require("../model/location");
 const ErrorResponse = require('../model/error');
 const Project = require('../model/project');
+var ObjectId = require('mongodb').ObjectId;
 
 require("dotenv").config();
 
@@ -51,7 +52,7 @@ try{
   var newSubProject = {
       "name":name,
       "description":description,
-      "parentid": parentid,  
+      "parentid": new ObjectId(parentid), 
       "parenttype": parenttype,
       "type": "subproject",
       "url":url,    

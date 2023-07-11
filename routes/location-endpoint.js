@@ -4,6 +4,7 @@ var router = express.Router();
 const locations = require("../model/location");
 const sections = require("../model/sections");
 const ErrorResponse = require('../model/error');
+var ObjectId = require('mongodb').ObjectId;
 
 require("dotenv").config();
 
@@ -28,7 +29,7 @@ try{
       "createdby":createdBy,
       "url":url,
       "createdat":creationtime,    
-      "parentid":parentid,
+      "parentid": new ObjectId(parentid),
       "parenttype": parenttype,
       "type":type,
       "sections":[],
