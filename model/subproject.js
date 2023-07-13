@@ -16,7 +16,7 @@ var addSubProject = async function (subproject) {
                 {
                     children:
                     {
-                        "id": result.insertedId,
+                        "_id": result.insertedId,
                         "description": subproject.description,
                         "name": subproject.name,
                         "type": "subproject",
@@ -275,7 +275,7 @@ var updateSubProjectVisibilityStatus = async function (id, name, parentId, isVis
                     {
                         children:
                         {
-                            "id": new ObjectId(id),
+                            "_id": new ObjectId(id),
                             "name": name,
                             "type": "subproject",
                             "description": result.description,
