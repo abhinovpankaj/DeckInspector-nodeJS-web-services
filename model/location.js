@@ -16,7 +16,7 @@ var addLocation = async function (location) {
                     {
                         children:
                         {
-                            "id": result.insertedId,
+                            "_id": result.insertedId,
                             "name": location.name,
                             "description": location.description,
                             "url": location.url,
@@ -30,7 +30,7 @@ var addLocation = async function (location) {
                     {
                         children:
                         {
-                            "id": result.insertedId,
+                            "_id": result.insertedId,
                             "name": location.name,
                             "description": location.description,
                             "url": location.url,

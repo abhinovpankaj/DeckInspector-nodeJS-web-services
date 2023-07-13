@@ -16,7 +16,7 @@ var addSection = async function (section) {
                 {
                     sections:
                     {
-                        "id": result.insertedId,
+                        "_id": result.insertedId,
                         "name": section.name,
                         "visualsignsofleak": section.visualsignsofleak,
                         "furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
