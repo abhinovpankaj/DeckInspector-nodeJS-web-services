@@ -88,12 +88,13 @@ if(result.error){
 });
 
 
-router.route('/:id')
-.get(async function(req,res){
+router.route('/getSubProjectById')
+.post(async function(req,res){
   try{
     var errResponse;
-    const subprojectId = req.params.id;
-    var result = await subprojects.getSubProjectById( subprojectId);
+    const subprojectId = req.body.subprojectid;
+    const userName = req.body.username;
+    var result = await subprojects.getSubProjectById(subprojectId);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
@@ -107,6 +108,8 @@ router.route('/:id')
       res.status(500).json(errResponse);
   }
 })
+
+router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
@@ -294,6 +297,8 @@ router.route('/getSubprojectsDataByProjectId')
       res.status(500).json(errResponse);
   }
 });
+
+
 
 
 
