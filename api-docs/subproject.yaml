@@ -84,3 +84,30 @@ paths:
           description: No subproject found.
         '500':
           description: Internal server error.
+  
+  /api/subproject/getSubProjectById:
+     post:
+      tags:
+        - SubProject
+      summary: Get SubProject by Id
+      description: Get SubProject by Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subprojectid:
+                  type: string
+                  description: The ID of the subProject.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: Location retrieved.
+        '401':
+          description: No Location found.
+        '500':
+          description: Internal server error.
