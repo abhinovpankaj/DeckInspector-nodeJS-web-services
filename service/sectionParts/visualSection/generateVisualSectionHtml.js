@@ -25,11 +25,17 @@ class GenerateVisualSectionHTML extends GenerateSectionPartHTML{
         const template = fs.readFileSync(filePath, 'utf8');
         try {
             const sectionData =  await sections.getSectionById(sectionId);
-            this.changeSectionFields(sectionData.data.item);
-            const html_section = await ejs.render(template, sectionData.data.item);
-            const images_html = await replaceImagesInTemplate(sectionData.data.item.images,
-                sectionImageProperties,this.imagesHeader);
-            return html_section + images_html;
+            if(sectionData.data && sectionData.data.item)
+            {
+                this.changeSectionFields(sectionData.data.item);
+                const html_section = await ejs.render(template, sectionData.data.item);
+                const images_html = await replaceImagesInTemplate(sectionData.data.item.images,
+                    sectionImageProperties,this.imagesHeader);
+                return html_section + images_html;
+            }
+            else{
+                return "";
+            }
           } catch (err) {
             console.error(err);
           }
