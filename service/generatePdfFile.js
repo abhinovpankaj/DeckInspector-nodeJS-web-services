@@ -31,6 +31,7 @@ const generatePdfFile = async function (pdfFileName ,htmlString,companyName) {
           footerTemplate: footerTemplate,
           margin: { top: '80px', bottom: '40px' }, // Adjust the margin values as needed
           colorProfile: 'sRGB',
+          timeout: 0,
         });
         await browserInstance.close();
         console.timeEnd("generatePdfFile");
