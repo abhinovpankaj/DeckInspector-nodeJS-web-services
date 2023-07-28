@@ -3,6 +3,7 @@ var ObjectId = require('mongodb').ObjectId;
 const { QueryCollectionFormat } = require('@azure/core-http');
 const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
+const RatingMapping  = require("./ratingMapping.js");
 
 
 var addSection = async function (section) {
@@ -58,12 +59,33 @@ var addSection = async function (section) {
 };
 
 
+var transformData = function(section) {
+      section.visualreview = capitalizeWords(section.visualreview);
+      section.visualsignsofleak = capitalizeWords(section.visualsignsofleak.toString());
+      section.furtherinvasivereviewrequired = capitalizeWords(section.furtherinvasivereviewrequired.toString());
+      section.conditionalassessment = capitalizeWords(section.conditionalassessment.toString());
+      section.eee = RatingMapping[section.eee];
+      section.lbc = RatingMapping[section.lbc];
+      section.awe = RatingMapping[section.awe];
+
+};
+
+var capitalizeWords = function (word) {
+    if(word)
+    {
+    var finalWord = word[0].toUpperCase() + word.slice(1);
+    return finalWord;
+    }
+    return word;
+}
+
+
 var getSectionById = async function (id) {
     var response = {};
     try {
-        const result = await mongo.Sections.findOne({ _id: new ObjectId(id) });
-
+        const result = await mongo.Sections.findOne({ _id: new ObjectId(id) }); 
         if (result) {
+            transformData(result);
             response = {
                 "data": {
                     "item": result,
