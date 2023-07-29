@@ -4,13 +4,12 @@ const { QueryCollectionFormat } = require('@azure/core-http');
 const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
 const RatingMapping  = require("./ratingMapping.js");
-
+const Locations = require('./location.js');
 
 var addSection = async function (section) {
     var response = {};
     try {
         var result = await mongo.Sections.insertOne(section);
-
         if (result.insertedId) {
             var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(section.parentid) }, {
                 $push:
@@ -201,6 +200,60 @@ var updateSection = async function (section,count) {
         return response;
     }
 
+};
+
+var editSection = async function(sectionId,newSectionData)
+{
+    var response ={};
+    try{
+        const updateObject = { $set: newSectionData };
+        var result = await mongo.Sections.updateOne({ _id: new ObjectId(sectionId) },updateObject,{upsert:false});    
+        
+        if(result.modifiedCount<1){
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Location found."
+                  }
+            }
+            return response;
+        } else{
+            if(result.modifiedCount==1){
+                var section = await mongo.Sections.findOne({ _id: new ObjectId(sectionId) });
+                var  projeResult =  await Locations.updateSectionInLocationsRemove(section.parentid,sectionId);
+                console.log(projeResult.modifiedCount);
+                await Locations.updateSectionInLocationsAdd(section.parentid,sectionId,section);
+                response = {
+                    "data" :{                   
+                        "message": "Location updated successfully.",
+                        "code":201
+                    }   
+                };
+                return response;
+            }           
+            else{
+                response = {
+                    "data" :{                    
+                        "message": "Failed to update the Location details.",
+                        "code":409
+                    }   
+                };
+                return response;
+            }                   
+        }   
+    }
+    catch(err){
+        console.log(err);
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching Location.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
 };
 //Soft Delete/undelete
 var updateSectionVisibilityStatus = async function (id, name, parentId, isVisible) {
@@ -432,5 +485,6 @@ module.exports = {
     updateSection,
     getSectionById,
     addRemoveImages,
-    getSectionMetaDataForLocationId
+    getSectionMetaDataForLocationId,
+    editSection
 };

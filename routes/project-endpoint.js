@@ -120,29 +120,15 @@ router.route('/getProjectById')
       res.status(500).json(errResponse);
     }
   })
+
+  router.route('/:id')
   .put(async function (req, res) {
     try {
       var errResponse;
-      const { name, description, address, url, lasteditedby } = req.body;
+      const newData = req.body;
       const projectId = req.params.id;
       // Validate user input
-      if (!(name && description && address && lasteditedby)) {
-        errResponse = new ErrorResponse(400, "name,description,address and lasteditedby is required", "");
-        res.status(400).json(errResponse);
-        return;
-      }
-      var editedat = (new Date(Date.now())).toISOString();
-      var editedProject = {
-        "name": name,
-        "id": projectId,
-        "description": description,
-        "address": address,
-        "url": url,
-        "lasteditedby": lasteditedby,
-        "editedat": editedat
-      }
-
-      var result = await projects.updateProject(editedProject);
+      var result = await projects.editProject(projectId,newData);
       if (result.error) {
         res.status(result.error.code).json(result.error);
         return;

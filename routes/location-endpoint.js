@@ -78,28 +78,14 @@ router.route('/:id')
       res.status(500).json(errResponse);
   }
 })
+
+router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
-    const { name, description,url,lasteditedby,parentid} = req.body;
+    const newData = req.body;
     const locationId = req.params.id;
-    // Validate user input
-    if (!(name&&description&&url&&lasteditedby)) {
-      errResponse = new ErrorResponse(500, "name,description,url and lasteditedby are required", "");
-      res.status(500).json(errResponse);
-      return;
-    }
-    var editedat=(new Date(Date.now())).toISOString();
-    var editedLocation = {
-        "name":name,        
-        "description":description,            
-        "url":url,
-        "id"  :locationId,
-        "lasteditedby":lasteditedby,
-        "editedat":editedat        
-    }
-  
-    var result = await locations.updateLocation(editedLocation);
+    var result = await locations.editLocation(locationId,newData);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }

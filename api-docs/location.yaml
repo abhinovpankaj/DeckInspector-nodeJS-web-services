@@ -56,6 +56,33 @@ paths:
         500:
           description: Internal server error
 
+
+  /api/location/{id}:
+    
+    put:
+      tags:
+        [Locations]
+      summary: Edit location
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the location.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location'
+      responses:
+        201:
+          description: location uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+
   /api/location/getLocationById:
     post:
       tags:

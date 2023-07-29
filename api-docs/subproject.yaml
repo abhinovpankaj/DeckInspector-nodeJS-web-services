@@ -58,6 +58,33 @@ paths:
         500:
           description: Internal server error
 
+
+  /api/subproject/{id}:
+    
+    put:
+      tags:
+        [SubProject]
+      summary: Edit subproject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the subProject.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/subproject'
+      responses:
+        201:
+          description: subproject uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+
   /api/subproject/getSubprojectsDataByProjectId:
     post:
       tags:

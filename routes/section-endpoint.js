@@ -79,43 +79,16 @@ router.route('/:id')
       res.status(500).json(errResponse);
   }
 })
+
+router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
-    const { name, exteriorelements, waterproofingelements,additionalconsiderations,
-      thumbnail,visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
-    awe,eee,lbc,lasteditedby,parentid,count } = req.body;
-    const locationId = req.params.id;
-    // Validate user input
-    if (!(name&&lasteditedby&&parentid)) {
-      errResponse = new ErrorResponse(500, "name,parentid,lasteditedby are required", "");
-      res.status(500).json(errResponse);
-      return;
-    }
-    var editedat=(new Date(Date.now())).toISOString();
-    
-    var editedSection = {
-      "id":locationId,
-      "name":name,
-      "exteriorelements":exteriorelements,    
-      "waterproofingelements":waterproofingelements,
-      "additionalconsiderations":additionalconsiderations,    
-      "thumbnail":thumbnail,
-      "visualreview":visualreview,   
-      "isdeleted":false, 
-      "parentid":parentid,
-      "visualsignsofleak": visualsignsofleak,
-      "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
-      "conditionalassessment":conditionalassessment,   
-      "awe":awe, 
-      "eee":eee,
-      "lbc": lbc,      
-      "lasteditedby":lasteditedby,
-      "editedat":editedat,
-      
-  } 
-  
-    var result = await sections.updateSection(editedSection,count);
+    const sectionId = req.params.id;
+    const newData = req.body;
+
+    var result = await sections.editSection(sectionId,newData);
+
     if(result.error){
         res.status(result.error.code).json(result.error);
     }
