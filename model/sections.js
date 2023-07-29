@@ -10,6 +10,7 @@ var addSection = async function (section) {
     var response = {};
     try {
         var result = await mongo.Sections.insertOne(section);
+        var insertedId = result.insertedId;
         if (result.insertedId) {
             var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(section.parentid) }, {
                 $push:
@@ -27,16 +28,18 @@ var addSection = async function (section) {
                 }
             }
             );
-
             if (projresult.modifiedCount > 0) {
                 var msg = "Section inserted successfully,parent updated successfully."
             }
             else
                 var msg = "Section inserted successfully,parent failed to updated."
+            //console.log(msg);
+           
+            var result = await markInvasive(section);
 
             response = {
                 "data": {
-                    "id": result.insertedId,
+                    "id": insertedId,
                     "message": msg,
                     "code": 201
                 }
@@ -52,10 +55,56 @@ var addSection = async function (section) {
         }
         return response;
     } catch (error) {
-
+        console.log(error);
     }
-
 };
+
+
+var markInvasive = async function(section) {
+    if (Boolean(section.furtherinvasivereviewrequired) === true) {
+        var parentId = section.parentid;
+        var parentType = section.parenttype.toLowerCase().trim();
+        //console.log( "  ----  " ,parentId, "  ----  " ,parentType);
+        while (parentId && parentType) {
+            //console.log(parentId, "  ----  " ,parentType);
+            if (parentType === 'buildinglocation' ||
+                parentType === 'projectlocation' ||
+                parentType === 'apartment') {
+                var result = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) }, {
+                    $set: {
+                        isInvasive: true
+                    }
+                });
+                var location = await mongo.Locations.findOne({ _id: new ObjectId(parentId) });
+                parentId = location.parentid;
+                parentType = location.parenttype.toLowerCase().trim();
+            }
+            else if (parentType === 'subproject') {
+                var result = await mongo.SubProjects.updateOne({ _id: new ObjectId(parentId) }, {
+                    $set: {
+                        isInvasive: true
+                    }
+                });
+                //console.log(result.modifiedCount);
+                var subProject = await mongo.SubProjects.findOne({ _id: new ObjectId(parentId) });
+                parentId = subProject.parentid;
+                parentType = subProject.parenttype.toLowerCase().trim();
+            }
+            else if (parentType === 'project') {
+                var result = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) }, {
+                    $set: {
+                        isInvasive: true
+                    }
+                });
+                //console.log(result.modifiedCount);
+                var project = await mongo.Projects.findOne({ _id: new ObjectId(parentId) });
+                parentId = undefined
+                parentType = undefined;
+            }
+        }
+    }
+    return result;
+}
 
 
 var transformData = function(section) {
@@ -135,7 +184,6 @@ var updateSection = async function (section,count) {
                 lbc: section.lbc,
                 awe: section.awe,
                 parentid: section.parentid
-
             }
         });
 
@@ -220,9 +268,11 @@ var editSection = async function(sectionId,newSectionData)
         } else{
             if(result.modifiedCount==1){
                 var section = await mongo.Sections.findOne({ _id: new ObjectId(sectionId) });
-                var  projeResult =  await Locations.updateSectionInLocationsRemove(section.parentid,sectionId);
-                console.log(projeResult.modifiedCount);
-                await Locations.updateSectionInLocationsAdd(section.parentid,sectionId,section);
+                if(newSectionData.furtherinvasivereviewrequired && newSectionData.furtherinvasivereviewrequired.toLowerCase().trim() === 'true'){
+                    await markInvasive(section);
+                }
+                var  projectResult =  await Locations.updateSectionInLocationsRemove(section.parentid,sectionId);
+                var projectResult2 = await Locations.updateSectionInLocationsAdd(section.parentid,sectionId,section);
                 response = {
                     "data" :{                   
                         "message": "Location updated successfully.",
