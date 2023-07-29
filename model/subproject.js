@@ -4,6 +4,7 @@ const { QueryCollectionFormat } = require('@azure/core-http');
 const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
 const user = require('./user');
+const Projects = require('./project');
 
 var addSubProject = async function (subproject) {
     var response = {};
@@ -11,19 +12,7 @@ var addSubProject = async function (subproject) {
         var result = await mongo.SubProjects.insertOne(subproject);
 
         if (result.insertedId) {
-            var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(subproject.parentid) }, {
-                $push:
-                {
-                    children:
-                    {
-                        "_id": result.insertedId,
-                        "description": subproject.description,
-                        "name": subproject.name,
-                        "type": "subproject",
-                        "url": subproject.url
-                    }
-                }
-            });
+            var projresult = await Projects.updateProjectChildrenWithAdd(subproject.parentid, result.insertedId,subproject);
             if (projresult.modifiedCount > 0) {
                 var msg = "SubProject inserted successfully,parent project updated successfully."
             }
@@ -250,6 +239,59 @@ var updateSubProject = async function (subproject) {
     }
 
 };
+
+var editSubProject = async function (subProjectId,newData) {
+    var response ={};
+    try{
+        const updateObject = { $set: newData };
+        var result = await mongo.SubProjects.updateOne({ _id: new ObjectId(subProjectId) },updateObject,{upsert:false});    
+        
+        if(result.matchedCount<1){
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No SubProject found."
+                  }
+            }
+            return response;
+        } else{
+            if(result.modifiedCount==1){
+                var subProject = await mongo.SubProjects.findOne({ _id: new ObjectId(subProjectId) });
+                var projresult = await Projects.updateProjectChildrenWithRemove(subProject.parentid,subProjectId);
+                var projresult2 = await Projects.updateProjectChildrenWithAdd(subProject.parentid,subProjectId,subProject);
+                response = {
+                    "data" :{                   
+                        "message": "SubProject updated successfully.",
+                        "code":201
+                    }   
+                };
+                return response;
+            }           
+            else{
+                response = {
+                    "data" :{                    
+                        "message": "Failed to update the SubProject details.",
+                        "code":409
+                    }   
+                };
+                return response;
+            }                   
+        }   
+    }
+    catch(err){
+        console.log(err);
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
+
 //Soft Delete/undelete
 var updateSubProjectVisibilityStatus = async function (id, name, parentId, isVisible) {
     var response = {};
@@ -444,6 +486,32 @@ var getSubProjectsByParentId = async function(parentId)
     }
 }
 
+var updateSubProjectChildrenWithAdd = async function(subprojectId,childrenId,childrenData)
+{
+    return await mongo.SubProjects.updateOne({ _id: new ObjectId(subprojectId) }, {
+        $push: {
+            children: {
+                "_id": childrenId,
+                "description": childrenData.description,
+                "name": childrenData.name,
+                "type": childrenData.type,
+                "url": childrenData.url
+            }
+        }
+    });
+}
+
+var updateSubProjectChildrenWithRemove = async function(subprojectId,childrenId)
+{
+    return await mongo.SubProjects.updateOne({ _id: new ObjectId(subprojectId) }, {
+        $pull: {
+            children: {
+                "_id": childrenId
+            }
+        }
+    });
+}
+
 module.exports = {
     addSubProject,
     updateSubProjectVisibilityStatus,
@@ -453,5 +521,8 @@ module.exports = {
     assignSubProjectToUser,
     unassignUserFromSubProject,
     addRemoveChildren,
-    getSubProjectsByParentId
+    getSubProjectsByParentId,
+    editSubProject,
+    updateSubProjectChildrenWithAdd,
+    updateSubProjectChildrenWithRemove
 };

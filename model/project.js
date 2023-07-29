@@ -314,6 +314,55 @@ var updateProject = async function (project) {
     
 };
 
+
+var editProject = async function (projectId,newData) {
+    var response ={};
+    try{
+        const updateObject = { $set: newData };
+        var result = await mongo.Projects.updateOne({ _id: new ObjectId(projectId) },updateObject,{upsert:false});    
+        
+        if(result.matchedCount<1){
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Project found."
+                  }
+            }
+            return response;
+        } else{
+            if(result.modifiedCount==1){
+                response = {
+                    "data" :{                   
+                        "message": "Project updated successfully.",
+                        "code":201
+                    }   
+                };
+                return response;
+            }           
+            else{
+                response = {
+                    "data" :{                    
+                        "message": "Failed to update the project details.",
+                        "code":409
+                    }   
+                };
+                return response;
+            }                   
+        }   
+    }
+    catch(err){
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching project.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
+
 var updateProjectVisibilityStatus = async function (id,isVisible) {
     var response ={};
     try {
@@ -503,6 +552,7 @@ var getAllFilesOfProject = async function (id) {
 var addRemoveChildren = async function(projectId,isAdd,{id,name,type}){
     var response = {};
     try {
+        console.log(projectId + {id,name,type});
         if(isAdd)
             var result = await mongo.Projects.updateOne({_id:new ObjectId(projectId)},{ $push: { children: {"id":id,"name":name,"type":type}}});
         else
@@ -591,6 +641,32 @@ var getProjectByAssignedToUserId = async function(userId)
     }   
 }
 
+var updateProjectChildrenWithAdd = async function(projectId,childrenId,childrenData)
+{
+    return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
+        $push: {
+            children: {
+                "_id": childrenId,
+                "description": childrenData.description,
+                "name": childrenData.name,
+                "type": childrenData.type,
+                "url": childrenData.url
+            }
+        }
+    });
+}
+
+var updateProjectChildrenWithRemove = async function(projectId,childrenId)
+{
+    return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
+        $pull: {
+            children: {
+                "_id": childrenId
+            }
+        }
+    });
+}
+
 
 
 module.exports = {
@@ -605,6 +681,8 @@ module.exports = {
     getAllProjects,assignProjectToUser,
     getAllFilesOfProject,unassignUserFromProject,
     addRemoveChildren,
-    getProjectByAssignedToUserId
-    
+    getProjectByAssignedToUserId,
+    editProject,
+    updateProjectChildrenWithAdd,
+    updateProjectChildrenWithRemove
 };

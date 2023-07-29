@@ -113,26 +113,11 @@ router.route('/:id')
 .put(async function(req,res){
   try{
     var errResponse;
-    const { name, description,url,lasteditedby,parentid} = req.body;
+    const newData = req.body;
     const subprojectId = req.params.id;
     // Validate user input
-    if (!(name&&description&&url&&lasteditedby)) {
-      errResponse = new ErrorResponse(500, "name,description,url,lasteditedby are required", "");
-      res.status(500).json(errResponse);
-      return;
-    }
-    var editedat=(new Date(Date.now())).toISOString();
-    var editedProject = {
-        "name":name,
-        "id": subprojectId,
-        "description":description,            
-        "url":url,  
-        "lasteditedby":lasteditedby,
-        "editedat":editedat,
-        "parentid":parentid
-    }
-  
-    var result = await subprojects.updateSubProject(editedProject);
+    
+    var result = await subprojects.editSubProject(subprojectId,newData);
     if(result.error){
         res.status(result.error.code).json(result.error);
     }

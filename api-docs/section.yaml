@@ -83,6 +83,33 @@ paths:
         500:
           description: Internal server error
 
+
+  /api/section/{id}:
+    
+    put:
+      tags:
+        [Section]
+      summary: edit Section
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the Section.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/section'
+      responses:
+        201:
+          description: section uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+
   /api/section/getSectionById:
     post:
       tags:

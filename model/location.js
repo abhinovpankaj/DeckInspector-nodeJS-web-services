@@ -3,6 +3,8 @@ var ObjectId = require('mongodb').ObjectId;
 const { QueryCollectionFormat } = require('@azure/core-http');
 const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
+const Projects = require('./project');
+const SubProjects = require('./subproject');
 
 var addLocation = async function (location) {
     var response = {};
@@ -287,6 +289,69 @@ var updateLocationVisibilityStatus = async function (id,type, name, parentId, pa
     }
 };
 
+var editLocation = async function (locationId,newData) {
+    var response ={};
+    try{
+        const updateObject = { $set: newData };
+        var result = await mongo.Locations.updateOne({ _id: new ObjectId(locationId) },updateObject,{upsert:false});    
+        console.log(result.modifiedCount);
+        if(result.modifiedCount<1){
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Location found."
+                  }
+            }
+            return response;
+        } else{
+            if(result.modifiedCount==1){
+                var location = await mongo.Locations.findOne({ _id: new ObjectId(locationId) });
+
+                console.log(location);
+                if(location.parenttype == 'project')
+                {
+                    var projresult = await Projects.updateProjectChildrenWithRemove(location.parentid,locationId);
+                    var projresult2 = await Projects.updateProjectChildrenWithAdd(location.parentid,locationId,location);
+                }
+                else if(location.parenttype == 'subproject')
+                {
+                    var projresult = await SubProjects.updateSubProjectChildrenWithRemove(location.parentid,locationId);
+                    var projresult2 = await SubProjects.updateSubProjectChildrenWithAdd(location.parentid,locationId,location);
+                }
+                response = {
+                    "data" :{                   
+                        "message": "Location updated successfully.",
+                        "code":201
+                    }   
+                };
+                return response;
+            }           
+            else{
+                response = {
+                    "data" :{                    
+                        "message": "Failed to update the Location details.",
+                        "code":409
+                    }   
+                };
+                return response;
+            }                   
+        }   
+    }
+    catch(err){
+        console.log(err);
+        response = {
+            "error": {
+                "code": 500,
+                "message": "Error fetching Location.",
+                "errordata": err
+              }
+        }
+        return response;
+    }
+    
+};
+
+
 var deleteLocationPermanently = async function (id) {
     try {
         var result = await mongo.Locations.deleteOne({ _id: new ObjectId(id) });
@@ -408,6 +473,33 @@ var getLocationByParentId = async function(parentId){
     }
 }
 
+var updateSectionInLocationsAdd = async function(locationId,sectionId,sectionData)
+{
+    return await mongo.Locations.updateOne({ _id: new ObjectId(locationId) }, {
+        $push: {
+            sections: {
+                "_id": new ObjectId(sectionId),
+                "name": sectionData.name,
+                "visualsignsofleak": sectionData.visualsignsofleak,
+                "furtherinvasivereviewrequired": sectionData.furtherinvasivereviewrequired,
+                "conditionalassessment": sectionData.conditionalassessment,
+                "visualreview"  : sectionData.visualreview,
+            }
+        }
+    });
+}
+
+var updateSectionInLocationsRemove = async function(locationId,sectionId)
+{
+    return await mongo.Locations.updateOne({ _id: new ObjectId(locationId) }, {
+        $pull: {
+            sections: {
+                "_id": new ObjectId(sectionId),
+            }
+        }
+    });
+}
+
 module.exports = {
     addLocation,
     updateLocationVisibilityStatus,
@@ -415,5 +507,8 @@ module.exports = {
     updateLocation,
     getLocationById,
     addRemoveSections,
-    getLocationByParentId
+    getLocationByParentId,
+    editLocation,
+    updateSectionInLocationsAdd,
+    updateSectionInLocationsRemove
 };
