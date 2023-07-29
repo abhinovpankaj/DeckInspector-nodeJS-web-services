@@ -1,0 +1,126 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Invasive Sections API
+components:
+  schemas:
+    invasiveSection:
+      type: object          
+      properties:
+        invasiveDescription:
+          type: string
+          description: invasive Description 
+        postinvasiverepairsrequired:
+          type: boolean
+          description: post invasive repairs required
+        parentid:
+          type: string
+          description: invasive Section pareentId
+        invasiveimages:
+          type: array
+          items:
+            type: string
+          description: Invasive images        
+    uploadOtions:
+      type: object
+
+paths:
+   /api/invasivesection/add:
+    
+    post:
+      tags:
+        [InvasiveSection]
+      summary: add Invasive Section
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/invasiveSection'
+      responses:
+        201:
+          description: Invasive section uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+  
+   /api/invasivesection/{id}:
+    
+    put:
+      tags:
+        [InvasiveSection]
+      summary: edit Invasive Section
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the Invasive Section.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/invasiveSection'
+      responses:
+        201:
+          description: invasiveSection uploaded successfully 
+        400:
+          description: Invalid input, inputs are missing
+        500:
+          description: Internal server error
+
+
+   /api/invasivesection/getInvasiveSectionById:
+    post:
+      tags:
+        - InvasiveSection
+      summary: Get InvasiveSection by Id
+      description: Get InvasiveSection by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invaisveSectionid:
+                  type: string
+                  description: The ID of the invaisveSectionid.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: InvaisveSection retrieved.
+        '401':
+          description: No projects found.
+        '500':
+          description: Internal server error.
+
+   /api/invasivesection/getInvasiveSectionByParentId:
+    post:
+      tags:
+        - InvasiveSection
+      summary: Get InvasiveSection by parent Id
+      description: Get InvasiveSection by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parentSectionId:
+                  type: string
+                  description: The ID of the parent Sectionid.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+        '201':
+          description: InvaisveSection  retrieved.
+        '401':
+          description: No projects found.
+        '500':
+          description: Internal server error.
