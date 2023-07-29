@@ -34,9 +34,6 @@ class GenerateSectionConclusiveHTML extends GenerateSectionPartHTML{
     async changeSectionFields(conclusiveSection)
     {
       conclusiveSection.invasiverepairsinspectedandcompleted = this.capitalizeWords(conclusiveSection.invasiverepairsinspectedandcompleted.toString());
-      conclusiveSection.eeeconclusive = RatingMapping[conclusiveSection.eeeconclusive];
-      conclusiveSection.lbcconclusive = RatingMapping[conclusiveSection.lbcconclusive];
-      conclusiveSection.aweconclusive = RatingMapping[conclusiveSection.aweconclusive];
     }
 
     capitalizeWords(word) {

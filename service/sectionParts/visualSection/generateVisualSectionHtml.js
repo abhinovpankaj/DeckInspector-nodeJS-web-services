@@ -47,9 +47,6 @@ class GenerateVisualSectionHTML extends GenerateSectionPartHTML{
       section.visualsignsofleak = this.capitalizeWords(section.visualsignsofleak.toString());
       section.furtherinvasivereviewrequired = this.capitalizeWords(section.furtherinvasivereviewrequired.toString());
       section.conditionalassessment = this.capitalizeWords(section.conditionalassessment.toString());
-      section.eee = RatingMapping[section.eee];
-      section.lbc = RatingMapping[section.lbc];
-      section.awe = RatingMapping[section.awe];
     }
 
       
