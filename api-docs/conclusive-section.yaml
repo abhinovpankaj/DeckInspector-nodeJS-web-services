@@ -1,0 +1,135 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Conclusive Sections API
+components:
+  schemas:
+    conclusiveSection:
+      type: object
+      properties:
+        aweconclusive:
+          type: string
+          description: conclusive awe
+        conclusiveconsiderations:
+          type: string
+          description: conclusive considerations
+        eeeconclusive:
+          type: string
+          description: conclusive eee
+        invasiverepairsinspectedandcompleted:
+          type: boolean
+          description: Invasive repairs inspected and completed boolean
+        lbcconclusive:
+          type: string
+          description: conclusive lbc
+        parentid:
+          type: string
+          description: conclusive parentid
+        propowneragreed:
+          type: boolean
+          description: prop owner agreed boolean
+        conclusiveimages:
+          type: array
+          items:
+            type: string
+          description: conclusive images
+    uploadOptions:
+      type: object
+
+paths:
+    /api/conclusivesection/add:
+      post:
+        tags:
+          - [ConclusiveSection]
+        summary: add Conclusive Section
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conclusiveSection'
+        responses:
+          '201':
+            description: Conclusive section uploaded successfully
+          '400':
+            description: Invalid input, inputs are missing
+          '500':
+            description: Internal server error
+
+    /api/conclusivesection/{id}:
+      put:
+        tags:
+          - [ConclusiveSection]
+        summary: edit Conclusive Section
+        parameters:
+          - name: id
+            in: path
+            required: true
+            description: The id of the Conclusive Section.
+            schema:
+              type: string
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conclusiveSection'
+        responses:
+          '201':
+            description: Conclusive section uploaded successfully
+          '400':
+            description: Invalid input, inputs are missing
+          '500':
+            description: Internal server error
+
+    /api/conclusivesection/getConclusiveSectionById:
+      post:
+        tags:
+          - [ConclusiveSection]
+        summary: Get ConclusiveSection by Id
+        description: Get ConclusiveSection by id
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conclusiveSectionid:
+                    type: string
+                    description: The ID of the ConclusiveSection.
+                  username:
+                    type: string
+                    description: The username of the user sending the request.
+        responses:
+          '201':
+            description: ConclusiveSection retrieved.
+          '401':
+            description: No projects found.
+          '500':
+            description: Internal server error.
+
+    /api/conclusivesection/getConclusiveSectionsByParentId:
+      post:
+        tags:
+          - [ConclusiveSection]
+        summary: Get ConclusiveSection by parent Id
+        description: Get ConclusiveSection by Parent id
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  parentSectionId:
+                    type: string
+                    description: The ID of the parent Sectionid.
+                  username:
+                    type: string
+                    description: The username of the user sending the request.
+        responses:
+          '201':
+            description: ConclusiveSection retrieved.
+          '401':
+            description: No projects found.
+          '500':
+            description: Internal server error.
