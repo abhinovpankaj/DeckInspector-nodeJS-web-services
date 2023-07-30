@@ -37,6 +37,7 @@ const getProjectHierarchyMetadata = async function(username)
         const projectData = await project.getProjectById(projectId);
         projectResponse.id = projectData.data.item._id;
         projectResponse.name = projectData.data.item.name;
+        projectResponse.isInvasive = projectData.data.item.isInvasive?projectData.data.item.isInvasive:false;
 
         projectResponse.subProjects = await getSubProjectsData(projectId);
         projectResponse.locations = await getProjectWiseLocationsMetaData(projectId);
@@ -50,7 +51,7 @@ const getProjectHierarchyMetadata = async function(username)
         if(locationData.data && locationData.data.item)
         {
             for (const loc of locationData.data.item) {
-                locations.push({ locationId: loc._id, locationName: loc.name, locationType: loc.type });
+                locations.push({ locationId: loc._id, locationName: loc.name, locationType: loc.type ,isInvasive:loc.isInvasive?loc.isInvasive:false});
             }
         }
         return locations;
@@ -65,14 +66,17 @@ const getProjectHierarchyMetadata = async function(username)
                 const subProjectData = {};
                 subProjectData._id = subProject._id;
                 subProjectData.name = subProject.name;
+                subProjectData.isInvasive = subProject.isInvasive?subProject.isInvasive:false;
                 const subProjectLocations = [];
                 const subProjectChildren = await location.getLocationByParentId(subProject._id);
+                //console.log(subProjectChildren);
                 if (subProjectChildren.data) {
                     for (const loc of subProjectChildren.data.item) {
                         const locId = loc._id;
                         const locName = loc.name;
                         const locType = loc.type;
-                        subProjectLocations.push({ locationId: locId, locationName: locName, locationType: locType });
+                        const isInvasive = loc.isInvasive?loc.isInvasive:false;
+                        subProjectLocations.push({ locationId: locId, locationName: locName, locationType: locType,isInvasive:isInvasive });
                     }
                 }
                 subProjectData.subProjectLocations = subProjectLocations;
