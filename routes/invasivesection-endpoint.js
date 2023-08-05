@@ -37,6 +37,10 @@ router.route('/:id')
           var errResponse;
           const invasivesectionId = req.params.id;
           const newData = req.body;
+
+          if(newData.parentid){
+            newData.parentid = new ObjectId(newData.parentid);
+          }
       
           var result = await invasiveSections.editInvasiveSection(invasivesectionId,newData);
       

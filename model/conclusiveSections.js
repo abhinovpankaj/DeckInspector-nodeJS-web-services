@@ -10,8 +10,8 @@ var getConclusiveSectionById = async function(id){
     var response = {};
     try {
         const result = await mongo.ConclusiveSections.findOne({ _id: new ObjectId(id) });
-        transformData(result);
         if (result) {
+            transformData(result);
             response = {
                 "data": {
                     "item": result,
@@ -55,8 +55,9 @@ var getConclusiveSectionByParentId = async function(id){
     var response = {};
     try {
         const result = await mongo.ConclusiveSections.findOne({ parentid: new ObjectId(id) });
-        transformData(result);
+        
         if (result) {
+            transformData(result);
             response = {
                 "data": {
                     "item": result,

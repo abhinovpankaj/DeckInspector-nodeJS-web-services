@@ -116,7 +116,9 @@ router.route('/:id')
     const newData = req.body;
     const subprojectId = req.params.id;
     // Validate user input
-    
+    if(newData.parentid){
+      newData.parentid = new ObjectId(newData.parentid);
+    }
     var result = await subprojects.editSubProject(subprojectId,newData);
     if(result.error){
         res.status(result.error.code).json(result.error);

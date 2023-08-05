@@ -100,6 +100,10 @@ router.route('/:id')
       var errResponse;
       const conclusiveSectionId = req.params.id;
       const newData = req.body;
+
+      if(newData.parentid){
+        newData.parentid = new ObjectId(newData.parentid);
+      }
   
       var result = await conclusiveSection.editConclusiveSection(conclusiveSectionId,newData);
   
