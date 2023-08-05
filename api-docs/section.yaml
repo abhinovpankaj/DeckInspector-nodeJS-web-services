@@ -33,7 +33,7 @@ components:
             type: string
           description: section exteriorelements     
         furtherinvasivereviewrequired:
-          type: boolean
+          type: string
           description: section furtherinvasivereviewrequired
         lbc:
           type: string

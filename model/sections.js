@@ -61,7 +61,7 @@ var addSection = async function (section) {
 
 
 var markInvasive = async function(section) {
-    if (Boolean(section.furtherinvasivereviewrequired) === true) {
+    if (section.furtherinvasivereviewrequired === true) {
         var parentId = section.parentid;
         var parentType = section.parenttype.toLowerCase().trim();
         //console.log( "  ----  " ,parentId, "  ----  " ,parentType);
@@ -255,9 +255,11 @@ var editSection = async function(sectionId,newSectionData)
     var response ={};
     try{
         const updateObject = { $set: newSectionData };
+        if(newSectionData.furtherinvasivereviewrequired ){
+             newSectionData.furtherinvasivereviewrequired = (newSectionData.furtherinvasivereviewrequired.toLowerCase() === 'true');
+        }
         var result = await mongo.Sections.updateOne({ _id: new ObjectId(sectionId) },updateObject,{upsert:false});    
-        
-        if(result.modifiedCount<1){
+        if(result.modifiedCount<1 && result.matchedCount<1){
             response = {
                 "error": {
                     "code": 401,
@@ -268,8 +270,11 @@ var editSection = async function(sectionId,newSectionData)
         } else{
             if(result.modifiedCount==1){
                 var section = await mongo.Sections.findOne({ _id: new ObjectId(sectionId) });
-                if(newSectionData.furtherinvasivereviewrequired && newSectionData.furtherinvasivereviewrequired.toLowerCase().trim() === 'true'){
-                    await markInvasive(section);
+                if(newSectionData.furtherinvasivereviewrequired ){
+                    if(newSectionData.furtherinvasivereviewrequired === true)
+                    {
+                        await markInvasive(section);
+                    }
                 }
                 var  projectResult =  await Locations.updateSectionInLocationsRemove(section.parentid,sectionId);
                 var projectResult2 = await Locations.updateSectionInLocationsAdd(section.parentid,sectionId,section);
