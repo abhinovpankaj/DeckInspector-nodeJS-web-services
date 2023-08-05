@@ -85,6 +85,9 @@ router.route('/:id')
     var errResponse;
     const newData = req.body;
     const locationId = req.params.id;
+    if(newData.parentid){
+      newData.parentid = new ObjectId(newData.parentid);
+    }
     var result = await locations.editLocation(locationId,newData);
     if(result.error){
         res.status(result.error.code).json(result.error);

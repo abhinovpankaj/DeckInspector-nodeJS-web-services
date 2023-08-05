@@ -86,6 +86,9 @@ router.route('/:id')
     var errResponse;
     const sectionId = req.params.id;
     const newData = req.body;
+    if(newData.parentid){
+      newData.parentid = new ObjectId(newData.parentid);
+    }
 
     var result = await sections.editSection(sectionId,newData);
 
