@@ -293,7 +293,7 @@ router.route('/:id/toggleprojectstatus/:state')
       const projectId = req.params.id;
       const state = req.params.state;
       const iscomplete = state == 1 ? true : false;
-      var result = await projects.updateProjectVisibilityStatus(projectId, iscomplete);
+      var result = await projects.updateProjectStatus(projectId, iscomplete);
       if (result.error) {
         res.status(result.error.code).json(result.error);
       }
