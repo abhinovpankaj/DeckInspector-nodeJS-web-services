@@ -43,6 +43,7 @@ class GenerateVisualSectionHTML extends GenerateSectionPartHTML{
 
     async changeSectionFields(section)
     {
+        // Abhinov updated for yes no
       section.visualreview = this.capitalizeWords(section.visualreview);
       section.visualsignsofleak = this.capitalizeWords(section.visualsignsofleak==true?'Yes':'No');
       section.furtherinvasivereviewrequired = this.capitalizeWords(section.furtherinvasivereviewrequired==true?'Yes':'No');
