@@ -469,7 +469,7 @@ var updateProjectStatus = async function (id,iscomplete) {
             return response;
         }
         if(result.modifiedCount==1){
-            var message = `Project state updated successfully,is project complete:${isavailableoffline}.`;
+            var message = `Project state updated successfully,is project complete:${iscomplete}.`;
             response = {
                 "data" :{                
                     "message": message,
@@ -488,7 +488,7 @@ var updateProjectStatus = async function (id,iscomplete) {
             }
             return response;           
         }
-    } catch (error) {
+    } catch (err) {
         response = {
             "error": {
                 "code": 500,
