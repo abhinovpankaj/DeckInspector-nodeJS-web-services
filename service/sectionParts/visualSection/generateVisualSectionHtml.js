@@ -26,7 +26,7 @@ class GenerateVisualSectionHTML extends GenerateSectionPartHTML{
         try {
             const sectionData =  await sections.getSectionById(sectionId);
             if(sectionData.data && sectionData.data.item)
-            {
+            {              
                 this.changeSectionFields(sectionData.data.item);
                 const html_section = await ejs.render(template, sectionData.data.item);
                 const images_html = await replaceImagesInTemplate(sectionData.data.item.images,
@@ -44,9 +44,10 @@ class GenerateVisualSectionHTML extends GenerateSectionPartHTML{
     async changeSectionFields(section)
     {
       section.visualreview = this.capitalizeWords(section.visualreview);
-      section.visualsignsofleak = this.capitalizeWords(section.visualsignsofleak.toString());
-      section.furtherinvasivereviewrequired = this.capitalizeWords(section.furtherinvasivereviewrequired.toString());
+      section.visualsignsofleak = this.capitalizeWords(section.visualsignsofleak==true?'Yes':'No');
+      section.furtherinvasivereviewrequired = this.capitalizeWords(section.furtherinvasivereviewrequired==true?'Yes':'No');
       section.conditionalassessment = this.capitalizeWords(section.conditionalassessment.toString());
+
     }
 
       
