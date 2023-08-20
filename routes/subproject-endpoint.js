@@ -59,7 +59,7 @@ try{
       "createdat":creationtime,
       "createdby":createdBy,
       "assignedto":assignedTo,
-      "editedat":new Date(Date.now()),
+      "editedat":creationtime ,
       "lasteditedby":createdBy,
       "children":[],
       "isInvasive": isInvasive

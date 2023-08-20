@@ -34,7 +34,7 @@ router.route('/add')
       "url": url, // Correct the property name to "filePath"
       "lasteditedby": createdBy, // Correct the property name to "lastEditedBy"
       "assignedto": assignedTo,// Assign the array of assignedTo directly
-      "editedat":      (new Date(Date.now())),//new Date()..toISOString(),
+      "editedat":      (new Date(Date.now())).toISOString(),//new Date()..toISOString(),
       "children": [],
       "projecttype": projecttype,
       "createdat": (new Date(Date.now())).toISOString(), // Use the current date for createdat
