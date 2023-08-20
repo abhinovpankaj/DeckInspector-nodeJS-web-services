@@ -30,7 +30,7 @@ var newSection = {
     "conditionalassessment":conditionalassessment,
     "createdat":creationtime,
     "createdby":createdby,
-    "editedat":creationtime,
+    "editedat":new Date(Date.now()),
     "lasteditedby":createdby,
     "eee":eee,
     "exteriorelements":exteriorelements,

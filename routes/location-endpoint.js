@@ -34,7 +34,7 @@ try{
       "type":type,
       "sections":[],
       "lasteditedBy":createdBy,
-      "editedat":creationtime,
+      "editedat":new Date(Date.now()),
       "isInvasive":isInvasive
   }
 }catch(ex){
