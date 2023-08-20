@@ -73,9 +73,9 @@ router.route('/add')
             "aweconclusive":aweconclusive,
             "conclusiveconsiderations" :conclusiveconsiderations,
             "eeeconclusive":eeeconclusive,
-            "invasiverepairsinspectedandcompleted": invasiverepairsinspectedandcompleted,
+            "invasiverepairsinspectedandcompleted": invasiverepairsinspectedandcompleted.toLowerCase()==='true',
             "parentid": new ObjectId(parentid), 
-            "propowneragreed": propowneragreed,
+            "propowneragreed": propowneragreed.toLowerCase()==='true',
             "conclusiveimages":conclusiveimages,
             "lbcconclusive":lbcconclusive
         } 

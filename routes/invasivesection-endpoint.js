@@ -76,7 +76,7 @@ router.route('/add')
   var newInvasiveSection = {
       "invasiveDescription":invasiveDescription,
       "parentid": new ObjectId(parentid), 
-      "postinvasiverepairsrequired":postinvasiverepairsrequired ,
+      "postinvasiverepairsrequired":postinvasiverepairsrequired.toLowerCase()==='true' ,
       "invasiveimages":invasiveimages,
   } 
   var result = await invasiveSections.addInvasiveSection(newInvasiveSection);    

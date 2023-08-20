@@ -59,15 +59,15 @@
                 <p ><strong>Any Visual Signs of leaks</strong></p>
             </td>
             <td  class="<%= visualsignsofleak === 'False' ? 'good' : 'bad' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove; ">
-                <%= visualsignsofleak %>
+                <%= visualsignsofleak?'Yes':'No' %>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
             <td style="width: 50%; text-align: left; padding: 8px; ">
                 <p ><strong>Further Invasive Review Required</strong></p>
             </td>
-            <td class="<%= furtherinvasivereviewrequired === 'False' ? 'good' : 'bad' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <%= furtherinvasivereviewrequired %>
+            <td class="<%= furtherinvasivereviewrequired ? 'good' : 'bad' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+                <%= furtherinvasivereviewrequired?'Yes':'No' %>
             </td>
         </tr>
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
