@@ -22,7 +22,9 @@ var addLocation = async function (location) {
                             "name": location.name,
                             "description": location.description,
                             "url": location.url,
-                            "type": location.type
+                            "type": location.type,
+                            "isInvasive": false,
+                            "count": 0
                         }
                     }
                 });
@@ -36,7 +38,9 @@ var addLocation = async function (location) {
                             "name": location.name,
                             "description": location.description,
                             "url": location.url,
-                            "type": "location"
+                            "type": "location",
+                            "isInvasive": false,
+                            "count": 0
                         }
                     }
                 });

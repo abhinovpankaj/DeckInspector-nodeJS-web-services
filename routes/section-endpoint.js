@@ -42,7 +42,8 @@ var newSection = {
     "visualreview":visualreview,
     "visualsignsofleak": visualsignsofleak,
     "waterproofingelements":waterproofingelements,
-    "images":images
+    "images":images,
+    "unitUnavailable": false
 } 
 var result = await sections.addSection(newSection);    
 if(result.error){
