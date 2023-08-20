@@ -3,7 +3,7 @@
         border-spacing: initial;
         border-collapse: collapse;
         background: #F0F0F0;
-        width: 100%;
+        
         table-layout: fixed;
         margin: 5px auto;
         word-wrap: break-word;
@@ -26,53 +26,53 @@
 <table class="MsoTableGrid" align="center">
     <tbody>
         <tr style=" font-size: 16px; border: 1px solid #E3F1D5; ">
-            <td style="width:100%; padding:8px;margin:10px; padding:8px;text-align:center;background-color:#888888"
+            <td style=" padding:8px;margin:10px; padding:8px;text-align:center;background-color:#888888"
                 colspan="2">
                 <strong>Invasive Conclusion Details</strong>
             </td>
         </tr>
         
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
-            <td style="width: 50%; text-align: left; padding: 8px; ">
+            <td style=" text-align: left; padding: 8px; ">
                 <p><strong>Invasive Repairs Approved and Completed</strong></p>
             </td>
-            <td class="<%= invasiverepairsinspectedandcompleted === 'True' ? 'good' : 'bad' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <p>&nbsp;<%= invasiverepairsinspectedandcompleted %></p>
+            <td class="<%= invasiverepairsinspectedandcompleted ? 'good' : 'bad' %>" style=" text-align: left; padding: 8px;  border-left: groove;  ">
+                <p>&nbsp;<%= invasiverepairsinspectedandcompleted?'Yes':'No' %></p>
             </td>
         </tr>
 
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
-            <td style="width: 50%; text-align: left; padding: 8px; ">
+            <td style=" text-align: left; padding: 8px; ">
                 <p><strong>Updated Life Expectancy (EEE)</strong></p>
             </td>
-            <td class="<%= eeeconclusive === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td class="<%= eeeconclusive === '0-1 Years' ? 'bad' : 'good' %>" style=" text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= eeeconclusive %>
             </td>
         </tr>
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
-            <td style="width: 50%; text-align: left; padding: 8px; ">
+            <td style=" text-align: left; padding: 8px; ">
                 <p><strong>Updated Life Expectancy (LBC)</strong></p>
             </td>
-            <td class="<%= lbcconclusive === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px; border-left: groove; ">
+            <td class="<%= lbcconclusive === '0-1 Years' ? 'bad' : 'good' %>" style=" text-align: left; padding: 8px; border-left: groove; ">
                 <%= lbcconclusive %>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
-            <td style="width: 50%; text-align: left; padding: 8px; ">
+            <td style=" text-align: left; padding: 8px; ">
                 <p><strong>Updated Life Expectancy (AWE)</strong></p>
             </td>
-            <td class="<%= aweconclusive === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
+            <td class="<%= aweconclusive === '0-1 Years' ? 'bad' : 'good' %>" style=" text-align: left; padding: 8px;  border-left: groove;  ">
                 <%= aweconclusive %>
             </td>
         </tr>
         <tr style=" font-size: 15px; border: 1px solid #E3F1D5; ">
-            <td style="width:100%; padding:8px;margin:10px; padding:8px;text-align:center;background-color:#888888"
+            <td style=" padding:8px;margin:10px; padding:8px;text-align:center;background-color:#888888"
                 colspan="2">
                 <strong>Additional Considerations or Concerns</strong>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5; ">
-            <td style="width:100%; text-align: left; padding: 8px;"
+            <td style=" text-align: left; padding: 8px;"
                 colspan="2">
                 <%= conclusiveconsiderations %>
             </td>
