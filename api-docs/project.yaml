@@ -242,3 +242,31 @@ paths:
             schema:
               type: string
               example: "<html><body><h1>Project Report</h1><p>This is the project report content.</p></body></html>"
+
+/api/project/generateexcel:
+  post:
+      tags:
+        - Project
+      summary: Get ProjectExcel By project Id
+      description: Get ProjectExcel By project Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectid:
+                  type: string
+                  description: The ID of the projectid.
+                username:
+                  type: string
+                  description: The username of the user sending the request.
+      responses:
+      '200':
+        description: Successful operation. The Excel is generated and returned.
+        content:
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              type: string
+              format: binary

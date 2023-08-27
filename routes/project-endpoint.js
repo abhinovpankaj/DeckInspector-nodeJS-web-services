@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs'); 
 const {generateProjectReport,getProjectHtml}= require('../service/projectreportgeneration.js');
 const {getProjectHierarchyMetadata} = require('../service/projectmetadata/getProjectMetaData.js');
+const {generateExcelForProject} = require('../service/generateExcelForProject.js');
 
 
 require("dotenv").config();
@@ -120,6 +121,31 @@ router.route('/getProjectById')
       res.status(500).json(errResponse);
     }
   })
+
+
+router.route('/generateexcel')
+  .post(async function (req, res) {
+    try {
+      const projectId = req.body.projectid;
+      const fullexcelPath = await generateExcelForProject(projectId);
+
+      // Set headers and status
+      console.log(fullexcelPath);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(fullexcelPath)); 
+      res.sendFile(fullexcelPath, {}, (err) => {
+        if (err) {
+          console.error('Error sending file:', err);
+        } else {
+          console.log('excel sent successfully');
+          fs.unlinkSync(fullexcelPath);
+        }
+      });
+    } catch (err) {
+      console.error('Error generating Excel:', err);
+      res.status(500).send('Error generating Excel');
+    }
+  });
 
   router.route('/:id')
   .put(async function (req, res) {
