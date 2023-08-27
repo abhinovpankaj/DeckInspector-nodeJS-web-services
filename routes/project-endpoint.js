@@ -367,7 +367,7 @@ router.route('/generatereport')
   const absolutePath = path.resolve(reportFilePath);
   console.log(absolutePath);
   reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessing');
 
   res.setHeader('Content-Disposition', `attachment; filename="${reportFilePath}"`);
   res.sendFile(absolutePath, {}, (err) => {
