@@ -1,5 +1,5 @@
-const {generateReportForSubProject} = require("../subprojectreportgeneration.js");
-const {generateReportForLocation} = require("../sectionParts/util/locationGeneration/locationreportgeneration.js")
+const {generateReportForSubProject,generateDocReportForSubProject} = require("../subprojectreportgeneration.js");
+const {generateReportForLocation,generateDocReportForLocation} = require("../sectionParts/util/locationGeneration/locationreportgeneration.js")
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
@@ -7,8 +7,73 @@ const ProjectChildType = require("../../model/projectChildType.js");
 const ProjectReportType = require("../../model/projectReportType.js");
 const filePath = path.join(__dirname, 'projectfile.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
+const docxTemplate = require('docx-templates');
+
 
 class ReportGeneration{
+    async generateReportDoc(project,sectionImageProperties,reportType){
+        try{
+            console.time("generateReportDocs");
+            const promises = [];
+            const locsHtmls = []; 
+            project.data.item.projectHeader = this.getProjectHeader(reportType);
+            let projectHtml = '';//ejs.render(template, project.data.item);
+            //create project header docx
+
+            const template = fs.readFileSync('DeckProjectHeader.docx');
+
+            const buffer = await docxTemplate.createReport({
+            template,
+            data: {
+                project:{
+                    name: project.data.item.name,
+                    address: project.data.item.address,
+                    description:project.data.item.description,
+                    createdBy:project.data.item.createdby,
+                    createdAt : project.data.item.createdat,
+                    
+                }               
+            },
+            additionalJsContext: {
+                tile: async () => {
+                  const resp = await fetch(
+                    project.data.item.url
+                  );
+                  const buffer = resp.arrayBuffer
+                    ? await resp.arrayBuffer()
+                    : await resp.buffer();
+                  return { height: 17,width: 19.8,  data: buffer, extension: '.png' };
+                },
+               
+              },
+            });
+
+            fs.writeFileSync('projectheader.docx', buffer);
+
+            const orderedProjects = this.reOrderProjects(project.data.item.children);
+            for (let key in orderedProjects) {
+                const promise = this.getReportDoc(orderedProjects[key],sectionImageProperties,reportType)
+                .then((loc_html) => {
+                 locsHtmls[key] = loc_html;
+                });
+              promises.push(promise);
+            }
+            await Promise.all(promises);
+            
+            for (let key in locsHtmls) {
+                projectHtml += locsHtmls[key];
+            }
+            console.timeEnd("generateReportDoc");
+            return projectHtml;
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+
+    
+    
+
     async generateReportHtml(project,sectionImageProperties,reportType){
         try{
             console.time("generateReportHtml");
@@ -55,6 +120,20 @@ class ReportGeneration{
         return orderedProjects;
     }
     
+    async getReportDoc(child,sectionImageProperties,reportType){
+        try{
+            if(child.type === ProjectChildType.PROJECTLOCATION)
+            {
+                const loc_html =  await generateDocReportForLocation(child._id,sectionImageProperties,reportType);
+                return loc_html;
+            }else if(child.type ===  ProjectChildType.SUBPROJECT){
+                const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties,reportType);
+                return subProjectHtml;
+            }
+        }catch(error){
+            console.log(error);
+        }
+    }
     
     async getReport(child,sectionImageProperties,reportType){
         try{
@@ -70,6 +149,7 @@ class ReportGeneration{
             console.log(error);
         }
     }
+
 
      getProjectHeader(reportType){
         if(ProjectReportType.VISUALREPORT === reportType)
