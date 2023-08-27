@@ -3,9 +3,10 @@ const sections = require("../../../../model/sections.js")
 const SectionPartProcessExecutorFactory = require("../../sectionPartProcessExecutorFactory.js");
 const projectReportType = require("../../../../model/projectReportType.js");
 const docxTemplate = require('docx-templates');
+const path = require('path');
 const fs = require('fs');
 
-const generateDocReportForLocation = async function (locationId, sectionImageProperties, reportType) {
+const generateDocReportForLocation = async function (locationId, sectionImageProperties, reportType,subprojectName='') {
   try {
     const sectionDataDoc =
     [];
@@ -44,15 +45,23 @@ const generateDocReportForLocation = async function (locationId, sectionImagePro
 
             if(sectionData.data && sectionData.data.item)
             {
-              var htmlData = `+++HTML
-              <p style="color: red;">${sectionData.data.item.eee}</p>
-              +++`;
-              const template = fs.readFileSync('Deck2VisualDetails.docx');
+              // var htmlData = `+++HTML
+              // <p style="color: red;">${sectionData.data.item.eee}</p>
+              // +++`;
+              var template;
+              if (subprojectName=='') {
+                 template = fs.readFileSync('Deck2VisualDetails.docx');
+              }else{
+                 template = fs.readFileSync('DeckVisualDetails.docx');
+              }
+              
 
               const buffer = await docxTemplate.createReport({
               template,
+              failFast:false,
               data: {
                   section:{
+                    buildingName: subprojectName,
                       parentType: locationType,
                       parentName: location.data.item.name,
                       name: sectionData.data.item.name,
@@ -79,7 +88,7 @@ const generateDocReportForLocation = async function (locationId, sectionImagePro
                   
                   for (index = 0; index < arrayLength; index += chunk_size) {
                       myChunk = imageArray.slice(index, index+chunk_size);
-                      // Do something if you want with the group
+                      
                       tempArray.push(myChunk);
                     }
                   
@@ -95,7 +104,8 @@ const generateDocReportForLocation = async function (locationId, sectionImagePro
                   const buffer = resp.arrayBuffer
                     ? await resp.arrayBuffer()
                     : await resp.buffer();
-                  return { height: 6.2,width: 4.85,  data: buffer, extension: '.png' };
+                  const extension  = path.extname(imageurl);
+                  return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
                 }, 
             }
           });

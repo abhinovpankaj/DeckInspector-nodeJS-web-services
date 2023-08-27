@@ -15,9 +15,9 @@ class ReportGeneration{
         try{
             console.time("generateReportDocs");
             const promises = [];
-            const locsHtmls = []; 
+            const reportDocList = ['projectheader.docx']; 
             project.data.item.projectHeader = this.getProjectHeader(reportType);
-            let projectHtml = '';//ejs.render(template, project.data.item);
+            let projectHtml = [];//ejs.render(template, project.data.item);
             //create project header docx
 
             const template = fs.readFileSync('DeckProjectHeader.docx');
@@ -54,17 +54,18 @@ class ReportGeneration{
             for (let key in orderedProjects) {
                 const promise = this.getReportDoc(orderedProjects[key],sectionImageProperties,reportType)
                 .then((loc_html) => {
-                 locsHtmls[key] = loc_html;
+                 //locsHtmls[key] = loc_html;
+                 reportDocList.push(...loc_html);
                 });
               promises.push(promise);
             }
             await Promise.all(promises);
             
-            for (let key in locsHtmls) {
-                projectHtml += locsHtmls[key];
-            }
+            // for (let key in locsHtmls) {
+            //     projectHtml.push( locsHtmls[key]);
+            // }
             console.timeEnd("generateReportDoc");
-            return projectHtml;
+            return reportDocList;
         }
         catch(err){
             console.log(err);
@@ -127,7 +128,7 @@ class ReportGeneration{
                 const loc_html =  await generateDocReportForLocation(child._id,sectionImageProperties,reportType);
                 return loc_html;
             }else if(child.type ===  ProjectChildType.SUBPROJECT){
-                const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties,reportType);
+                const subProjectHtml = await generateDocReportForSubProject(child._id,sectionImageProperties,reportType);
                 return subProjectHtml;
             }
         }catch(error){
