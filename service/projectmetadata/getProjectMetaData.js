@@ -38,6 +38,7 @@ const getProjectHierarchyMetadata = async function(username)
         projectResponse.id = projectData.data.item._id;
         projectResponse.name = projectData.data.item.name;
         projectResponse.isInvasive = projectData.data.item.isInvasive?projectData.data.item.isInvasive:false;
+        projectResponse.projectType = projectData.data.item.projecttype;
 
         projectResponse.subProjects = await getSubProjectsData(projectId);
         projectResponse.locations = await getProjectWiseLocationsMetaData(projectId);
