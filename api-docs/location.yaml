@@ -164,3 +164,22 @@ paths:
         '500':
           description: Internal server error.
 
+/api/location/{id}:
+  delete:
+      tags:
+        [Locations]
+      summary: delete location by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The location Id.
+          schema:
+            type: string
+      responses:
+        201:
+          description: location deleted successfully.        
+        401:
+          description: No location founds.
+        500:
+          description: Internal server error.

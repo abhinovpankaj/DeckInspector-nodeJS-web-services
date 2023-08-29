@@ -390,11 +390,27 @@ var updateSectionVisibilityStatus = async function (id, name, parentId, isVisibl
 
 var deleteSectionPermanently = async function (id) {
     try {
+        var section = await mongo.Sections.findOne({ _id: new ObjectId(id) });
+
+        if(!section)
+        {
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Section found."
+                }
+            }
+            return response;
+        }
+
+        //Update Parent
+        await Locations.updateSectionInLocationsRemove(section.parentid,section._id);
+
+        //Delete self
         var result = await mongo.Sections.deleteOne({ _id: new ObjectId(id) });
 
         if (result.deletedCount == 1) {
-            var projresult = await mongo.Locations.updateOne({ _id: new ObjectId(parentId) },
-            { $pull: { sections: { "id": new ObjectId(id) } } });
+           
             var response = {
                 "data": {
                     "message": "Section deleted successfully.",

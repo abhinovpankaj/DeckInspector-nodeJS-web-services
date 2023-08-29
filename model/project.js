@@ -3,6 +3,8 @@ var ObjectId = require('mongodb').ObjectId;
 const { QueryCollectionFormat } = require('@azure/core-http');
 const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
+const Location = require("./location");
+const SubProject = require("./subproject");
 
 
 var addProject = async function (project) {
@@ -503,6 +505,49 @@ var updateProjectStatus = async function (id,iscomplete) {
 
 var deleteProjectPermanently = async function (id) {
     try{
+        const projectData = await mongo.Projects.findOne({ _id:  new ObjectId(id) },{files:0});
+        //delete project Locations
+
+        if(!projectData){
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Project found."
+                  }
+            }
+            return response;
+        }
+
+        //Delete Project
+        const locations = await Location.getLocationByParentId(id);
+        if(locations && locations.data && locations.data.item && locations.data.item.length>0)
+        {
+            for(location of locations.data.item)
+            {
+                const locationId = location._id;
+                const result = await Location.deleteLocationPermanently(locationId);
+                if(result.error){
+                    return result;
+                }
+            }
+            console.log("Project Locations deleted successfully for project Id  : ",id);
+        } 
+         
+        //Delete SubProjects
+        const subProjects = await SubProject.getSubProjectsByParentId(id);
+        if(subProjects && subProjects.data && subProjects.data.item && subProjects.data.item.length>0)
+        {
+            for(subProject of subProjects.data.item)
+            {
+                const subProjectId = subProject._id;
+                const result = await SubProject.deleteSubProjectPermanently(subProjectId);
+                if(result.error){
+                    return result;
+                }
+            }
+            console.log("SubProjects deleted successfully for project Id  : ",id);
+        }
+
         var result = await mongo.Projects.deleteOne({_id: new ObjectId(id)});
 
         if(result.deletedCount==1){
@@ -516,16 +561,17 @@ var deleteProjectPermanently = async function (id) {
             return response;
         }
         else{
-            response = {
-                "error": {
-                    "code": 401,
-                    "message": "No Project found."
-                  }
-            }
+                response = {
+                    "error": {
+                        "code": 401,
+                        "message": "No Project found."
+                    }
+                }
             return response;  
-        }            
+            }
     }
     catch(err){
+        console.log(err);
         response = {
             "error": {
                 "code": 500,
@@ -534,8 +580,7 @@ var deleteProjectPermanently = async function (id) {
               }
         }
         return response;
-    }
-    
+    }  
 };
 var getAllFilesOfProject = async function (id) {    
     const result = await mongo.Projects.findOne({ _id:  new ObjectId(id) },{files:1});

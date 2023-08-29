@@ -138,3 +138,23 @@ paths:
           description: No Location found.
         '500':
           description: Internal server error.
+
+/api/subproject/{id}:
+  delete:
+      tags:
+        [SubProject]
+      summary: delete subproject by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The subproject Id.
+          schema:
+            type: string
+      responses:
+        201:
+          description: subproject deleted successfully.        
+        401:
+          description: No subproject founds.
+        500:
+          description: Internal server error.
