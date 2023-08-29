@@ -270,3 +270,23 @@ paths:
             schema:
               type: string
               format: binary
+
+/api/project/{id}:
+  delete:
+      tags:
+        [Project]
+      summary: delete Projects by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The project Id.
+          schema:
+            type: string
+      responses:
+        201:
+          description: project deleted successfully.        
+        401:
+          description: No projects founds.
+        500:
+          description: Internal server error.

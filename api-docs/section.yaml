@@ -136,3 +136,23 @@ paths:
           description: No projects found.
         '500':
           description: Internal server error.
+    
+/api/section/{id}:
+  delete:
+      tags:
+        [Section]
+      summary: delete section by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The section Id.
+          schema:
+            type: string
+      responses:
+        201:
+          description: section deleted successfully.        
+        401:
+          description: No section founds.
+        500:
+          description: Internal server error.

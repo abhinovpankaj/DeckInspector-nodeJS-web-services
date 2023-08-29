@@ -111,7 +111,7 @@ router.route('/:id')
   try{
     var errResponse;
     const sectionId = req.params.id;
-    var result = await sections.deleteLocationPermanently(sectionId);
+    var result = await sections.deleteSectionPermanently(sectionId);
     if (result.error) { 
       res.status(result.error.code).json(result.error); 
     }

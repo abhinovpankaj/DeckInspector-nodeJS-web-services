@@ -5,6 +5,7 @@ const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
 const user = require('./user');
 const Projects = require('./project');
+const Locations = require('./location');
 
 var addSubProject = async function (subproject) {
     var response = {};
@@ -364,13 +365,44 @@ var updateSubProjectVisibilityStatus = async function (id, name, parentId, isVis
     }
 };
 
-var deleteSubProjectPermanently = async function (id,parentId) {
+var deleteSubProjectPermanently = async function (id) {
     try {
+        
+        var subProject = await mongo.SubProjects.findOne({ _id: new ObjectId(id) });
+
+        if(!subProject)
+        {
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No SubProject found."
+                }
+            }
+            return response;
+        }
+
+        //Remove all children
+        const locations = Locations.getLocationByParentId(id);
+        if(locations && locations.data && locations.data.item && locations.data.item.length>0)
+        {
+            for(location of locations.data.item)
+            {
+                const result = await Locations.deleteLocationPermanently(location._id);
+                if(result.error)
+                {
+                    return result;
+                }
+            }
+        }
+
+        //Update Parent
+        await Projects.updateProjectChildrenWithRemove(subProject.parentid,id);
+
+        //Delete self
         var result = await mongo.SubProjects.deleteOne({ _id: new ObjectId(id) });
 
         if (result.deletedCount == 1) {
-            var projresult = await mongo.Projects.updateOne({ _id: new ObjectId(parentId) },
-             { $pull: { children: { "id": new ObjectId(id) } } });
+            
             var response = {
                 "data": {
                     "message": "SubProject deleted successfully.",
@@ -388,6 +420,8 @@ var deleteSubProjectPermanently = async function (id,parentId) {
             }
             return response;
         }
+
+
     }
     catch (err) {
         response = {

@@ -5,6 +5,7 @@ const { JsonWebTokenError } = require('jsonwebtoken');
 var mongo = require('../database/mongo');
 const Projects = require('./project');
 const SubProjects = require('./subproject');
+const Sections = require('./sections');
 
 var addLocation = async function (location) {
     var response = {};
@@ -358,6 +359,44 @@ var editLocation = async function (locationId,newData) {
 
 var deleteLocationPermanently = async function (id) {
     try {
+        var locationData = await mongo.Locations.findOne({ _id: new ObjectId(id) });
+
+        if(!locationData)
+        {
+            response = {
+                "error": {
+                    "code": 401,
+                    "message": "No Location found."
+                }
+            }
+            return response;
+        }
+
+        if(locationData.sections && locationData.sections.length>0)
+        {
+            //Delete Children 
+            for(section of locationData.sections)
+            {
+                const result = await Sections.deleteSectionPermanently(section._id);   
+                if(result.error)
+                {
+                    return result;
+                }
+            }
+        }
+        
+
+        //Update Parent
+        if(locationData.parenttype == "subproject")
+        {
+            await SubProjects.updateSubProjectChildrenWithRemove(locationData.parentid,locationData._id);
+        }
+        else if(locationData.parenttype == "project")
+        {
+            await Projects.updateProjectChildrenWithRemove(locationData.parentid,locationData._id);
+        }
+
+        //Delete self
         var result = await mongo.Locations.deleteOne({ _id: new ObjectId(id) });
 
         if (result.deletedCount == 1) {
