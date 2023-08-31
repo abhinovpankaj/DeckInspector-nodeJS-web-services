@@ -290,3 +290,23 @@ paths:
           description: No projects founds.
         500:
           description: Internal server error.
+
+/api/project/getProjectMetadata/{id}:
+  get:
+      tags:
+        [Project]
+      summary: get Project Metadata by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The project Id.
+          schema:
+            type: string
+      responses:
+        201:
+          description: project deleted successfully.        
+        401:
+          description: No projects founds.
+        500:
+          description: Internal server error.
