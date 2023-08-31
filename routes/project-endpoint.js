@@ -6,7 +6,7 @@ const ErrorResponse = require('../model/error');
 const path = require('path');
 const fs = require('fs'); 
 const {generateProjectReport,getProjectHtml}= require('../service/projectreportgeneration.js');
-const {getProjectHierarchyMetadata} = require('../service/projectmetadata/getProjectMetaData.js');
+const {getProjectHierarchyMetadata,getSingleProjectMetadata} = require('../service/projectmetadata/getProjectMetaData.js');
 const {generateExcelForProject} = require('../service/generateExcelForProject.js');
 
 
@@ -107,7 +107,7 @@ router.route('/getProjectById')
     try {
       var errResponse;
       const projectId = req.body.projectid;
-      var result = await projects.getProjectById(projectId);
+      var result = await getSingleProjectMetadata(projectId);
       if (result.error) {
         res.status(result.error.code).json(result.error);
       }
@@ -361,6 +361,26 @@ router.route('/getProjectsMetaDataByUserName/:username')
     var errResponse;
     const username = req.params.username;
     var result = await getProjectHierarchyMetadata(username);
+    if (result.error) {
+      res.status(result.error.code).json(result.error);
+    }
+    if (result.data) {
+      res.status(201).json(result.data);
+    }
+  }catch(error)
+  {
+    console.log(error);
+    errResponse = new ErrorResponse(500, "Internal server error", error);
+    res.status(500).json(errResponse);
+  }
+});
+
+router.route('/getProjectMetadata/:id')
+.get(async function(req,res){
+  try{
+    var errResponse;
+    const projectId = req.params.id;
+    var result = await getSingleProjectMetadata(projectId);
     if (result.error) {
       res.status(result.error.code).json(result.error);
     }
