@@ -8,20 +8,18 @@ const fs = require('fs');
 const {generateProjectReport,getProjectHtml}= require('../service/projectreportgeneration.js');
 const {getProjectHierarchyMetadata,getSingleProjectMetadata} = require('../service/projectmetadata/getProjectMetaData.js');
 const {generateExcelForProject} = require('../service/generateExcelForProject.js');
-
-
+const projectService = require('../service/projectService');
 require("dotenv").config();
 
 router.route('/add')
 .post(async function (req, res) {
   try {
-    var errResponse;
     // Get user input
-    const { name, description, address, createdBy, url, assignedTo , projecttype } = req.body;
+    const { name, description, address, createdBy, url, assignedTo, projecttype } = req.body;
 
     // Validate user input
     if (!name) {
-      errResponse = new ErrorResponse(400, "Name is required", "");
+      const errResponse = new ErrorResponse(400, "Name is required", "");
       res.status(400).json(errResponse);
       return;
     }
@@ -31,28 +29,28 @@ router.route('/add')
       "name": name,
       "description": description,
       "address": address,
-      "createdby": createdBy, // Correct the property name to "createdBy"
-      "url": url, // Correct the property name to "filePath"
-      "lasteditedby": createdBy, // Correct the property name to "lastEditedBy"
-      "assignedto": assignedTo,// Assign the array of assignedTo directly
-      "editedat":new Date().toISOString(),
+      "createdby": createdBy,
+      "url": url,
+      "lasteditedby": createdBy,
+      "assignedto": assignedTo,
+      "editedat": new Date().toISOString(),
       "children": [],
       "projecttype": projecttype,
-      "createdat": new Date().toISOString(), // Use the current date for createdat
+      "createdat": new Date().toISOString(),
     }
 
     // Save the new project to the database
-    var result = await projects.addProject(newProject);
-
-    if (result.error) {
-      res.status(result.error.code).json(result.error);
-    }
-    if (result.data) {
-      res.status(201).json(result.data);
+    var result = await projectService.addProject(newProject);
+    
+    if (result.success) {
+      res.status(201).json({ success: true, id: result.id });
+    } else {
+      const errResponse = new ErrorResponse(400, result.reason, "");
+      res.status(400).json(errResponse);
     }
 
   } catch (err) {
-    errResponse = new ErrorResponse(500, "Internal server error, Exception occurred while adding project", err);
+    const errResponse = new ErrorResponse(500, "Internal server error, Exception occurred while adding project", err);
     res.status(500).json(errResponse);
   }
 });

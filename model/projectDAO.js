@@ -19,8 +19,23 @@ module.exports = {
     unassignUserFromProject: async (id, username) => {
         return await mongo.Projects.updateOne({ _id: new ObjectId(id) }, { $pull: { assignedto: username }});
     },
-    getProjectsByNameCreatedOnIsCompletedAndDeleted: async (query) => {
-        return await mongo.Projects.find(query).sort({ editedat: -1 }).limit(25).toArray();
+
+   getProjectsByNameCreatedOnIsCompletedAndDeleted: async function({name = null,createdon = null,iscomplete = false,isdeleted = false} = {}) {
+    // Initialize an empty query object
+        const query = {};
+
+        // Populate the query object based on function arguments
+        if (name !== null) { query.name = name; }
+        if (createdon !== null) { query.createdon = createdon; }
+        query.iscomplete = iscomplete;
+        query.isdeleted = isdeleted;
+
+        // Execute the query and return the result
+        return await mongo.Projects.find(query)
+            .sort({ editedat: -1 })
+            .limit(25)
+            .toArray();
+ 
     },
 
     editProject: async (projectId, newData) => {
