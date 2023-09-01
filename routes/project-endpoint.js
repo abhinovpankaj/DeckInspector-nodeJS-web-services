@@ -407,24 +407,36 @@ router.route('/generatereport')
   const companyName = req.body.companyName;
   const reportType = req.body.reportType;
   const reportFormat = req.body.reportFormat;
-  const reportFilePath = await generateProjectReport(projectId,sectionImageProperties,companyName,reportType,reportFormat);
+  await generateProjectReport(projectId,sectionImageProperties,companyName,reportType,
+    reportFormat,(docpath)=>{
+      console.log(docpath);
+      const absolutePath = path.resolve(docpath);
+      console.log(absolutePath);
+      reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    
+      res.setHeader('Content-Disposition', `attachment; filename="${docpath}"`);
+      res.sendFile(absolutePath, {}, (err) => {
+        if (err) {
+          console.error('Error sending file:', err);
+          res.status(500).send('Error sending file');
+        } else {
+          console.log('Report sent successfully');
+          //fs.unlinkSync(absolutePath);
+        }
+      });
+      // res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(fullexcelPath)); 
+      // res.sendFile(fullexcelPath, {}, (err) => {
+      //   if (err) {
+      //     console.error('Error sending file:', err);
+      //   } else {
+      //     console.log('excel sent successfully');
+      //     fs.unlinkSync(fullexcelPath);
+      //   }
+      // });
+    });
 
-  console.log(reportFilePath);
-  const absolutePath = path.resolve(reportFilePath);
-  console.log(absolutePath);
-  reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessing');
-
-  res.setHeader('Content-Disposition', `attachment; filename="${reportFilePath}"`);
-  res.sendFile(absolutePath, {}, (err) => {
-    if (err) {
-      console.error('Error sending file:', err);
-      res.status(500).send('Error sending file');
-    } else {
-      console.log('Report sent successfully');
-      fs.unlinkSync(absolutePath);
-    }
-  });
+  
 } catch (err) {
   console.error('Error generating Report:', err);
   res.status(500).send('Error generating Report');
