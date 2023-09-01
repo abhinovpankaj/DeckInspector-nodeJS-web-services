@@ -422,18 +422,9 @@ router.route('/generatereport')
           res.status(500).send('Error sending file');
         } else {
           console.log('Report sent successfully');
-          //fs.unlinkSync(absolutePath);
+          fs.unlinkSync(absolutePath);
         }
-      });
-      // res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(fullexcelPath)); 
-      // res.sendFile(fullexcelPath, {}, (err) => {
-      //   if (err) {
-      //     console.error('Error sending file:', err);
-      //   } else {
-      //     console.log('excel sent successfully');
-      //     fs.unlinkSync(fullexcelPath);
-      //   }
-      // });
+      });     
     });
 
   

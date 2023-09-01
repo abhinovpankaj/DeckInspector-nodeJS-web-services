@@ -11,7 +11,7 @@ const docxTemplate = require('docx-templates');
 
 
 class ReportGeneration{
-    async generateReportDoc(project,sectionImageProperties,reportType){
+    async generateReportDoc(project,companyName,sectionImageProperties,reportType){
         try{
             console.time("generateReportDocs");
             const promises = [];
@@ -19,8 +19,13 @@ class ReportGeneration{
             project.data.item.projectHeader = this.getProjectHeader(reportType);
             let projectHtml = [];//ejs.render(template, project.data.item);
             //create project header docx
-
-            const template = fs.readFileSync('DeckProjectHeader.docx');
+            var template;
+            if (companyName=='Wicr') {
+                template = fs.readFileSync('WicrProjectHeader.docx');
+            }else{
+                template = fs.readFileSync('DeckProjectHeader.docx');
+            }
+            
 
             const buffer = await docxTemplate.createReport({
             template,
@@ -42,7 +47,7 @@ class ReportGeneration{
                   const buffer = resp.arrayBuffer
                     ? await resp.arrayBuffer()
                     : await resp.buffer();
-                  return { height: 17,width: 19.8,  data: buffer, extension: '.png' };
+                  return { height: 16,width: 19.8,  data: buffer, extension: '.png' };
                 },
                
               },
@@ -52,7 +57,7 @@ class ReportGeneration{
 
             const orderedProjects = this.reOrderProjects(project.data.item.children);
             for (let key in orderedProjects) {
-                const promise = this.getReportDoc(orderedProjects[key],sectionImageProperties,reportType)
+                const promise = this.getReportDoc(orderedProjects[key],companyName,sectionImageProperties,reportType)
                 .then((loc_html) => {
                  //locsHtmls[key] = loc_html;
                  reportDocList.push(...loc_html);
@@ -66,6 +71,19 @@ class ReportGeneration{
             // }
             console.timeEnd("generateReportDoc");
             return reportDocList;
+            // var fileList=[];
+            // reportDocList.forEach(reportChunk => {
+            //     fileList.push(fs.readFileSync(reportChunk, 'binary'));
+            // });
+            // var docx = new DocxMerger({},fileList);
+            // const docFilePath = `${fileName}.docx`;
+            // docx.save('nodebuffer',function (data) {
+                
+            //     fs.writeFile(`${fileName}.docx`, data, function(err){
+            //         console.log(err);
+            //     });
+            //     callback( docFilePath);
+            // });
         }
         catch(err){
             console.log(err);
@@ -121,14 +139,14 @@ class ReportGeneration{
         return orderedProjects;
     }
     
-    async getReportDoc(child,sectionImageProperties,reportType){
+    async getReportDoc(child,companyName,sectionImageProperties,reportType){
         try{
             if(child.type === ProjectChildType.PROJECTLOCATION)
             {
-                const loc_html =  await generateDocReportForLocation(child._id,sectionImageProperties,reportType);
+                const loc_html =  await generateDocReportForLocation(child._id,companyName,sectionImageProperties,reportType);
                 return loc_html;
             }else if(child.type ===  ProjectChildType.SUBPROJECT){
-                const subProjectHtml = await generateDocReportForSubProject(child._id,sectionImageProperties,reportType);
+                const subProjectHtml = await generateDocReportForSubProject(child._id,companyName,sectionImageProperties,reportType);
                 return subProjectHtml;
             }
         }catch(error){

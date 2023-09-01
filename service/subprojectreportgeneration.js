@@ -3,7 +3,7 @@ const {generateReportForLocation, generateDocReportForLocation} = require("./sec
 const LocationType = require("../model/locationType.js");
 
 
-const generateDocReportForSubProject = async function generateDocReportForSubProject(subProjectId,
+const generateDocReportForSubProject = async function generateDocReportForSubProject(subProjectId,companyName,
     sectionImageProperties,
     reportType)
 {
@@ -13,7 +13,7 @@ const generateDocReportForSubProject = async function generateDocReportForSubPro
     const subProjectdoc = [];
     const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
     for (let key in orderdLocationsInSubProject) {
-        const promise = generateDocReportForLocation(orderdLocationsInSubProject[key]._id,sectionImageProperties,reportType,subprojectName)
+        const promise = generateDocReportForLocation(orderdLocationsInSubProject[key]._id,companyName,sectionImageProperties,reportType,subprojectName)
             .then((loc_html) => {
                 subProjectdoc.push(...loc_html);
             });
