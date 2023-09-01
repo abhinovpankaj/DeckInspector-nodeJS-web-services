@@ -34,15 +34,16 @@ var newSection = {
     "lasteditedby":createdby,
     "eee":eee,
     "exteriorelements":exteriorelements,
-    "furtherinvasivereviewrequired":furtherinvasivereviewrequired,
+    "furtherinvasivereviewrequired":furtherinvasivereviewrequired.toLowerCase()==='true',
     "lbc": lbc,
     "name":name,
     "parentid": new ObjectId(parentid),
     "parenttype":parenttype,
     "visualreview":visualreview,
-    "visualsignsofleak": visualsignsofleak,
+    "visualsignsofleak": visualsignsofleak.toLowerCase()==='true',
     "waterproofingelements":waterproofingelements,
-    "images":images
+    "images":images,
+    "unitUnavailable": false
 } 
 var result = await sections.addSection(newSection);    
 if(result.error){

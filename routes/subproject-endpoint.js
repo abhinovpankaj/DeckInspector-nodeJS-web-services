@@ -46,7 +46,7 @@ if(!parentProject.data){
   return;
 }
 
-var creationtime= (new Date(Date.now())).toISOString();
+var creationtime= new Date(Date.now()).toISOString();
 //console.log(creationtime);
 try{
   var newSubProject = {
@@ -59,7 +59,7 @@ try{
       "createdat":creationtime,
       "createdby":createdBy,
       "assignedto":assignedTo,
-      "editedat":creationtime,
+      "editedat":creationtime ,
       "lasteditedby":createdBy,
       "children":[],
       "isInvasive": isInvasive

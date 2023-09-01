@@ -529,7 +529,9 @@ var updateSubProjectChildrenWithAdd = async function(subprojectId,childrenId,chi
                 "description": childrenData.description,
                 "name": childrenData.name,
                 "type": childrenData.type,
-                "url": childrenData.url
+                "url": childrenData.url,
+                "isInvasive": false,
+                "count": 0
             }
         }
     });

@@ -91,8 +91,8 @@ var getAllUser = async function  (callback) {
     callback(null, {status:200,users});
    
 };
-var removeUser = async  function (username, callback) {
-    var result = await mongo.Users.deleteOne({username:username});
+var removeUser = async  function (user, callback) {
+    var result = await mongo.Users.deleteOne({username:user.username});
     if(result.deletedCount==1){
         callback(null,{status:201,message:"User deleted successfully."});
     }

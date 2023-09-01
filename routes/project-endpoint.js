@@ -317,7 +317,7 @@ router.route('/:id/toggleprojectstatus/:state')
       const projectId = req.params.id;
       const state = req.params.state;
       const iscomplete = state == 1 ? true : false;
-      var result = await projects.updateProjectVisibilityStatus(projectId, iscomplete);
+      var result = await projects.updateProjectStatus(projectId, iscomplete);
       if (result.error) {
         res.status(result.error.code).json(result.error);
       }
@@ -404,24 +404,28 @@ router.route('/generatereport')
   const sectionImageProperties = req.body.sectionImageProperties;
   const companyName = req.body.companyName;
   const reportType = req.body.reportType;
-  const pdfFilePath = await generateProjectReport(projectId,sectionImageProperties,companyName,reportType);
+  const reportFormat = req.body.reportFormat;
+  const reportFilePath = await generateProjectReport(projectId,sectionImageProperties,companyName,reportType,reportFormat);
 
-  console.log(pdfFilePath);
-  const absolutePath = path.resolve(pdfFilePath);
+  console.log(reportFilePath);
+  const absolutePath = path.resolve(reportFilePath);
   console.log(absolutePath);
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${pdfFilePath}"`);
+  reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessing');
+
+  res.setHeader('Content-Disposition', `attachment; filename="${reportFilePath}"`);
   res.sendFile(absolutePath, {}, (err) => {
     if (err) {
       console.error('Error sending file:', err);
+      res.status(500).send('Error sending file');
     } else {
-      console.log('PDF sent successfully');
+      console.log('Report sent successfully');
       fs.unlinkSync(absolutePath);
     }
   });
 } catch (err) {
-  console.error('Error generating PDF:', err);
-  res.status(500).send('Error generating PDF');
+  console.error('Error generating Report:', err);
+  res.status(500).send('Error generating Report');
 }
 });
 
