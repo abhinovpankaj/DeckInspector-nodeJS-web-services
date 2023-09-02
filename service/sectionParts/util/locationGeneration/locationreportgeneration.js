@@ -6,7 +6,7 @@ const docxTemplate = require('docx-templates');
 const path = require('path');
 const fs = require('fs');
 
-const generateDocReportForLocation = async function (locationId, sectionImageProperties, reportType,subprojectName='') {
+const generateDocReportForLocation = async function (locationId,companyName, sectionImageProperties, reportType,subprojectName='') {
   try {
     const sectionDataDoc =
     [];
@@ -49,11 +49,20 @@ const generateDocReportForLocation = async function (locationId, sectionImagePro
               // <p style="color: red;">${sectionData.data.item.eee}</p>
               // +++`;
               var template;
-              if (subprojectName=='') {
-                 template = fs.readFileSync('Deck2VisualDetails.docx');
+              if (companyName==='Wicr') {
+                if (subprojectName=='') {
+                  template = fs.readFileSync('Wicr2VisualDetails.docx');
+               }else{
+                  template = fs.readFileSync('WicrVisualDetails.docx');
+               }
               }else{
-                 template = fs.readFileSync('DeckVisualDetails.docx');
+                if (subprojectName=='') {
+                  template = fs.readFileSync('Deck2VisualDetails.docx');
+               }else{
+                  template = fs.readFileSync('DeckVisualDetails.docx');
+               }
               }
+              
               
 
               const buffer = await docxTemplate.createReport({

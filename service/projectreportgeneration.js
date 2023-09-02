@@ -6,7 +6,9 @@ const projects = require("../model/project");
 const DocxMerger = require("docx-merger");
 const fs = require('fs');
 
-const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName,reportType,reportFormat)
+
+const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName,reportType,
+    reportFormat,callback)
 {
     try{
         const project  = await projects.getProjectById(projectId);
@@ -16,23 +18,26 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
         if (reportFormat==='pdf') {
             
             const path = await generatePdfFile(fileName,projectHtml,companyName);
-            return path;
+            callback( path);
         }else{
             
-            var projectDocxList=  await getProjectDoc(project, sectionImageProperties, reportType,reportFormat);
+            var projectDocxList=  await getProjectDoc(project, sectionImageProperties,companyName, reportType,reportFormat);
             var fileList=[];
             projectDocxList.forEach(reportChunk => {
                 fileList.push(fs.readFileSync(reportChunk, 'binary'));
             });
+            //unlink all
+            projectDocxList.forEach(filechunk=>{
+                fs.unlinkSync(filechunk);
+            });
             var docx = new DocxMerger({},fileList);
             const docFilePath = `${fileName}.docx`;
-            docx.save('nodebuffer',function (data) {
-                
-                fs.writeFile(`${fileName}.docx`, data, function(err){
-                    console.log(err);
-                });
-            });
-            return docFilePath;
+            docx.save('nodebuffer', function (data) {
+            
+                console.log('inside document save');
+                 fs.writeFileSync(`${fileName}.docx`, data);
+                 callback(docFilePath);
+            });         
         }
         
     }
@@ -41,12 +46,12 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
     }
 }
 
-async function getProjectDoc(project, sectionImageProperties, reportType,reportFormat='pdf') {
+async function getProjectDoc(project, sectionImageProperties,companyName, reportType,reportFormat='pdf') {
     if (project.data.item.projecttype === "singlelevel") {
-       return await SingleProjectReportGeneration.generateReportDoc(project, sectionImageProperties, reportType);
+       return await SingleProjectReportGeneration.generateReportDoc(project,companyName, sectionImageProperties, reportType);
     }
     else if (project.data.item.projecttype  === "multilevel") {
-       return await ReportGeneration.generateReportDoc(project, sectionImageProperties, reportType);
+       return await ReportGeneration.generateReportDoc(project,companyName, sectionImageProperties, reportType);
     }
 }
 
