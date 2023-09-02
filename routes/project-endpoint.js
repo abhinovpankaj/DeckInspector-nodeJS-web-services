@@ -105,7 +105,7 @@ router.route('/getProjectById')
     try {
       var errResponse;
       const projectId = req.body.projectid;
-      var result = await getSingleProjectMetadata(projectId);
+      var result = await projects.getProjectById(projectId);
       if (result.error) {
         res.status(result.error.code).json(result.error);
       }
