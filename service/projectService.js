@@ -23,6 +23,7 @@ var addProject = async function (project) {
             };
         }
         return {
+            code:500,
             success: false,
             reason: 'Insertion failed'
         };
@@ -41,6 +42,7 @@ var getProjectById = async function (projectId) {
             };
         }
         return {
+            code:401,
             success: false,
             reason: 'No project found with the given ID'
         };
@@ -58,6 +60,7 @@ var deleteProjectPermanently = async function (projectId) {
             };
         }
         return {
+            code:401,
             success: false,
             reason: 'No project found with the given ID'
         };
@@ -76,6 +79,7 @@ var getProjectsByUser = async function (username) {
             };
         }
         return {
+            code:401,
             success: false,
             reason: 'No project found with the given username'
         };
@@ -94,6 +98,7 @@ var getAllProjects = async function () {
             };
         }
         return {
+            code:401,
             success: false,
             reason: 'No project found'
         };
@@ -111,20 +116,95 @@ var editProject = async function (projectId, newData) {
             };
         }
         return {
+            code:401,
             success: false,
             reason: 'No project found with the given ID'
         };
     } catch (error) {
-        return {
-            success: false,
-            reason: 'An error occurred'
-        };
+        return handleError(error);
     }
 }
+
+var assignProjectToUser = async function (projectId, username) {
+    try {
+        const result = await ProjectDAO.assignProjectToUser(projectId, username);
+        if (result.modifiedCount === 1) {
+            return {
+                success: true,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No project found with the given ID'
+        };  
+    } catch (error) {
+        return handleError(error);
+    }
+}
+
+var unassignUserFromProject = async function (projectId, username) {
+    try {
+        const result = await ProjectDAO.unassignUserFromProject(projectId, username);
+        if (result.modifiedCount === 1) {
+            return {
+                success: true,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No project found with the given ID'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+}
+
+var getProjectByAssignedToUserId = async function (userId) {
+    try {
+        const result = await ProjectDAO.getProjectByAssignedToUserId(userId);
+        if (result) {
+            return {
+                success: true,
+                projects: result,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No project found with the given username'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+}
+
+var getProjectsByNameCreatedOnIsCompletedAndDeleted = async function ({name = null,createdon = null,iscomplete = false,isdeleted = false} = {}) {
+    try {
+        const result = await ProjectDAO.getProjectsByNameCreatedOnIsCompletedAndDeleted({name,createdon,iscomplete,isdeleted});
+        if (result) {
+            return {
+                success: true,
+                projects: result,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No project found for given criteria'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+}
+
+
 
 const handleError = (error) => {
     console.error('An error occurred:', error);
     return {
+        code:500,
         success: false,
         reason: `An error occurred: ${error.message}`
     };
@@ -136,6 +216,10 @@ module.exports = {
     deleteProjectPermanently,
     getProjectsByUser,
     getAllProjects,
-    editProject
+    editProject,
+    assignProjectToUser,
+    unassignUserFromProject,
+    getProjectByAssignedToUserId,
+    getProjectsByNameCreatedOnIsCompletedAndDeleted
 };
 
