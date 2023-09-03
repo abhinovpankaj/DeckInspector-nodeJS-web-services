@@ -25,48 +25,36 @@ const addLocation = async (location) => {
 };
 
 
-var getSubProjectById = async function (subProjectId) {
+var getLocationById = async function (locationId) {
     try {
-        const result = await subProjectDAO.getSubProjectById(subProjectId); 
+        const result = await LocationDAO.getLocationById(locationId); 
         if (result) {
             return {
                 success: true,
-                project: result,
+                location: result,
             };
         }
         return {
             code:401,
             success: false,
-            reason: 'No Subproject found with the given ID'
+            reason: 'No Location found with the given ID'
         };
     } catch (error) {
         return handleError(error);
     }
 };
 
-var deleteSubProjectPermanently = async function (subProjectId) {
+var deleteLocationPermanently = async function (locationId) {
     try {
-        const subProjectData = await subProjectDAO.findSubProjectById(subProjectId);
-        //Delete Locations using location DAOI
-        if(subProjectData)
-        {
-            const locations = await LocationDAO.getLocationByParentId(subProjectId);
-            if(locations){
-                for (const location of locations) {
-                    if(location)
-                    {
-                        sections = SectionDAO.getSectionByParentId(location._id);
-                        for(const section of sections)
-                        {
-                            await SectionDAO.deleteSection(section._id);
-                        }
-                    }
-                    await LocationDAO.deleteLocation(location._id);
+            const location = await LocationDAO.getLocationById(locationId);
+            if (location) {
+                sections = SectionDAO.getSectionByParentId(locationId);
+                for (const section of sections) {
+                  await SectionDAO.deleteSection(section._id);
                 }
-                console.log("SubProject Locations deleted successfully for subProject Id  : ",subProjectId);
+                await LocationDAO.deleteLocation(location._id);
             }
-        }
-        const result = await subProjectDAO.deleteSubProject(subProjectId);
+        const result = await LocationDAO.deleteLocation(locationId);
         if (result.deletedCount === 1) {
             return {
                 success: true,
@@ -75,77 +63,39 @@ var deleteSubProjectPermanently = async function (subProjectId) {
         return {
             code:401,
             success: false,
-            reason: 'No SubProject found with the given ID'
+            reason: 'No Location found with the given ID'
         };
     } catch (error) {
         return handleError(error);
     }
 }
 
-var getSubProjectByParentId = async function (parentId) {
+var getLocationsByParentId = async function (parentId) {
     try {
-        const result = await subProjectDAO.getSubProjectByParentId(parentId);
+        const result = await LocationDAO.getLocationByParentId(parentId);
         if (result) {
             return {
                 success: true,
-                subprojects: result,
+                locations: result,
             };
         }
         return {
             code:401,
             success: false,
-            reason: 'No Subproject found with the given ID'
+            reason: 'No Location found with the given parent ID'
         };
     } catch (error) {
         return handleError(error);
     }
 };
 
-
-var assignSubProjectToUser = async function (id, username) {
+const editLocation = async (locationId,location) => {
     try {
-        const result = await subProjectDAO.assignSubprojectToUser(id, username);
-        if (result) {
-            return {
-                success: true,
-            };
-        }
-        return {
-            code:401,
-            success: false,
-            reason: 'No Subproject found with the given ID'
-        };
-    }
-    catch (error) {
-        return handleError(error);
-    }
-};
-
-var unAssignSubProjectFromUser = async function (id, username) {
-    try {
-        const result = await subProjectDAO.unassignSubprojectFromUser(id, username);
-        if (result) {
-            return {
-                success: true,
-            };
-        }
-        return {
-            code:401,
-            success: false,
-            reason: 'No Subproject found with the given ID'
-        };
-    }
-    catch (error) {
-        return handleError(error);
-    }
-};
-
-const editSubProject = async (subProjectId,subproject) => {
-    try {
-        const result = await subProjectDAO.editSubProject(subProjectId, subproject);
+        const result = await LocationDAO.editLocation(locationId, location);
         if (result.modifiedCount === 1) {
-            await ProjectDAO.removeProjectChild(subProjectId);
-            await addSubprojectMetaDataInProject(subProjectId,subproject);
+            const locationFromDB = await LocationDAO.getLocationById(locationId);
+            await removeLocationFromParent(locationId,locationFromDB);
+            await addLocationMetadataInParent(locationId,locationFromDB);
             return {
                 success: true,
             };
@@ -153,7 +103,7 @@ const editSubProject = async (subProjectId,subproject) => {
         return {
             code:401,
             success: false,
-            reason: 'No Subproject found with the given ID'
+            reason: 'No location found with the given ID'
         };
     } catch (error) {
         return handleError(error);
@@ -186,6 +136,25 @@ const addLocationMetadataInParent = async (locationId,location) => {
         return handleError(error);
     }
 };
+
+const removeLocationFromParent = async (locationId,location) => {
+    try{
+
+        if(location.parenttype == 'subproject' )
+        {
+            await subProjectDAO.removeSubProjectChild(location.parentid, locationId);
+            console.log(`Removed Location with id ${locationId} in subProject id ${location.parentid} successfully`);
+        }
+        else if(location.parenttype == 'project')
+        {
+            await ProjectDAO.removeProjectChild(location.parentid, locationId);
+            console.log(`Removed Location with id ${locationId} in Project id ${location.parentid} successfully`);
+        }
+    }
+    catch (error) {
+        return handleError(error);
+    }
+}
         
 
     
@@ -199,17 +168,10 @@ const handleError = (error) => {
     };
 };
 
-
-
-// ... More service functions
-
 module.exports = {
-    addSubProject,
-    getSubProjectById,
-    deleteSubProjectPermanently,
-    getSubProjectByParentId,
-    assignSubProjectToUser,
-    unAssignSubProjectFromUser,
-    editSubProject
-    // ... More exported functions
+    addLocation,
+    getLocationById,
+    deleteLocationPermanently,
+    getLocationsByParentId,
+    editLocation
 };
