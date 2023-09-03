@@ -2,6 +2,7 @@
 const ProjectDAO = require('../model/projectDAO');
 const LocationDAO = require('../model/locationDAO');
 const SubprojectService = require('../service/subProjectService')
+const LocationService = require('../service/locationService');
 /**
  * 
  * @param {*} project 
@@ -53,42 +54,45 @@ var getProjectById = async function (projectId) {
 };
 //UMESH TODO -- ADD transaction in this
 var deleteProjectPermanently = async function (projectId) {
-    try {
-        const projectData = await ProjectDAO.getProjectById(projectId);
+  try {
 
-        if (projectData) {
-            const locations = await LocationDAO.getLocationByParentId(id);
-            if(locations){
-                for (const location of locations) {
-                    await LocationDAO.deleteLocation(location._id);
-                }
-                console.log("Project Locations deleted successfully for project Id  : ",projectId);
-            }
+    //Delete projectLocations
+    const locationResult = await LocationService.getLocationsByParentId(
+      projectId
+    );
 
-            const result = await SubprojectService.getSubProjectByParentId(projectId);
-            if(result)
-            {
-                subProjects = result.subProjects;
-                if(subProjects){
-                    await SubprojectService.deleteSubProjectPermanently(subProjects._id);
-                }
-            }           
-        }
-        const result = await ProjectDAO.deleteProjectPermanently(projectId);
-        if (result.deletedCount === 1) {
-            return {
-                success: true,
-            };
-        }
-        return {
-            code:401,
-            success: false,
-            reason: 'No project found with the given ID'
-        };
-    } catch (error) {
-        return handleError(error);
+    if (locationResult.locations) {
+      for (const location of locationResult.locations) {
+        await LocationService.deleteLocationPermanently(location._id);
+      }
     }
-}
+
+    //Delete Subprojects
+    const subProjectResult = await SubprojectService.getSubProjectByParentId(
+      projectId
+    );
+
+    if (subProjectResult.subprojects) {
+      for (const subProject of subProjectResult.subprojects) {
+        await SubprojectService.deleteSubProjectPermanently(subProject._id);
+      }
+    }
+    
+    const result = await ProjectDAO.deleteProjectPermanently(projectId);
+    if (result.deletedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No project found with the given ID",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
 
 var getProjectsByUser = async function (username) {
     try {

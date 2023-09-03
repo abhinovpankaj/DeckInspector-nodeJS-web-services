@@ -1,8 +1,8 @@
 "use strict";
 const ProjectDAO = require('../model/projectDAO'); 
-const LocationDAO = require('./location'); 
 const subProjectDAO = require('../model/subProjectDAO'); 
-const SectionDAO = require('../model/sectionDAO');
+const LocationService = require('../service/locationService');
+const InvasiveUtil = require('../service/invasiveUtil');
 
 const addSubProject = async (subproject) => {
     try {
@@ -45,42 +45,42 @@ var getSubProjectById = async function (subProjectId) {
 };
 
 var deleteSubProjectPermanently = async function (subProjectId) {
-    try {
-        const subProjectData = await subProjectDAO.findSubProjectById(subProjectId);
-        //Delete Locations using location DAOI
-        if(subProjectData)
-        {
-            const locations = await LocationDAO.getLocationByParentId(subProjectId);
-            if(locations){
-                for (const location of locations) {
-                    if(location)
-                    {
-                        sections = SectionDAO.getSectionByParentId(location._id);
-                        for(const section of sections)
-                        {
-                            await SectionDAO.deleteSection(section._id);
-                        }
-                    }
-                    await LocationDAO.deleteLocation(location._id);
-                }
-                console.log("SubProject Locations deleted successfully for subProject Id  : ",subProjectId);
-            }
-        }
-        const result = await subProjectDAO.deleteSubProject(subProjectId);
-        if (result.deletedCount === 1) {
-            return {
-                success: true,
-            };
-        }
-        return {
-            code:401,
-            success: false,
-            reason: 'No SubProject found with the given ID'
-        };
-    } catch (error) {
-        return handleError(error);
+  try {
+    const locationResult = await LocationService.getLocationsByParentId(subProjectId);
+
+    if (locationResult.locations) {
+      for (const location of locationResult.locations) {
+        await LocationService.deleteLocationPermanently(location._id);
+      }
+      console.log(
+        "SubProject Locations deleted successfully for subProject Id  : ",
+        subProjectId
+      );
     }
-}
+    const subProject = await subProjectDAO.getSubProjectById(subProjectId);
+
+    const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
+
+    await removeSubprojectMetaDataInProject(subProjectId,subProject);
+
+    await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
+
+    await remove
+
+    if (finalResult.deletedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No SubProject found with the given ID",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
 
 var getSubProjectByParentId = async function (parentId) {
     try {
@@ -144,8 +144,9 @@ const editSubProject = async (subProjectId,subproject) => {
     try {
         const result = await subProjectDAO.editSubProject(subProjectId, subproject);
         if (result.modifiedCount === 1) {
-            await ProjectDAO.removeProjectChild(subProjectId);
-            await addSubprojectMetaDataInProject(subProjectId,subproject);
+            const subProjectFromDB = await subProjectDAO.getSubProjectById(subProjectId);
+            await removeSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
+            await addSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
             return {
                 success: true,
             };
@@ -164,11 +165,11 @@ const editSubProject = async (subProjectId,subproject) => {
 const addSubprojectMetaDataInProject = async (subProjectId,subProject) => {
     try {
         subProjectDataInParent = {
-            name: subProject.name,
-            type: 'subproject',
-            url: subProject.url,
-            description: subProject.description,
-            isInvasive: false,
+            "name": subProject.name,
+            "type": 'subproject',
+            "url": subProject.url,
+            "description": subProject.description,
+            "isInvasive": false,
         }
         await ProjectDAO.addProjectChild(subProject.parentid, subProjectId,subProjectDataInParent);
         console.log(`Added subproject with id ${subProjectId} in project id ${subProject.parentid} successfully`);
@@ -178,6 +179,15 @@ const addSubprojectMetaDataInProject = async (subProjectId,subProject) => {
     }
 };
         
+const removeSubprojectMetaDataInProject = async (subProjectId,subProject) => {
+    try {
+        await ProjectDAO.removeProjectChild(subProject.parentid,subProjectId);
+        console.log(`Removed subproject with id ${subProjectId} in project successfully`);
+    }
+    catch (error) {
+        return handleError(error);
+    }
+};
 
     
 
