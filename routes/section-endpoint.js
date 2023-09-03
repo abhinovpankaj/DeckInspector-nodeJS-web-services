@@ -1,9 +1,10 @@
 "use strict";
 var express = require('express');
 var router = express.Router();
-const sections = require("../model/sections");
 const ErrorResponse = require('../model/error');
 var ObjectId = require('mongodb').ObjectId;
+const newErrorResponse = require('../model/newError');
+const SectionService = require("../service/sectionService");
 
 require("dotenv").config();
 
@@ -43,20 +44,21 @@ var newSection = {
     "visualsignsofleak": visualsignsofleak.toLowerCase()==='true',
     "waterproofingelements":waterproofingelements,
     "images":images,
-    "unitUnavailable": false
+    "unitUnavailable": false,
+    "isuploading":false,
 } 
-var result = await sections.addSection(newSection);    
-if(result.error){
-    res.status(result.error.code).json(result.error);
-  }
-  if(result.data){
-    console.debug(result);
-    res.status(201).json(result.data);
-  }
- 
-}catch (err) {
-  errResponse = new ErrorResponse(500, "Internal server error", err);
-  res.status(500).json(errResponse);
+var result = await SectionService.addSection(newSection);    
+if (result.reason) {
+  res.status(result.code).json(result.reason);
+}
+if (result) {
+  //console.debug(result);
+  res.status(201).json(result);
+}
+}
+catch (exception) {
+errResponse = new newErrorResponse(500, false, err);
+res.status(500).json(errResponse);
 }
 });
 
@@ -66,18 +68,18 @@ router.route('/:id')
   try{
     var errResponse;
     const sectionId = req.params.id;
-    var result = await sections.getSectionById( sectionId);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SectionService.getSectionById( sectionId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-  catch(ex){
-    errResponse = new ErrorResponse(500, "Internal server error", ex);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 })
 
@@ -91,38 +93,37 @@ router.route('/:id')
       newData.parentid = new ObjectId(newData.parentid);
     }
 
-    var result = await sections.editSection(sectionId,newData);
+    var result = await SectionService.editSetion(sectionId,newData);
 
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-
-  catch(err){
-    errResponse = new ErrorResponse(500, "Internal server error", err);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 })
 .delete(async function(req,res){
   try{
     var errResponse;
     const sectionId = req.params.id;
-    var result = await sections.deleteSectionPermanently(sectionId);
-    if (result.error) { 
-      res.status(result.error.code).json(result.error); 
+    var result = await SectionService.deleteSectionPermanently(sectionId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data) {          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-      
   }
-  catch(err){
-    errResponse = new ErrorResponse(500, "Internal server error", err);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 });
 
@@ -132,17 +133,18 @@ router.route('/:id/addimage')
     var errResponse;
     const sectionId = req.params.id;
     const {url} = req.body;
-    var result = await locations.addRemoveImages(sectionId,true,url);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SectionService.addImageInSection(sectionId,url);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
+  }
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 });
 
@@ -152,40 +154,42 @@ router.route('/:id/removeimage')
     var errResponse;
     const sectionId = req.params.id;
     const {url} = req.body
-    var result = await sections.addRemoveImages(sectionId,false,url);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SectionService.removeImageFromSection(sectionId,url);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
+  }
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 });
 
-router.route('/:id/toggleVisibility/')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const locationId = req.params.id;
-    const {parentId,isVisible,name} = req.body;
+//TODO Umesh to delete 
+// router.route('/:id/toggleVisibility/')
+// .post(async function(req,res){
+//   try {
+//     var errResponse;
+//     const locationId = req.params.id;
+//     const {parentId,isVisible,name} = req.body;
     
-    var result = await sections.updateSectionVisibilityStatus(locationId,name,parentId,isVisible);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
+//     var result = await sections.updateSectionVisibilityStatus(locationId,name,parentId,isVisible);
+//     if(result.error){
+//         res.status(result.error.code).json(result.error);
+//     }
+//     if(result.data){
+//       //console.debug(result);                                          
+//       res.status(result.data.code).json(result.data);
+//     }
+//   } catch (error) {
+//     errResponse = new ErrorResponse(500, "Internal server error", error);
+//       res.status(500).json(errResponse);
+//   }
+// });
 
 router.route('/getSectionById')
   .post(async function(req, res) {
@@ -193,18 +197,18 @@ router.route('/getSectionById')
       const sectionId = req.body.sectionid; // Use req.body instead of req.params
       const userName = req.body.username; // Use req.body instead of req.params
 
-      const result = await sections.getSectionById(sectionId);
+      const result = await SectionService.getSectionById(sectionId);
 
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      } else if (result.data) {
-        res.status(201).json(result.data);
-      } else {
-        res.status(404).json({ message: 'Section not found' }); // Add a response for the case when no data is returned
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-    } catch (error) {
-      console.log(error);
-      const errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
+      }
+    }
+    catch (exception) {
+      const errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });

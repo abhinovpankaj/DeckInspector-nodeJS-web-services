@@ -146,6 +146,44 @@ const editSetion = async (sectionId, section) => {
   }
 };
 
+const addImageInSection = async (sectionId, imageUrl) => {
+  try {
+    const result = await SectionDAO.addImageInSection(sectionId, imageUrl);
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Section found with the given ID",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+
+const removeImageFromSection = async (sectionId, imageUrl) => {
+  try {
+    const result = await SectionDAO.removeImageInSection(sectionId, imageUrl);
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Section found with the given ID",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+
 /**
  *
  * @param
@@ -205,4 +243,6 @@ module.exports = {
   deleteSectionPermanently,
   getSectionsByParentId,
   editSetion,
+  addImageInSection,
+  removeImageFromSection
 };

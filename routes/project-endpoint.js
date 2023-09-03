@@ -43,14 +43,15 @@ router.route('/add')
     // Save the new project to the database
     var result = await projectService.addProject(newProject);
     
-    if (result.success) {
-      res.status(201).json({ success: true, id: result.id });
-    } else {
-      const errResponse = new ErrorResponse(400, result.reason, "");
-      res.status(400).json(errResponse);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-
-  } catch (err) {
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
+    }
+  }
+  catch (exception) {
     const errResponse = new newErrorResponse(500, false, err);
     res.status(500).json(errResponse);
   }
