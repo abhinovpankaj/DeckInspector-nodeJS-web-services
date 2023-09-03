@@ -1,6 +1,63 @@
 "use strict";
 const ConclusiveSectionDAO = require('../model/conclusiveSectionDAO');
 
+const addConclusiveSection = async (conclusiveSection) => {
+    try {
+        const result = await ConclusiveSectionDAO.addConclusiveSection(conclusiveSection);
+        if (result.insertedId) {
+            return {
+                success: true,
+                id: result.insertedId,
+            };
+        }
+        return {
+            code:500,
+            success: false,
+            reason: 'Insertion failed'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+};
+
+const getConclusiveSectionById = async (conclusiveSectionId) => {
+    try {
+        const result = await ConclusiveSectionDAO.getConclusiveSectionById(conclusiveSectionId);
+        if (result) {
+            return {
+                success: true,
+                conclusiveSection: result,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No Conclusive Section found with the given ID'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+};
+
+const editConclusiveSection = async (conclusiveSectionId, conclusiveSection) => {
+    try {
+        const result = await ConclusiveSectionDAO.editConclusiveSection(conclusiveSectionId, conclusiveSection);
+        if (result.modifiedCount === 1) {
+            return {
+                success: true,
+                id: conclusiveSectionId,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No Conclusive Section found with the given ID'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+};
+
 
 const deleteConclusiveSectionPermanently = async (conclusiveSectionId) => {
     try {
@@ -53,6 +110,9 @@ const handleError = (error) => {
 
 
 module.exports = {
+    getConclusiveSectionById,
+    addConclusiveSection,
+    editConclusiveSection,
     getConclusiveSectionByParentId,
     deleteConclusiveSectionPermanently
 };

@@ -212,5 +212,4 @@ module.exports = {
     assignSubProjectToUser,
     unAssignSubProjectFromUser,
     editSubProject
-    // ... More exported functions
 };
