@@ -294,16 +294,16 @@ router.route('/:id/toggleprojectstatus/:state')
       const projectId = req.params.id;
       const state = req.params.state;
       const iscomplete = state == 1 ? true : false;
-      var result = await projects.updateProjectStatus(projectId, iscomplete);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.toggleProjectstatus(projectId, iscomplete);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
+      if (result) {
+        res.status(201).json(result);
       }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });

@@ -237,6 +237,25 @@ var getProjectsByNameCreatedOnIsCompletedAndDeleted = async function ({
   }
 };
 
+var toggleProjectstatus = async function (projectId,iscomplete) {
+    try {
+        const result = await ProjectDAO.updateProjectStatus(projectId,iscomplete);
+        if (result.modifiedCount === 1) {
+            return {
+                success: true,
+            };
+        }
+        return {
+            code:401,
+            success: false,
+            reason: 'No project found with the given ID'
+        };
+    } catch (error) {
+        return handleError(error);
+    }
+};
+
+
 const handleError = (error) => {
   console.error("An error occurred:", error);
   return {
@@ -257,4 +276,5 @@ module.exports = {
   unassignUserFromProject,
   getProjectByAssignedToUserId,
   getProjectsByNameCreatedOnIsCompletedAndDeleted,
+  toggleProjectstatus
 };
