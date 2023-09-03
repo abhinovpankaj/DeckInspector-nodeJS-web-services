@@ -1,6 +1,7 @@
 "use strict";
-const ProjectDAO = require('../model/projectDAO'); 
-
+const ProjectDAO = require('../model/projectDAO');
+const LocationDAO = require('../model/locationDAO');
+const SubprojectService = require('../service/subProjectService')
 /**
  * 
  * @param {*} project 
@@ -50,9 +51,29 @@ var getProjectById = async function (projectId) {
         return handleError(error);
     }
 };
-
+//UMESH TODO -- ADD transaction in this
 var deleteProjectPermanently = async function (projectId) {
     try {
+        const projectData = await ProjectDAO.getProjectById(projectId);
+
+        if (projectData) {
+            const locations = await LocationDAO.getLocationByParentId(id);
+            if(locations){
+                for (const location of locations) {
+                    await LocationDAO.deleteLocation(location._id);
+                }
+                console.log("Project Locations deleted successfully for project Id  : ",projectId);
+            }
+
+            const result = await SubprojectService.getSubProjectByParentId(projectId);
+            if(result)
+            {
+                subProjects = result.subProjects;
+                if(subProjects){
+                    await SubprojectService.deleteSubProjectPermanently(subProjects._id);
+                }
+            }           
+        }
         const result = await ProjectDAO.deleteProjectPermanently(projectId);
         if (result.deletedCount === 1) {
             return {
