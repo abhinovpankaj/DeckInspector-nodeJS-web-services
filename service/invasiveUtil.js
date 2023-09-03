@@ -8,9 +8,7 @@ const markSectionInvasive = async (sectionId) => {
   try {
     const section = await SectionDAO.getSectionById(sectionId);
     if (section) {
-      const isInvasiveFlag =
-        section.furtherinvasivereviewrequired.toLowerCase() === "true";
-      if (isInvasiveFlag) {
+      if (section.furtherinvasivereviewrequired) {
         await markLocationInvasive(section.parentid);
       }
     }
@@ -83,9 +81,7 @@ const markSectionNonInvasive = async (sectionId) => {
   try {
     const section = await SectionDAO.getSectionById(sectionId);
     if (section) {
-      if (section.furtherinvasivereviewrequired.toLowerCase() === "true") {
-        return;
-      }
+      if (section.furtherinvasivereviewrequired) return;
       const location = await LocationDAO.getLocationById(section.parentid);
       if (location) {
         await markLocationNonInvasive(section.parentid);

@@ -126,7 +126,7 @@ const editSetion = async (sectionId, section) => {
       await addSectionMetadataInParent(sectionId, sectionFromDB);
       //if section is invasive ,it will mark entire parent hierarchy as invasive
       if (
-        sectionFromDB.furtherinvasivereviewrequired.toLowerCase() === "true"
+        sectionFromDB.furtherinvasivereviewrequired
       ) {
         await InvasiveUtil.markSectionInvasive(sectionId);
       } else {
