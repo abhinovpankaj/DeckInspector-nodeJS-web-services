@@ -6,6 +6,9 @@ const locations = require("../model/location");
 const ErrorResponse = require('../model/error');
 const Project = require('../model/project');
 var ObjectId = require('mongodb').ObjectId;
+var SubProjectService = require('../service/subProjectService');
+const projectDAO = require('../model/projectDAO');
+const LocationService = require('../service/locationService');
 
 require("dotenv").config();
 
@@ -70,20 +73,18 @@ try{
   res.status(500).json(errResponse);
   return;
 }
-console.log(newSubProject);
-var result = await subprojects.addSubProject(newSubProject); 
-console.log(result);
-if(result.error){
-    res.status(result.error.code).json(result.error);
-  }
-  if(result.data){
-    console.debug(result);
-    res.status(201).json(result.data);
-  }
- 
-}catch (err) {
-  errResponse = new ErrorResponse(500, "Internal server error", err);
-  res.status(500).json(errResponse);
+var result = await SubProjectService.addSubProject(newSubProject); 
+if (result.reason) {
+  res.status(result.code).json(result.reason);
+}
+if (result) {
+  //console.debug(result);
+  res.status(201).json(result);
+}
+}
+catch (exception) {
+errResponse = new newErrorResponse(500, false, err);
+res.status(500).json(errResponse);
 }
 });
 
@@ -94,18 +95,18 @@ router.route('/getSubProjectById')
     var errResponse;
     const subprojectId = req.body.subprojectid;
     const userName = req.body.username;
-    var result = await subprojects.getSubProjectById(subprojectId);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SubProjectService.getSubProjectById(subprojectId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-  catch(ex){
-    errResponse = new ErrorResponse(500, "Internal server error", ex);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 })
 
@@ -119,39 +120,38 @@ router.route('/:id')
     if(newData.parentid){
       newData.parentid = new ObjectId(newData.parentid);
     }
-    var result = await subprojects.editSubProject(subprojectId,newData);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SubProjectService.editSubProject(subprojectId,newData);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-
-  catch(err){
-    errResponse = new ErrorResponse(500, "Internal server error", err);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 })
 .delete(async function(req,res){
   try{
     var errResponse;
     const subprojectId = req.params.id;
-    var result = await subprojects.deleteSubProjectPermanently(subprojectId);
-    if (result.error) { 
-      res.status(result.error.code).json(result.error); 
+    var result = await SubProjectService.deleteSubProjectPermanently(subprojectId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data) {          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-      
   }
-  catch(err){
-    errResponse = new ErrorResponse(500, "Internal server error", err);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
-});
+})
 
 router.route('/:id/assign')
 .post(async function(req,res){
@@ -159,19 +159,20 @@ router.route('/:id/assign')
     var errResponse;
     const subprojectId = req.params.id;
     const {username} = req.body;
-    var result = await subprojects.assignSubProjectToUser(subprojectId,username);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SubProjectService.assignSubProjectToUser(subprojectId,username);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
+  }
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
     res.status(500).json(errResponse);
   }
-});
+})
 
 router.route('/:id/unassign')
 .post(async function(req,res){
@@ -179,114 +180,49 @@ router.route('/:id/unassign')
     var errResponse;
     const subprojectId = req.params.id;
     const {username} = req.body;
-    var result = await subprojects.unassignUserFromSubProject(subprojectId,username);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await SubProjectService.unAssignSubProjectFromUser(subprojectId,username);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
   }
-});
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
+  }
+})
 
-router.route('/:id/addchild')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const subprojectId = req.params.id;
-    const {id,name} = req.body;//type=location always
-    var result = await subprojects.addRemoveChildren(subprojectId,true,{id,name,type:"location"});
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
-
-router.route('/:id/removechild')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const subprojectId = req.params.id;
-    const {id,name,type} = req.body;
-    var result = await subprojects.addRemoveChildren(subprojectId,false,{id,name,type:"location"});
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
-
-router.route('/:id/toggleVisibility/')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const subprojectId = req.params.id;
-    const {parentId,isVisible,name} = req.body;
-    
-    var result = await subprojects.updateSubProjectVisibilityStatus(subprojectId,name,parentId,isVisible);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
 
 router.route('/getSubprojectsDataByProjectId')
 .post(async function(req,res){
   try {
     var errResponse;
     const projectId = req.body.projectid;
-    var result = await subprojects.getSubProjectsByParentId(projectId);
+    var result = await SubProjectService.getSubProjectByParentId(projectId);
     
-    const subprojectsData = result.data.item;
+    const subprojectsData = result.subprojects;
     for(const subProject of subprojectsData){
       const subProjectId = subProject._id;
-      const subProjectChildren = await locations.getLocationByParentId(subProjectId);
-      console.log("SubProjectDhildren " ,subProjectChildren);
-      if(subProjectChildren.data)
+      const locationresult = await LocationService.getLocationsByParentId(subProjectId);
+      if(locationresult.locations)
       {
-        subProject.children = subProjectChildren.data.item;
+        subProject.children = locationresult.locations;
       }
     }
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-  } catch (error) {
-    console.log(error);
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
   }
-});
-
-
-
-
-
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
+  }
+})
 module.exports = router ;
