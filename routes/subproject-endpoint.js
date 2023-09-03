@@ -9,6 +9,7 @@ var ObjectId = require('mongodb').ObjectId;
 var SubProjectService = require('../service/subProjectService');
 const projectDAO = require('../model/projectDAO');
 const LocationService = require('../service/locationService');
+const newErrorResponse = require('../model/newError');
 
 require("dotenv").config();
 
