@@ -63,19 +63,18 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                }
               }
               
-              
-
               const buffer = await docxTemplate.createReport({
               template,
               failFast:false,
               data: {
                   section:{
+                    reportType : reportType,
                     buildingName: subprojectName,
                       parentType: locationType,
                       parentName: location.data.item.name,
                       name: sectionData.data.item.name,
-                      exteriorelements: sectionData.data.item.exteriorelements,
-                      waterproofing:sectionData.data.item.waterproofingelements,
+                      exteriorelements: sectionData.data.item.exteriorelements.toString().replaceAll(',',', '),
+                      waterproofing:sectionData.data.item.waterproofingelements.toString().replaceAll(',',', '),
                       visualreview:sectionData.data.item.visualreview,
                       signsofleak : sectionData.data.item.visualsignsofleak?'Yes':'No',
                       furtherinvasive:sectionData.data.item.furtherinvasivereviewrequired?'Yes':'No',

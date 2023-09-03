@@ -13,7 +13,7 @@ const docxTemplate = require('docx-templates');
 class ReportGeneration{
     async generateReportDoc(project,companyName,sectionImageProperties,reportType){
         try{
-            console.time("generateReportDocs");
+         //   console.time("generateReportDocs");
             const promises = [];
             const reportDocList = ['projectheader.docx']; 
             project.data.item.projectHeader = this.getProjectHeader(reportType);
@@ -26,16 +26,18 @@ class ReportGeneration{
                 template = fs.readFileSync('DeckProjectHeader.docx');
             }
             
-
+            var createdAtString = project.data.item.createdat;
+            var date = new Date(createdAtString);
             const buffer = await docxTemplate.createReport({
             template,
             data: {
                 project:{
+                    reportType: reportType,
                     name: project.data.item.name,
                     address: project.data.item.address,
                     description:project.data.item.description,
                     createdBy:project.data.item.createdby,
-                    createdAt : project.data.item.createdat,
+                    createdAt : date.toLocaleString(),
                     
                 }               
             },
@@ -69,7 +71,7 @@ class ReportGeneration{
             // for (let key in locsHtmls) {
             //     projectHtml.push( locsHtmls[key]);
             // }
-            console.timeEnd("generateReportDoc");
+            //console.timeEnd("generateReportDoc");
             return reportDocList;
             // var fileList=[];
             // reportDocList.forEach(reportChunk => {
