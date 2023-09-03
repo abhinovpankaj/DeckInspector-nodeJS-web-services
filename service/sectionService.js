@@ -156,13 +156,14 @@ const editSetion = async (sectionId, section) => {
 const addSectionMetadataInParent = async (sectionId, section) => {
   try {
     sectionDataInParent = {
-      name: section.name,
-      conditionalassessment: section.conditionalassessment,
-      visualreview: section.visualreview,
-      coverUrl: section.coverUrl,
-      furtherinvasivereviewrequired: section.furtherinvasivereviewrequired,
-      isInvasive: section.isInvasive,
-      visualsignsofleak: section.visualsignsofleak,
+      "name": section.name,
+      "conditionalassessment": section.conditionalassessment,
+      "visualreview": section.visualreview,
+      "coverUrl": section.coverUrl,
+      "furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
+      "isInvasive": section.isInvasive,
+      "visualsignsofleak": section.visualsignsofleak,
+      "isuploading":false
     };
 
     await LocationDAO.addLocationChild(

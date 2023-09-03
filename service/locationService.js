@@ -125,12 +125,11 @@ const editLocation = async (locationId, location) => {
 const addLocationMetadataInParent = async (locationId, location) => {
   try {
     locationDataInParent = {
-      name: location.name,
-      type: location.type,
-      url: location.url,
-      type: location.type,
-      description: location.description,
-      isInvasive: location.isInvasive ? location.isInvasive : false,
+      "name": location.name,
+      "type": location.type,
+      "url": location.url,
+      "description": location.description,
+      "isInvasive": location.isInvasive ? location.isInvasive : false,
     };
 
     if (location.parenttype == "subproject") {
