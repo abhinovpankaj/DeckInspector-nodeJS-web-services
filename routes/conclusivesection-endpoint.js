@@ -108,9 +108,13 @@ router.route('/:id')
       if(newData.parentid){
         newData.parentid = new ObjectId(newData.parentid);
       }
+
+      if(newData.propowneragreed){
+        newData.propowneragreed = newData.propowneragreed.toLowerCase()==='true' ;
+      }
   
       var result = await ConclusiveSectionService.editConclusiveSection(conclusiveSectionId,newData);
-  
+      
       if (result.reason) {
         return res.status(result.code).json(result);
       }

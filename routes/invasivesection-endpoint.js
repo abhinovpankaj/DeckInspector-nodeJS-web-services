@@ -43,6 +43,10 @@ router.route("/:id").put(async function (req, res) {
       newData.parentid = new ObjectId(newData.parentid);
     }
 
+    if(newData.postinvasiverepairsrequired){
+      newData.postinvasiverepairsrequired = newData.postinvasiverepairsrequired.toLowerCase()==='true' ;
+    }
+
     var result = await InvasiveSectionService.editInvasiveSection(
       invasivesectionId,
       newData
