@@ -80,8 +80,8 @@ const deleteConclusiveSectionPermanently = async (conclusiveSectionId) => {
 
 const getConclusiveSectionByParentId = async (parentId)=>{
     try{
-        const result = await ConclusiveSectionDAO.getConclusiveSectionById(parentId);
-        if (result) {
+        const result = await ConclusiveSectionDAO.getConclusiveSectionByParentId(parentId);
+        if (result.length > 0) {
             return {
                 success: true,
                 sections: result,
