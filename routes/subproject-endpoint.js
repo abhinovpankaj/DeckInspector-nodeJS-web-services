@@ -84,7 +84,7 @@ if (result) {
 }
 }
 catch (exception) {
-errResponse = new newErrorResponse(500, false, err);
+errResponse = new newErrorResponse(500, false, exception);
 res.status(500).json(errResponse);
 }
 });
@@ -106,7 +106,7 @@ router.route('/getSubProjectById')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -131,7 +131,7 @@ router.route('/:id')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -149,7 +149,7 @@ router.route('/:id')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -170,7 +170,7 @@ router.route('/:id/assign')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -191,7 +191,7 @@ router.route('/:id/unassign')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -222,7 +222,7 @@ router.route('/getSubprojectsDataByProjectId')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })

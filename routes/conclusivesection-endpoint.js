@@ -29,7 +29,7 @@ router.route('/getConclusiveSectionById')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   })
@@ -53,7 +53,7 @@ router.route('/getConclusiveSectionsByParentId')
         }
       }
       catch (exception) {
-        errResponse = new newErrorResponse(500, false, err);
+        errResponse = new newErrorResponse(500, false, exception);
         res.status(500).json(errResponse);
       }
     })
@@ -93,7 +93,7 @@ router.route('/add')
         }
       }
       catch (exception) {
-        errResponse = new newErrorResponse(500, false, err);
+        errResponse = new newErrorResponse(500, false, exception);
         res.status(500).json(errResponse);
       }
     })
@@ -120,7 +120,7 @@ router.route('/:id')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   })

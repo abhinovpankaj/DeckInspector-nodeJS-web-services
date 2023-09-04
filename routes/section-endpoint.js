@@ -57,7 +57,7 @@ if (result) {
 }
 }
 catch (exception) {
-errResponse = new newErrorResponse(500, false, err);
+errResponse = new newErrorResponse(500, false, exception);
 res.status(500).json(errResponse);
 }
 });
@@ -78,7 +78,7 @@ router.route('/:id')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -104,7 +104,7 @@ router.route('/:id')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })
@@ -122,7 +122,7 @@ router.route('/:id')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 });
@@ -143,7 +143,7 @@ router.route('/:id/addimage')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 });
@@ -164,7 +164,7 @@ router.route('/:id/removeimage')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 });
@@ -208,7 +208,7 @@ router.route('/getSectionById')
       }
     }
     catch (exception) {
-      const errResponse = new newErrorResponse(500, false, err);
+      const errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
