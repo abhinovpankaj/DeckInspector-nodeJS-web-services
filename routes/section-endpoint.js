@@ -93,6 +93,14 @@ router.route('/:id')
       newData.parentid = new ObjectId(newData.parentid);
     }
 
+    if(newData.furtherinvasivereviewrequired){
+      newData.furtherinvasivereviewrequired = newData.furtherinvasivereviewrequired.toLowerCase()==='true'
+    }
+    if(newData.visualsignsofleak)
+    {
+      newData.visualsignsofleak = newData.visualsignsofleak.toLowerCase()==='true'
+    }
+        
     var result = await SectionService.editSetion(sectionId,newData);
 
     if (result.reason) {

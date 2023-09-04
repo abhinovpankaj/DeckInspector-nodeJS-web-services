@@ -97,7 +97,7 @@ const markLocationNonInvasive = async (locationid) => {
     const sections = await SectionDAO.getSectionByParentId(locationid);
     if (sections) {
       for (const section of sections) {
-        if (section.furtherinvasivereviewrequired.toLowerCase() === "true") {
+        if (section.furtherinvasivereviewrequired) {
           return;
         }
       }
