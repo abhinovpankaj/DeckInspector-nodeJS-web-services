@@ -112,6 +112,11 @@ router.route('/:id')
       if(newData.propowneragreed){
         newData.propowneragreed = newData.propowneragreed.toLowerCase()==='true' ;
       }
+
+      if(newData.invasiverepairsinspectedandcompleted)
+      {
+        newData.invasiverepairsinspectedandcompleted = newData.invasiverepairsinspectedandcompleted.toLowerCase()==='true' ;
+      }
   
       var result = await ConclusiveSectionService.editConclusiveSection(conclusiveSectionId,newData);
       
