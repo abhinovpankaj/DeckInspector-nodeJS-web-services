@@ -126,10 +126,11 @@ const markSubProjectNonInvasive = async (subProjectId) => {
           return;
         }
       }
-      subProject.isInvasive = false;
-      await SubProjectDAO.editSubProject(subProjectId, subProject);
+     
       const subProject = await SubProjectDAO.findSubProjectById(subProjectId);
       if (subProject) {
+        subProject.isInvasive = false;
+        await SubProjectDAO.editSubProject(subProjectId, subProject);
         if (subProject.parenttype == "project") {
           await markProjectNonInvasive(subProject.parentid);
         }
