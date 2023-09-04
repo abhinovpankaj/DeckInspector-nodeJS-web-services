@@ -221,6 +221,27 @@ router.route('/getSectionById')
     }
   });
 
+router.route('/getSectionsByParentId')
+.post(async function(req,res){
+try{
+  var errResponse;
+  const parentId = req.body.parentid;
+  const username = req.body.username;
+  var result = await SectionService.getSectionsByParentId(parentId);
+  if (result.reason) {
+    return res.status(result.code).json(result);
+  }
+  if (result) {
+    //console.debug(result);
+    return res.status(201).json(result);
+  }
+}
+catch (exception) {
+  errResponse = new newErrorResponse(500, false, exception);
+  return res.status(500).json(errResponse);
+}
+})
+
 
 
 module.exports = router ;

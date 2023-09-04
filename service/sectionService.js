@@ -100,7 +100,7 @@ var deleteSectionPermanently = async function (sectionId) {
 
 var getSectionsByParentId = async function (parentId) {
   try {
-    const result = await LocationDAO.getLocationByParentId(parentId);
+    const result = await SectionDAO.getSectionByParentId(parentId);
     if (result) {
       return {
         success: true,
