@@ -76,16 +76,16 @@ try{
 }
 var result = await SubProjectService.addSubProject(newSubProject); 
 if (result.reason) {
-  res.status(result.code).json(result.reason);
+  return res.status(result.code).json(result.reason);
 }
 if (result) {
   //console.debug(result);
-  res.status(201).json(result);
+  return res.status(201).json(result);
 }
 }
 catch (exception) {
 errResponse = new newErrorResponse(500, false, exception);
-res.status(500).json(errResponse);
+return res.status(500).json(errResponse);
 }
 });
 
@@ -98,16 +98,16 @@ router.route('/getSubProjectById')
     const userName = req.body.username;
     var result = await SubProjectService.getSubProjectById(subprojectId);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return  res.status(500).json(errResponse);
   }
 })
 
@@ -123,16 +123,16 @@ router.route('/:id')
     }
     var result = await SubProjectService.editSubProject(subprojectId,newData);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 .delete(async function(req,res){
@@ -140,17 +140,18 @@ router.route('/:id')
     var errResponse;
     const subprojectId = req.params.id;
     var result = await SubProjectService.deleteSubProjectPermanently(subprojectId);
+    console.log(result);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -162,16 +163,16 @@ router.route('/:id/assign')
     const {username} = req.body;
     var result = await SubProjectService.assignSubProjectToUser(subprojectId,username);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -183,16 +184,16 @@ router.route('/:id/unassign')
     const {username} = req.body;
     var result = await SubProjectService.unAssignSubProjectFromUser(subprojectId,username);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -214,16 +215,16 @@ router.route('/getSubprojectsDataByProjectId')
       }
     }
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 module.exports = router ;

@@ -49,16 +49,16 @@ try{
 } 
 var result = await LocationService.addLocation(newLocation);    
 if (result.reason) {
-  res.status(result.code).json(result.reason);
+  return res.status(result.code).json(result.reason);
 }
 if (result) {
   //console.debug(result);
-  res.status(201).json(result);
+  return res.status(201).json(result);
 }
 }
 catch (exception) {
 errResponse = new newErrorResponse(500, false, exception);
-res.status(500).json(errResponse);
+return res.status(500).json(errResponse);
 }
 });
 
@@ -70,16 +70,16 @@ router.route('/:id')
     const locationId = req.params.id;
     var result = await LocationService.getLocationById( locationId);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -94,16 +94,16 @@ router.route('/:id')
     }
     var result = await LocationService.editLocation(locationId,newData);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 .delete(async function(req,res){
@@ -112,16 +112,16 @@ router.route('/:id')
     const locationId = req.params.id;
     var result = await LocationService.deleteLocationPermanently(locationId);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -133,16 +133,16 @@ post(async function(req,res){
     const userName = req.body.username;
     var result = await LocationService.getLocationById( locationId);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -177,16 +177,16 @@ try{
   const username = req.body.username;
   var result = await LocationService.getLocationsByParentId(projectId);
   if (result.reason) {
-    res.status(result.code).json(result.reason);
+    return res.status(result.code).json(result.reason);
   }
   if (result) {
     //console.debug(result);
-    res.status(201).json(result);
+    return res.status(201).json(result);
   }
 }
 catch (exception) {
   errResponse = new newErrorResponse(500, false, exception);
-  res.status(500).json(errResponse);
+  return res.status(500).json(errResponse);
 }
 })
 

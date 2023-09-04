@@ -49,16 +49,16 @@ var newSection = {
 } 
 var result = await SectionService.addSection(newSection);    
 if (result.reason) {
-  res.status(result.code).json(result.reason);
+  return res.status(result.code).json(result.reason);
 }
 if (result) {
   //console.debug(result);
-  res.status(201).json(result);
+  return res.status(201).json(result);
 }
 }
 catch (exception) {
 errResponse = new newErrorResponse(500, false, exception);
-res.status(500).json(errResponse);
+return res.status(500).json(errResponse);
 }
 });
 
@@ -70,16 +70,16 @@ router.route('/:id')
     const sectionId = req.params.id;
     var result = await SectionService.getSectionById( sectionId);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -96,16 +96,16 @@ router.route('/:id')
     var result = await SectionService.editSetion(sectionId,newData);
 
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 .delete(async function(req,res){
@@ -114,16 +114,16 @@ router.route('/:id')
     const sectionId = req.params.id;
     var result = await SectionService.deleteSectionPermanently(sectionId);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return es.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
 
@@ -135,16 +135,16 @@ router.route('/:id/addimage')
     const {url} = req.body;
     var result = await SectionService.addImageInSection(sectionId,url);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
 
@@ -156,16 +156,16 @@ router.route('/:id/removeimage')
     const {url} = req.body
     var result = await SectionService.removeImageFromSection(sectionId,url);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result.reason);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
 
@@ -200,16 +200,16 @@ router.route('/getSectionById')
       const result = await SectionService.getSectionById(sectionId);
 
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result.reason);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       const errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
