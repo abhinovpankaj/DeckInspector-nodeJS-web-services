@@ -52,7 +52,7 @@ router.route('/add')
     }
   }
   catch (exception) {
-    const errResponse = new newErrorResponse(500, false, err);
+    const errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 });
@@ -71,7 +71,7 @@ router.route('/allprojects')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
@@ -91,7 +91,7 @@ router.route('/filterprojects')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
@@ -112,7 +112,7 @@ router.route('/getProjectById')
       }
     }
     catch {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   })
@@ -138,7 +138,7 @@ router.route('/generateexcel')
         }
       });
     } catch (err) {
-      console.error('Error generating Excel:', err);
+      console.error('Error generating Excel:', exception);
       res.status(500).send('Error generating Excel');
     }
   });
@@ -160,7 +160,7 @@ router.route('/generateexcel')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   })
@@ -178,7 +178,7 @@ router.route('/generateexcel')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
@@ -198,7 +198,7 @@ router.route('/:id/assign')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
@@ -240,7 +240,7 @@ router.route('/:id/unassign')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
@@ -304,7 +304,7 @@ router.route('/:id/toggleprojectstatus/:state')
       }
     }
     catch (exception) {
-      errResponse = new newErrorResponse(500, false, err);
+      errResponse = new newErrorResponse(500, false, exception);
       res.status(500).json(errResponse);
     }
   });
@@ -323,7 +323,7 @@ router.route('/getProjectsByUser/:username')
     }
   }
   catch (exception) {
-    errResponse = new newErrorResponse(500, false, err);
+    errResponse = new newErrorResponse(500, false, exception);
     res.status(500).json(errResponse);
   }
 })

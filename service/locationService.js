@@ -124,7 +124,7 @@ const editLocation = async (locationId, location) => {
 
 const addLocationMetadataInParent = async (locationId, location) => {
   try {
-    locationDataInParent = {
+    const locationDataInParent = {
       "name": location.name,
       "type": location.type,
       "url": location.url,
