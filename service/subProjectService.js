@@ -31,7 +31,7 @@ var getSubProjectById = async function (subProjectId) {
         if (result) {
             return {
                 success: true,
-                project: result,
+                subproject: result,
             };
         }
         return {

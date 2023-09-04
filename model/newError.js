@@ -1,5 +1,5 @@
 class ErrorResponse {
-    constructor(code, success,reason) {
+    constructor(code, message,error) {
       this.code = code;
       this.success = message;
       this.reason =error;
