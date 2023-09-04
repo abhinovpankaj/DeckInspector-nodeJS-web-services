@@ -46,32 +46,34 @@ var getSubProjectById = async function (subProjectId) {
 
 var deleteSubProjectPermanently = async function (subProjectId) {
   try {
-    const locationResult = await LocationService.getLocationsByParentId(subProjectId);
-
-    if (locationResult.locations) {
-      for (const location of locationResult.locations) {
-        await LocationService.deleteLocationPermanently(location._id);
-      }
-      console.log(
-        "SubProject Locations deleted successfully for subProject Id  : ",
+    const subProject = await subProjectDAO.findSubProjectById(subProjectId);
+    if (subProject) {
+      const locationResult = await LocationService.getLocationsByParentId(
         subProjectId
       );
+      if (locationResult.locations) {
+        for (const location of locationResult.locations) {
+          await LocationService.deleteLocationPermanently(location._id);
+        }
+        console.log(
+          "SubProject Locations deleted successfully for subProject Id  : ",
+          subProjectId
+        );
+      }
+
+      const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
+
+      await removeSubprojectMetaDataInProject(subProjectId, subProject);
+
+      await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
+
+      if (finalResult.deletedCount === 1) {
+        return {
+          success: true,
+        };
+      }
     }
-    const subProject = await subProjectDAO.findSubProjectById(subProjectId);
 
-    const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
-
-    await removeSubprojectMetaDataInProject(subProjectId,subProject);
-
-    await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
-
-    await remove
-
-    if (finalResult.deletedCount === 1) {
-      return {
-        success: true,
-      };
-    }
     return {
       code: 401,
       success: false,
