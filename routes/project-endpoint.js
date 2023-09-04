@@ -44,7 +44,7 @@ router.route('/add')
     var result = await projectService.addProject(newProject);
     
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -63,7 +63,7 @@ router.route('/allprojects')
       var errResponse;
       var result = await projectService.getAllProjects();
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
@@ -84,7 +84,7 @@ router.route('/filterprojects')
 
       var result = await projectService.getProjectsByNameCreatedOnIsCompletedAndDeleted({ name, isdeleted, iscomplete, createdon });
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         return res.status(201).json(result);
@@ -104,7 +104,7 @@ router.route('/getProjectById')
       const projectId = req.body.projectid;
       var result = await projectService.getProjectById(projectId);
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
@@ -152,7 +152,7 @@ router.route('/generateexcel')
       // Validate user input
       var result = await projectService.editProject(projectId,newData);
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
@@ -170,7 +170,7 @@ router.route('/generateexcel')
       const projectId = req.params.id;
       var result = await projectService.deleteProjectPermanently(projectId);
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
@@ -191,7 +191,7 @@ router.route('/:id/assign')
       const { username } = req.body;
       var result = await projectService.assignProjectToUser(projectId, username); 
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         return res.status(201).json(result);
@@ -233,7 +233,7 @@ router.route('/:id/unassign')
       const { username } = req.body;
       var result = await projectService.unassignUserFromProject(projectId, username);
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         return res.status(201).json(result);
@@ -297,7 +297,7 @@ router.route('/:id/toggleprojectstatus/:state')
       const iscomplete = state == 1 ? true : false;
       var result = await projectService.toggleProjectstatus(projectId, iscomplete);
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         return res.status(201).json(result);
@@ -316,7 +316,7 @@ router.route('/getProjectsByUser/:username')
     const username = req.params.username;
     var result = await projectService.getProjectByAssignedToUserId(username);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       return res.status(201).json(result);

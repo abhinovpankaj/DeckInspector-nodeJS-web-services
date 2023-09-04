@@ -49,7 +49,7 @@ try{
 } 
 var result = await LocationService.addLocation(newLocation);    
 if (result.reason) {
-  return res.status(result.code).json(result.reason);
+  return res.status(result.code).json(result);
 }
 if (result) {
   //console.debug(result);
@@ -70,7 +70,7 @@ router.route('/:id')
     const locationId = req.params.id;
     var result = await LocationService.getLocationById( locationId);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -94,7 +94,7 @@ router.route('/:id')
     }
     var result = await LocationService.editLocation(locationId,newData);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -112,7 +112,7 @@ router.route('/:id')
     const locationId = req.params.id;
     var result = await LocationService.deleteLocationPermanently(locationId);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -133,7 +133,7 @@ post(async function(req,res){
     const userName = req.body.username;
     var result = await LocationService.getLocationById( locationId);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -177,7 +177,7 @@ try{
   const username = req.body.username;
   var result = await LocationService.getLocationsByParentId(projectId);
   if (result.reason) {
-    return res.status(result.code).json(result.reason);
+    return res.status(result.code).json(result);
   }
   if (result) {
     //console.debug(result);

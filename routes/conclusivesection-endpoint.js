@@ -21,7 +21,7 @@ router.route('/getConclusiveSectionById')
       const result = await ConclusiveSectionService.getConclusiveSectionById(conclusiveSectionid);
 
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
@@ -45,7 +45,7 @@ router.route('/getConclusiveSectionsByParentId')
         const result = await ConclusiveSectionService.getConclusiveSectionByParentId(parentSectionId);
   
         if (result.reason) {
-          return res.status(result.code).json(result.reason);
+          return res.status(result.code).json(result);
         }
         if (result) {
           //console.debug(result);
@@ -85,7 +85,7 @@ router.route('/add')
         } 
         var result = await ConclusiveSectionService.addConclusiveSection(newConclusiveSection);    
         if (result.reason) {
-          return res.status(result.code).json(result.reason);
+          return res.status(result.code).json(result);
         }
         if (result) {
           //console.debug(result);
@@ -112,7 +112,7 @@ router.route('/:id')
       var result = await ConclusiveSectionService.editConclusiveSection(conclusiveSectionId,newData);
   
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);

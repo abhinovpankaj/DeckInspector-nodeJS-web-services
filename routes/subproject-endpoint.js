@@ -76,7 +76,7 @@ try{
 }
 var result = await SubProjectService.addSubProject(newSubProject); 
 if (result.reason) {
-  return res.status(result.code).json(result.reason);
+  return res.status(result.code).json(result);
 }
 if (result) {
   //console.debug(result);
@@ -98,7 +98,7 @@ router.route('/getSubProjectById')
     const userName = req.body.username;
     var result = await SubProjectService.getSubProjectById(subprojectId);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -123,7 +123,7 @@ router.route('/:id')
     }
     var result = await SubProjectService.editSubProject(subprojectId,newData);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -142,7 +142,7 @@ router.route('/:id')
     var result = await SubProjectService.deleteSubProjectPermanently(subprojectId);
     console.log(result);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -163,7 +163,7 @@ router.route('/:id/assign')
     const {username} = req.body;
     var result = await SubProjectService.assignSubProjectToUser(subprojectId,username);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -184,7 +184,7 @@ router.route('/:id/unassign')
     const {username} = req.body;
     var result = await SubProjectService.unAssignSubProjectFromUser(subprojectId,username);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -215,7 +215,7 @@ router.route('/getSubprojectsDataByProjectId')
       }
     }
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);

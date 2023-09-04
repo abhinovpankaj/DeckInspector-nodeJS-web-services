@@ -19,7 +19,7 @@ router.route('/getInvasiveSectionById')
 
       const result = await InvasiveSectionService.getInvasiveSectionById(sectionId);
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
@@ -49,7 +49,7 @@ router.route("/:id").put(async function (req, res) {
     );
 
     if (result.reason) {
-      return  res.status(result.code).json(result.reason);
+      return  res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -84,7 +84,7 @@ router.route('/add')
   } 
   var result = await InvasiveSectionService.addInvasiveSection(newInvasiveSection);    
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -108,7 +108,7 @@ router.route('/getInvasiveSectionByParentId')
         const result = await InvasiveSectionService.getInvasiveSectionByParentId(parentSectionId);
   
         if (result.reason) {
-          return res.status(result.code).json(result.reason);
+          return res.status(result.code).json(result);
         }
         if (result) {
           //console.debug(result);

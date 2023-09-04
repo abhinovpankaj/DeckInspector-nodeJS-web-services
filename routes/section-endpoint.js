@@ -49,7 +49,7 @@ var newSection = {
 } 
 var result = await SectionService.addSection(newSection);    
 if (result.reason) {
-  return res.status(result.code).json(result.reason);
+  return res.status(result.code).json(result);
 }
 if (result) {
   //console.debug(result);
@@ -70,7 +70,7 @@ router.route('/:id')
     const sectionId = req.params.id;
     var result = await SectionService.getSectionById( sectionId);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -96,7 +96,7 @@ router.route('/:id')
     var result = await SectionService.editSetion(sectionId,newData);
 
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -114,7 +114,7 @@ router.route('/:id')
     const sectionId = req.params.id;
     var result = await SectionService.deleteSectionPermanently(sectionId);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -135,7 +135,7 @@ router.route('/:id/addimage')
     const {url} = req.body;
     var result = await SectionService.addImageInSection(sectionId,url);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -156,7 +156,7 @@ router.route('/:id/removeimage')
     const {url} = req.body
     var result = await SectionService.removeImageFromSection(sectionId,url);
     if (result.reason) {
-      return res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
@@ -200,7 +200,7 @@ router.route('/getSectionById')
       const result = await SectionService.getSectionById(sectionId);
 
       if (result.reason) {
-        return res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
