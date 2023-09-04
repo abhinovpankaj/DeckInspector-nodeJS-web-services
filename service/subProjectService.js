@@ -164,7 +164,7 @@ const editSubProject = async (subProjectId,subproject) => {
     
 const addSubprojectMetaDataInProject = async (subProjectId,subProject) => {
     try {
-        subProjectDataInParent = {
+       const subProjectDataInParent = {
             "name": subProject.name,
             "type": 'subproject',
             "url": subProject.url,

@@ -193,7 +193,7 @@ const removeImageFromSection = async (sectionId, imageUrl) => {
 
 const addSectionMetadataInParent = async (sectionId, section) => {
   try {
-    sectionDataInParent = {
+    const sectionDataInParent = {
       "name": section.name,
       "conditionalassessment": section.conditionalassessment,
       "visualreview": section.visualreview,
