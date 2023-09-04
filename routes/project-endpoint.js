@@ -44,16 +44,16 @@ router.route('/add')
     var result = await projectService.addProject(newProject);
     
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     const errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
 
@@ -63,16 +63,16 @@ router.route('/allprojects')
       var errResponse;
       var result = await projectService.getAllProjects();
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
@@ -84,15 +84,15 @@ router.route('/filterprojects')
 
       var result = await projectService.getProjectsByNameCreatedOnIsCompletedAndDeleted({ name, isdeleted, iscomplete, createdon });
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
@@ -104,16 +104,16 @@ router.route('/getProjectById')
       const projectId = req.body.projectid;
       var result = await projectService.getProjectById(projectId);
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return  res.status(500).json(errResponse);
     }
   })
 
@@ -139,7 +139,7 @@ router.route('/generateexcel')
       });
     } catch (err) {
       console.error('Error generating Excel:', exception);
-      res.status(500).send('Error generating Excel');
+      return res.status(500).send('Error generating Excel');
     }
   });
 
@@ -152,16 +152,16 @@ router.route('/generateexcel')
       // Validate user input
       var result = await projectService.editProject(projectId,newData);
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   })
   .delete(async function (req, res) {
@@ -170,16 +170,16 @@ router.route('/generateexcel')
       const projectId = req.params.id;
       var result = await projectService.deleteProjectPermanently(projectId);
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
@@ -191,15 +191,15 @@ router.route('/:id/assign')
       const { username } = req.body;
       var result = await projectService.assignProjectToUser(projectId, username); 
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
@@ -233,15 +233,15 @@ router.route('/:id/unassign')
       const { username } = req.body;
       var result = await projectService.unassignUserFromProject(projectId, username);
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
@@ -297,15 +297,15 @@ router.route('/:id/toggleprojectstatus/:state')
       const iscomplete = state == 1 ? true : false;
       var result = await projectService.toggleProjectstatus(projectId, iscomplete);
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   });
 
@@ -316,15 +316,15 @@ router.route('/getProjectsByUser/:username')
     const username = req.params.username;
     var result = await projectService.getProjectByAssignedToUserId(username);
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -336,16 +336,16 @@ router.route('/getProjectsMetaDataByUserName/:username')
     const username = req.params.username;
     var result = await getProjectHierarchyMetadata(username);
     if (result.error) {
-      res.status(result.error.code).json(result.error);
+      return res.status(result.error.code).json(result.error);
     }
     if (result.data) {
-      res.status(201).json(result.data);
+      return res.status(201).json(result.data);
     }
   }catch(error)
   {
     console.log(error);
     errResponse = new ErrorResponse(500, "Internal server error", error);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
 
@@ -357,16 +357,16 @@ router.route('/getProjectMetadata/:id')
     const projectId = req.params.id;
     var result = await getSingleProjectMetadata(projectId);
     if (result.error) {
-      res.status(result.error.code).json(result.error);
+      return res.status(result.error.code).json(result.error);
     }
     if (result.data) {
-      res.status(201).json(result.data);
+      return res.status(201).json(result.data);
     }
   }catch(error)
   {
     console.log(error);
     errResponse = new ErrorResponse(500, "Internal server error", error);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
 
@@ -394,7 +394,7 @@ router.route('/generatereport')
       res.sendFile(absolutePath, {}, (err) => {
         if (err) {
           console.error('Error sending file:', err);
-          res.status(500).send('Error sending file');
+          return res.status(500).send('Error sending file');
         } else {
           console.log('Report sent successfully');
           fs.unlinkSync(absolutePath);
@@ -405,7 +405,7 @@ router.route('/generatereport')
   
 } catch (err) {
   console.error('Error generating Report:', err);
-  res.status(500).send('Error generating Report');
+  return res.status(500).send('Error generating Report');
 }
 });
 
@@ -420,7 +420,7 @@ router.route('/generatereporthtml').post(async function (req, res) {
     res.send(htmlContent);
   } catch (err) {
     console.error('Error generating HTML:', err);
-    res.status(500).send('Error generating HTML');
+    return res.status(500).send('Error generating HTML');
   }
 });
 

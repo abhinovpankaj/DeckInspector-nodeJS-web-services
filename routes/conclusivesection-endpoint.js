@@ -21,16 +21,16 @@ router.route('/getConclusiveSectionById')
       const result = await ConclusiveSectionService.getConclusiveSectionById(conclusiveSectionid);
 
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   })
 
@@ -45,16 +45,16 @@ router.route('/getConclusiveSectionsByParentId')
         const result = await ConclusiveSectionService.getConclusiveSectionByParentId(parentSectionId);
   
         if (result.reason) {
-          res.status(result.code).json(result.reason);
+          return res.status(result.code).json(result);
         }
         if (result) {
           //console.debug(result);
-          res.status(201).json(result);
+          return res.status(201).json(result);
         }
       }
       catch (exception) {
         errResponse = new newErrorResponse(500, false, exception);
-        res.status(500).json(errResponse);
+        return res.status(500).json(errResponse);
       }
     })
 
@@ -85,16 +85,16 @@ router.route('/add')
         } 
         var result = await ConclusiveSectionService.addConclusiveSection(newConclusiveSection);    
         if (result.reason) {
-          res.status(result.code).json(result.reason);
+          return res.status(result.code).json(result);
         }
         if (result) {
           //console.debug(result);
-          res.status(201).json(result);
+          return res.status(201).json(result);
         }
       }
       catch (exception) {
         errResponse = new newErrorResponse(500, false, exception);
-        res.status(500).json(errResponse);
+        return res.status(500).json(errResponse);
       }
     })
 
@@ -112,16 +112,16 @@ router.route('/:id')
       var result = await ConclusiveSectionService.editConclusiveSection(conclusiveSectionId,newData);
   
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   })
 

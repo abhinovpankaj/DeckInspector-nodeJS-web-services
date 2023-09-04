@@ -19,16 +19,16 @@ router.route('/getInvasiveSectionById')
 
       const result = await InvasiveSectionService.getInvasiveSectionById(sectionId);
       if (result.reason) {
-        res.status(result.code).json(result.reason);
+        return res.status(result.code).json(result);
       }
       if (result) {
         //console.debug(result);
-        res.status(201).json(result);
+        return res.status(201).json(result);
       }
     }
     catch (exception) {
       errResponse = new newErrorResponse(500, false, exception);
-      res.status(500).json(errResponse);
+      return res.status(500).json(errResponse);
     }
   })
 
@@ -49,15 +49,15 @@ router.route("/:id").put(async function (req, res) {
     );
 
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return  res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   } catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 });
     
@@ -84,16 +84,16 @@ router.route('/add')
   } 
   var result = await InvasiveSectionService.addInvasiveSection(newInvasiveSection);    
     if (result.reason) {
-      res.status(result.code).json(result.reason);
+      return res.status(result.code).json(result);
     }
     if (result) {
       //console.debug(result);
-      res.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
     errResponse = new newErrorResponse(500, false, exception);
-    res.status(500).json(errResponse);
+    return res.status(500).json(errResponse);
   }
 })
 
@@ -108,16 +108,16 @@ router.route('/getInvasiveSectionByParentId')
         const result = await InvasiveSectionService.getInvasiveSectionByParentId(parentSectionId);
   
         if (result.reason) {
-          res.status(result.code).json(result.reason);
+          return res.status(result.code).json(result);
         }
         if (result) {
           //console.debug(result);
-          res.status(201).json(result);
+          return res.status(201).json(result);
         }
       }
       catch (exception) {
         errResponse = new newErrorResponse(500, false, exception);
-        res.status(500).json(errResponse);
+        return res.status(500).json(errResponse);
       }
     })
 
