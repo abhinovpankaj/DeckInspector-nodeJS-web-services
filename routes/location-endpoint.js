@@ -5,6 +5,10 @@ const locations = require("../model/location");
 const sections = require("../model/sections");
 const ErrorResponse = require('../model/error');
 var ObjectId = require('mongodb').ObjectId;
+const LocationService = require('../service/locationService');
+const newErrorResponse = require('../model/newError');
+
+
 
 require("dotenv").config();
 
@@ -43,18 +47,18 @@ try{
   res.status(500).json(errResponse);
   return;
 } 
-var result = await locations.addLocation(newLocation);    
-if(result.error){
-    res.status(result.error.code).json(result.error);
-  }
-  if(result.data){
-    console.debug(result);
-    res.status(201).json(result.data);
-  }
- 
-}catch (err) {
-  errResponse = new ErrorResponse(500, "Internal server error", err);
-  res.status(500).json(errResponse);
+var result = await LocationService.addLocation(newLocation);    
+if (result.reason) {
+  res.status(result.code).json(result.reason);
+}
+if (result) {
+  //console.debug(result);
+  res.status(201).json(result);
+}
+}
+catch (exception) {
+errResponse = new newErrorResponse(500, false, err);
+res.status(500).json(errResponse);
 }
 });
 
@@ -64,18 +68,18 @@ router.route('/:id')
   try{
     var errResponse;
     const locationId = req.params.id;
-    var result = await locations.getLocationById( locationId);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await LocationService.getLocationById( locationId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-  catch(ex){
-    errResponse = new ErrorResponse(500, "Internal server error", ex);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 })
 
@@ -88,100 +92,38 @@ router.route('/:id')
     if(newData.parentid){
       newData.parentid = new ObjectId(newData.parentid);
     }
-    var result = await locations.editLocation(locationId,newData);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await LocationService.editLocation(locationId,newData);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-
-  catch(err){
-    errResponse = new ErrorResponse(500, "Internal server error", err);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
 })
 .delete(async function(req,res){
   try{
     var errResponse;
     const locationId = req.params.id;
-    var result = await locations.deleteLocationPermanently(locationId);
-    if (result.error) { 
-      res.status(result.error.code).json(result.error); 
+    var result = await LocationService.deleteLocationPermanently(locationId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data) {          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-      
   }
-  catch(err){
-    errResponse = new ErrorResponse(500, "Internal server error", err);
-      res.status(500).json(errResponse);
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
   }
-});
-
-router.route('/:id/addchild')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const locationId = req.params.id;
-    const {id,name} = req.body;//type=location always
-    var result = await locations.addRemoveSections(locationId,true,{id,name,type:"location"});
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
-
-router.route('/:id/removechild')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const locationId = req.params.id;
-    const {id,name,type} = req.body;
-    var result = await locations.addRemoveSections(locationId,false,{id,name,type:"location"});
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
-
-router.route('/:id/toggleVisibility/')
-.post(async function(req,res){
-  try {
-    var errResponse;
-    const locationId = req.params.id;
-    const {type,parentId,parentType,isVisible,name} = req.body;
-    
-    var result = await locations.updateLocationVisibilityStatus(locationId,type,name,parentId,parentType,isVisible);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
-    }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(result.data.code).json(result.data);
-    }
-  } catch (error) {
-    errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-  }
-});
+})
 
 router.route('/getLocationById').
 post(async function(req,res){
@@ -189,61 +131,63 @@ post(async function(req,res){
     var errResponse;
     const locationId = req.body.locationid;
     const userName = req.body.username;
-    var result = await locations.getLocationById( locationId);
-    if(result.error){
-        res.status(result.error.code).json(result.error);
+    var result = await LocationService.getLocationById( locationId);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      //console.debug(result);                                          
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
   }
-  catch(ex){
-    errResponse = new ErrorResponse(500, "Internal server error", ex);
-      res.status(500).json(errResponse);
-  }
-});
-
-router.route('/getLocationSectionsMetaData')
-.post(async function(req,res){
-  try{
-    var errResponse;
-    const locationId = req.body.locationid;
-    const userId = req.body.username;
-    const result = await sections.getSectionMetaDataForLocationId(locationId);
-    if (result.error) {
-      res.status(result.error.code).json(result.error);
-    } else if (result.data) {
-      res.status(201).json(result.data);
-    } else {
-      res.status(404).json({ message: 'Sections not found' }); // Add a response for the case when no data is returned
-    }
-  } catch (error) {
-    console.log(error);
-    errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
     res.status(500).json(errResponse);
   }
-});
+})
+
+// UMESH TODO - -to cofnirm and remove this
+
+// router.route('/getLocationSectionsMetaData')
+// .post(async function(req,res){
+//   try{
+//     var errResponse;
+//     const locationId = req.body.locationid;
+//     const userId = req.body.username;
+//     const result = await sections.getSectionMetaDataForLocationId(locationId);
+//     if (result.reason) {
+//       res.status(result.code).json(result.reason);
+//     }
+//     if (result) {
+//       //console.debug(result);
+//       res.status(201).json(result);
+//     }
+//   }
+//   catch (exception) {
+//     errResponse = new newErrorResponse(500, false, err);
+//     res.status(500).json(errResponse);
+//   }
+// })
 
 router.route('/getLocationsByProjectId')
 .post(async function(req,res){
 try{
-  var errorResponse;
+  var errResponse;
   const projectId = req.body.projectid;
   const username = req.body.username;
-  var result = await locations.getLocationByParentId(projectId);
-  if (result.error) {
-    res.status(result.error.code).json(result.error);
-  } else if (result.data) {
-    res.status(201).json(result.data);
-  } else {
-    res.status(404).json({ message: 'Sections not found' }); // Add a response for the case when no data is returned
+  var result = await LocationService.getLocationsByParentId(projectId);
+  if (result.reason) {
+    res.status(result.code).json(result.reason);
   }
-}catch(error){
-  console.log(error);
-  errorResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
-  res.status(500).json(errorResponse);
+  if (result) {
+    //console.debug(result);
+    res.status(201).json(result);
+  }
 }
-});
+catch (exception) {
+  errResponse = new newErrorResponse(500, false, err);
+  res.status(500).json(errResponse);
+}
+})
 
 module.exports = router ;

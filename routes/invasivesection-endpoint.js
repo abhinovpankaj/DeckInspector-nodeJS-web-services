@@ -5,57 +5,60 @@ const invasiveSections = require("../model/invasiveSections");
 const ErrorResponse = require('../model/error');
 const { InvasiveSections } = require('../database/mongo');
 var ObjectId = require('mongodb').ObjectId;
+const InvasiveSectionService = require("../service/invasiveSectionService");
+const newErrorResponse = require('../model/newError');
 
 require("dotenv").config();
 
 router.route('/getInvasiveSectionById')
 .post(async function(req, res) {
     try {
+      var errResponse;
       const sectionId = req.body.invaisveSectionid; // Use req.body instead of req.params
       const userName = req.body.username; // Use req.body instead of req.params
 
-      const result = await invasiveSections.getInvasiveSectionById(sectionId);
-
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      } else if (result.data) {
-        res.status(201).json(result.data);
-      } else {
-        res.status(404).json({ message: 'Invasive Section not found' }); // Add a response for the case when no data is returned
+      const result = await InvasiveSectionService.getInvasiveSectionById(sectionId);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-    } catch (error) {
-      console.log(error);
-      const errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
+      }
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
-  });
+  })
 
 
-router.route('/:id')
-.put(async function(req,res){
-        try{
-          var errResponse;
-          const invasivesectionId = req.params.id;
-          const newData = req.body;
+router.route("/:id").put(async function (req, res) {
+  try {
+    var errResponse;
+    const invasivesectionId = req.params.id;
+    const newData = req.body;
 
-          if(newData.parentid){
-            newData.parentid = new ObjectId(newData.parentid);
-          }
-      
-          var result = await invasiveSections.editInvasiveSection(invasivesectionId,newData);
-      
-          if(result.error){
-              res.status(result.error.code).json(result.error);
-          }
-          if(result.data){
-            //console.debug(result);                                          
-            res.status(201).json(result.data);
-          }
-        }
-        catch(err){
-          errResponse = new ErrorResponse(500, "Internal server error", err);
-            res.status(500).json(errResponse);
-        }
+    if (newData.parentid) {
+      newData.parentid = new ObjectId(newData.parentid);
+    }
+
+    var result = await InvasiveSectionService.editInvasiveSection(
+      invasivesectionId,
+      newData
+    );
+
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
+    }
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
+    }
+  } catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
+    res.status(500).json(errResponse);
+  }
 });
     
 
@@ -79,43 +82,44 @@ router.route('/add')
       "postinvasiverepairsrequired":postinvasiverepairsrequired.toLowerCase()==='true' ,
       "invasiveimages":invasiveimages,
   } 
-  var result = await invasiveSections.addInvasiveSection(newInvasiveSection);    
-  if(result.error){
-      res.status(result.error.code).json(result.error);
+  var result = await InvasiveSectionService.addInvasiveSection(newInvasiveSection);    
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if(result.data){
-      console.debug(result);
-      res.status(201).json(result.data);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
     }
-   
-  }catch (err) {
-    errResponse = new ErrorResponse(500, "Internal server error", err);
+  }
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
     res.status(500).json(errResponse);
   }
-  });
+})
 
 
 router.route('/getInvasiveSectionByParentId')
 .post(async function(req, res) {
     try {
+        var errResponse;
         const parentSectionId = req.body.parentSectionId; // Use req.body instead of req.params
         const userName = req.body.username; // Use req.body instead of req.params
   
-        const result = await invasiveSections.getInvasiveSectionByParentId(parentSectionId);
+        const result = await InvasiveSectionService.getInvasiveSectionByParentId(parentSectionId);
   
-        if (result.error) {
-          res.status(result.error.code).json(result.error);
-        } else if (result.data) {
-          res.status(201).json(result.data);
-        } else {
-          res.status(404).json({ message: 'Invasive Section not found' }); // Add a response for the case when no data is returned
+        if (result.reason) {
+          res.status(result.code).json(result.reason);
         }
-      } catch (error) {
-        console.log(error);
-        const errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+        if (result) {
+          //console.debug(result);
+          res.status(201).json(result);
+        }
+      }
+      catch (exception) {
+        errResponse = new newErrorResponse(500, false, err);
         res.status(500).json(errResponse);
       }
-});
+    })
 
 module.exports = router ;
     

@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 const projects = require("../model/project");
 const ErrorResponse = require('../model/error');
+const newErrorResponse = require('../model/newError');
 const path = require('path');
 const fs = require('fs'); 
 const {generateProjectReport,getProjectHtml}= require('../service/projectreportgeneration.js');
@@ -42,36 +43,35 @@ router.route('/add')
     // Save the new project to the database
     var result = await projectService.addProject(newProject);
     
-    if (result.success) {
-      res.status(201).json({ success: true, id: result.id });
-    } else {
-      const errResponse = new ErrorResponse(400, result.reason, "");
-      res.status(400).json(errResponse);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-
-  } catch (err) {
-    const errResponse = new ErrorResponse(500, "Internal server error, Exception occurred while adding project", err);
+    if (result) {
+      //console.debug(result);
+      res.status(201).json(result);
+    }
+  }
+  catch (exception) {
+    const errResponse = new newErrorResponse(500, false, err);
     res.status(500).json(errResponse);
   }
 });
 
-  router.route('/allprojects')
+router.route('/allprojects')
   .get(async function (req, res) {
     try {
       var errResponse;
-      var result = await projects.getAllProjects();
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.getAllProjects();
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
+      if (result) {
         //console.debug(result);
-        res.status(201).json(result.data);
+        res.status(201).json(result);
       }
-
     }
     catch (exception) {
-      //res.status(500).send(`Intenal server error.${exception}"`);
-      errResponse = new ErrorResponse(500, "Internal server error", exception);
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });
@@ -82,19 +82,16 @@ router.route('/filterprojects')
       var errResponse;
       const { name, isdeleted, iscomplete, createdon } = req.body;
 
-      var result = await projects.getProjectsByNameCreatedOnIsCompletedAndDeleted({ name, isdeleted, iscomplete, createdon });
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-        
+      var result = await projectService.getProjectsByNameCreatedOnIsCompletedAndDeleted({ name, isdeleted, iscomplete, createdon });
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        //console.debug(result);
-        res.status(result.data.code).json(result.data);
+      if (result) {
+        res.status(201).json(result);
       }
-
     }
     catch (exception) {
-      errResponse = new ErrorResponse(500, "Internal server error", exception);
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });
@@ -105,26 +102,27 @@ router.route('/getProjectById')
     try {
       var errResponse;
       const projectId = req.body.projectid;
-      var result = await projects.getProjectById(projectId);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.getProjectById(projectId);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        console.debug(result);
-        res.status(201).json(result.data);
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
       }
     }
     catch {
-      errResponse = new ErrorResponse(500, "Internal server error", exception);
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   })
 
-
+//UMESH todo: to refactor this
 router.route('/generateexcel')
   .post(async function (req, res) {
     try {
       const projectId = req.body.projectid;
+      //Umesh TODO: to move this into ProjectService class
       const fullexcelPath = await generateExcelForProject(projectId);
 
       // Set headers and status
@@ -152,20 +150,17 @@ router.route('/generateexcel')
       const newData = req.body;
       const projectId = req.params.id;
       // Validate user input
-      var result = await projects.editProject(projectId,newData);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-        return;
+      var result = await projectService.editProject(projectId,newData);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(201).json(result.data);
-        return;
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
       }
     }
-
-    catch (err) {
-      errResponse = new ErrorResponse(500, "Internal server error", err);
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   })
@@ -173,17 +168,17 @@ router.route('/generateexcel')
     try {
       var errResponse;
       const projectId = req.params.id;
-      var result = await projects.deleteProjectPermanently(projectId);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.deleteProjectPermanently(projectId);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        res.status(201).json(result.data);
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
       }
-
     }
-    catch (err) {
-      errResponse = new ErrorResponse(500, "Internal server error", err);
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });
@@ -194,39 +189,41 @@ router.route('/:id/assign')
       var errResponse;
       const projectId = req.params.id;
       const { username } = req.body;
-      var result = await projects.assignProjectToUser(projectId, username);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.assignProjectToUser(projectId, username); 
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(201).json(result.data);
+      if (result) {
+        res.status(201).json(result);
       }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });
-router.route('/:id/toggleOfflineState/:state')
-  .post(async function (req, res) {
-    try {
-      var errResponse;
-      const projectId = req.params.id;
-      const state = req.params.state;
-      const isavailableoffline = state == 1 ? true : false;
-      var result = await projects.updateProjectOfflineAvailabilityStatus(projectId, isavailableoffline);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
-      }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-    }
-  });
+
+//Umesh TODO to rewmove this
+// router.route('/:id/toggleOfflineState/:state')
+//   .post(async function (req, res) {
+//     try {
+//       var errResponse;
+//       const projectId = req.params.id;
+//       const state = req.params.state;
+//       const isavailableoffline = state == 1 ? true : false;
+//       var result = await projects.updateProjectOfflineAvailabilityStatus(projectId, isavailableoffline);
+//       if (result.error) {
+//         res.status(result.error.code).json(result.error);
+//       }
+//       if (result.data) {
+//         //console.debug(result);                                          
+//         res.status(result.data.code).json(result.data);
+//       }
+//     } catch (error) {
+//       errResponse = new ErrorResponse(500, "Internal server error", error);
+//       res.status(500).json(errResponse);
+//     }
+//   });
 
 router.route('/:id/unassign')
   .post(async function (req, res) {
@@ -234,81 +231,62 @@ router.route('/:id/unassign')
       var errResponse;
       const projectId = req.params.id;
       const { username } = req.body;
-      var result = await projects.unassignUserFromProject(projectId, username);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.unassignUserFromProject(projectId, username);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
+      if (result) {
+        res.status(201).json(result);
       }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });
 
-router.route('/:id/addchild')
-  .post(async function (req, res) {
-    try {
-      var errResponse;
-      const projectId = req.params.id;
-      const { id, name, type } = req.body;
-      var result = await projects.addRemoveChildren(projectId, true, { id, name, type });
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
-      }
-    } catch (error) {
-      //res.status(500).send("Internal server error.");
-      errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-    }
-  });
 
-router.route('/:id/removechild')
-  .post(async function (req, res) {
-    try {
-      var errResponse;
-      const projectId = req.params.id;
-      const { id, name, type } = req.body;
-      var result = await projects.addRemoveChildren(projectId, false, { id, name, type });
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
-      }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-    }
-  });
+//TODO : Umesh to remove these API's after confirming with Rohit
+// router.route('/:id/addchild')
+//   .post(async function (req, res) {
+//     try {
+//       var errResponse;
+//       const projectId = req.params.id;
+//       const { id, name, type } = req.body;
+//       var result = await projects.addRemoveChildren(projectId, true, { id, name, type });
+//       if (result.error) {
+//         res.status(result.error.code).json(result.error);
+//       }
+//       if (result.data) {
+//         //console.debug(result);                                          
+//         res.status(result.data.code).json(result.data);
+//       }
+//     } catch (error) {
+//       //res.status(500).send("Internal server error.");
+//       errResponse = new ErrorResponse(500, "Internal server error", error);
+//       res.status(500).json(errResponse);
+//     }
+//   });
 
-router.route('/:id/toggleVisibility/:state')
-  .post(async function (req, res) {
-    try {
-      var errResponse;
-      const projectId = req.params.id;
-      const state = req.params.state;
-      const isVisible = state == 1 ? true : false;
-      var result = await projects.updateProjectVisibilityStatus(projectId, isVisible);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
-      }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
-      res.status(500).json(errResponse);
-    }
-  });
+// router.route('/:id/removechild')
+//   .post(async function (req, res) {
+//     try {
+//       var errResponse;
+//       const projectId = req.params.id;
+//       const { id, name, type } = req.body;
+//       var result = await projects.addRemoveChildren(projectId, false, { id, name, type });
+//       if (result.error) {
+//         res.status(result.error.code).json(result.error);
+//       }
+//       if (result.data) {
+//         //console.debug(result);                                          
+//         res.status(result.data.code).json(result.data);
+//       }
+//     } catch (error) {
+//       errResponse = new ErrorResponse(500, "Internal server error", error);
+//       res.status(500).json(errResponse);
+//     }
+//   });
 
 router.route('/:id/toggleprojectstatus/:state')
   .post(async function (req, res) {
@@ -317,16 +295,16 @@ router.route('/:id/toggleprojectstatus/:state')
       const projectId = req.params.id;
       const state = req.params.state;
       const iscomplete = state == 1 ? true : false;
-      var result = await projects.updateProjectStatus(projectId, iscomplete);
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
+      var result = await projectService.toggleProjectstatus(projectId, iscomplete);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if (result.data) {
-        //console.debug(result);                                          
-        res.status(result.data.code).json(result.data);
+      if (result) {
+        res.status(201).json(result);
       }
-    } catch (error) {
-      errResponse = new ErrorResponse(500, "Internal server error", error);
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
   });
@@ -336,23 +314,21 @@ router.route('/getProjectsByUser/:username')
   try{
     var errResponse;
     const username = req.params.username;
-    var result = await projects.getProjectByAssignedToUserId(username);
-    if (result.error) {
-      res.status(result.error.code).json(result.error);
+    var result = await projectService.getProjectByAssignedToUserId(username);
+    if (result.reason) {
+      res.status(result.code).json(result.reason);
     }
-    if (result.data) {
-      //console.debug(result);
-      res.status(201).json(result.data);
+    if (result) {
+      res.status(201).json(result);
     }
-  }catch(error)
-  {
-    console.log(error);
-    errResponse = new ErrorResponse(500, "Internal server error", error);
+  }
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, err);
     res.status(500).json(errResponse);
   }
 })
 
-
+//Umesh TODO: To refactor this entire thing
 router.route('/getProjectsMetaDataByUserName/:username')
 .get(async function(req,res){
   try{
@@ -373,6 +349,7 @@ router.route('/getProjectsMetaDataByUserName/:username')
   }
 });
 
+//Umesh TODO: To refactor this entire thing
 router.route('/getProjectMetadata/:id')
 .get(async function(req,res){
   try{

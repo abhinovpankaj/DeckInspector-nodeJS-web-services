@@ -5,6 +5,8 @@ const conclusiveSection = require("../model/conclusiveSections");
 const ErrorResponse = require('../model/error');
 const { ConclusiveSections } = require('../database/mongo');
 var ObjectId = require('mongodb').ObjectId;
+const ConclusiveSectionService = require("../service/conclusiveSectionService");
+const newErrorResponse = require('../model/newError');
 
 require("dotenv").config();
 
@@ -12,47 +14,49 @@ require("dotenv").config();
 router.route('/getConclusiveSectionById')
 .post(async function(req, res) {
     try {
+      var errResponse;
       const conclusiveSectionid = req.body.conclusiveSectionid; // Use req.body instead of req.params
       const userName = req.body.username; // Use req.body instead of req.params
 
-      const result = await conclusiveSection.getConclusiveSectionById(conclusiveSectionid);
+      const result = await ConclusiveSectionService.getConclusiveSectionById(conclusiveSectionid);
 
-      if (result.error) {
-        res.status(result.error.code).json(result.error);
-      } else if (result.data) {
-        res.status(201).json(result.data);
-      } else {
-        res.status(404).json({ message: 'Conclusive Section not found' }); // Add a response for the case when no data is returned
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-    } catch (error) {
-      console.log(error);
-      const errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
+      }
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
       res.status(500).json(errResponse);
     }
-  });
+  })
 
 
 router.route('/getConclusiveSectionsByParentId')
 .post(async function(req, res) {
     try {
+        var errResponse;
         const parentSectionId = req.body.parentSectionId; // Use req.body instead of req.params
         const userName = req.body.username; // Use req.body instead of req.params
   
-        const result = await conclusiveSection.getConclusiveSectionByParentId(parentSectionId);
+        const result = await ConclusiveSectionService.getConclusiveSectionByParentId(parentSectionId);
   
-        if (result.error) {
-          res.status(result.error.code).json(result.error);
-        } else if (result.data) {
-          res.status(201).json(result.data);
-        } else {
-          res.status(404).json({ message: 'Conclusive Section not found' }); // Add a response for the case when no data is returned
+        if (result.reason) {
+          res.status(result.code).json(result.reason);
         }
-      } catch (error) {
-        console.log(error);
-        const errResponse = { code: 500, message: 'Internal server error', error }; // Create a custom error response object
+        if (result) {
+          //console.debug(result);
+          res.status(201).json(result);
+        }
+      }
+      catch (exception) {
+        errResponse = new newErrorResponse(500, false, err);
         res.status(500).json(errResponse);
       }
-});
+    })
 
 router.route('/add')
 .post(async function (req,res){
@@ -79,20 +83,20 @@ router.route('/add')
             "conclusiveimages":conclusiveimages,
             "lbcconclusive":lbcconclusive
         } 
-        var result = await conclusiveSection.addConclusiveSection(newConclusiveSection);    
-        if(result.error){
-            res.status(result.error.code).json(result.error);
-          }
-          if(result.data){
-            console.debug(result);
-            res.status(201).json(result.data);
-          }
-         
-        }catch (err) {
-          errResponse = new ErrorResponse(500, "Internal server error", err);
-          res.status(500).json(errResponse);
+        var result = await ConclusiveSectionService.addConclusiveSection(newConclusiveSection);    
+        if (result.reason) {
+          res.status(result.code).json(result.reason);
         }
-});
+        if (result) {
+          //console.debug(result);
+          res.status(201).json(result);
+        }
+      }
+      catch (exception) {
+        errResponse = new newErrorResponse(500, false, err);
+        res.status(500).json(errResponse);
+      }
+    })
 
 router.route('/:id')
 .put(async function(req,res){
@@ -105,20 +109,20 @@ router.route('/:id')
         newData.parentid = new ObjectId(newData.parentid);
       }
   
-      var result = await conclusiveSection.editConclusiveSection(conclusiveSectionId,newData);
+      var result = await ConclusiveSectionService.editConclusiveSection(conclusiveSectionId,newData);
   
-      if(result.error){
-          res.status(result.error.code).json(result.error);
+      if (result.reason) {
+        res.status(result.code).json(result.reason);
       }
-      if(result.data){
-        //console.debug(result);                                          
-        res.status(201).json(result.data);
+      if (result) {
+        //console.debug(result);
+        res.status(201).json(result);
       }
     }
-    catch(err){
-      errResponse = new ErrorResponse(500, "Internal server error", err);
-        res.status(500).json(errResponse);
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, err);
+      res.status(500).json(errResponse);
     }
-});
+  })
 
 module.exports = router;

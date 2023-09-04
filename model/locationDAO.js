@@ -20,7 +20,7 @@ module.exports = {
     addLocationChild: async (locationId, childId, childData) => {
         return await mongo.Locations.updateOne({ _id: new ObjectId(locationId) }, {
             $push: {
-                children: {
+                sections: {
                     "_id": new ObjectId(childId),
                     ...childData
                 }
@@ -28,7 +28,7 @@ module.exports = {
         });
     },
     removeLocationChild : async (locationId, childId) => {
-        return await mongo.Locations.updateOne({ _id: new ObjectId(locationId) }, { $pull: { children: { "_id": new ObjectId(childId) } } });
+        return await mongo.Locations.updateOne({ _id: new ObjectId(locationId) }, { $pull: { sections: { "_id": new ObjectId(childId) } } });
     },
     getLocationByParentId: async (parentId) => {
         return await mongo.Locations.find({ parentid: new ObjectId(parentId) }).toArray();
