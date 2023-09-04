@@ -27,7 +27,7 @@ const addSubProject = async (subproject) => {
 
 var getSubProjectById = async function (subProjectId) {
     try {
-        const result = await subProjectDAO.getSubProjectById(subProjectId); 
+        const result = await subProjectDAO.findSubProjectById(subProjectId); 
         if (result) {
             return {
                 success: true,
@@ -84,7 +84,7 @@ var deleteSubProjectPermanently = async function (subProjectId) {
 
 var getSubProjectByParentId = async function (parentId) {
     try {
-        const result = await subProjectDAO.getSubProjectByParentId(parentId);
+        const result = await subProjectDAO.findSubProjectsByParentId(parentId);
         if (result) {
             return {
                 success: true,
