@@ -56,7 +56,8 @@ var deleteLocationPermanently = async function (locationId) {
           await SectionService.deleteSectionPermanently(section._id);
         }
       }
-
+      
+      const result = await LocationDAO.deleteLocation(locationId);
 
       if (location.parenttype === "subproject") {
         await InvasiveUtil.markSubProjectNonInvasive(location.parentid);
@@ -65,8 +66,6 @@ var deleteLocationPermanently = async function (locationId) {
       }
 
       await removeLocationFromParent(locationId, location);
-
-      const result = await LocationDAO.deleteLocation(locationId);
       
       if (result.deletedCount === 1) {
         return {

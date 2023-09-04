@@ -60,11 +60,12 @@ var deleteSubProjectPermanently = async function (subProjectId) {
           subProjectId
         );
       }
+      const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
       await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
 
       await removeSubprojectMetaDataInProject(subProjectId, subProject);
 
-      const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
+      
 
       if (finalResult.deletedCount === 1) {
         return {
