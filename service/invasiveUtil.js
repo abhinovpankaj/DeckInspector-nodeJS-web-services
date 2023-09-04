@@ -42,7 +42,7 @@ const markLocationInvasive = async (locationId) => {
 // Marks a subproject as invasive if the condition is met
 const markSubProjectInvasive = async (subProjectId) => {
   try {
-    const subProject = await SubProjectDAO.getSubProjectById(subProjectId);
+    const subProject = await SubProjectDAO.findSubProjectById(subProjectId);
     if (subProject) {
       let isInvasiveFlag = subProject.isInvasive;
       if (isInvasiveFlag) return;
@@ -128,7 +128,7 @@ const markSubProjectNonInvasive = async (subProjectId) => {
       }
       subProject.isInvasive = false;
       await SubProjectDAO.editSubProject(subProjectId, subProject);
-      const subProject = await SubProjectDAO.getSubProjectById(subProjectId);
+      const subProject = await SubProjectDAO.findSubProjectById(subProjectId);
       if (subProject) {
         if (subProject.parenttype == "project") {
           await markProjectNonInvasive(subProject.parentid);
