@@ -57,7 +57,7 @@ var deleteSubProjectPermanently = async function (subProjectId) {
         subProjectId
       );
     }
-    const subProject = await subProjectDAO.getSubProjectById(subProjectId);
+    const subProject = await subProjectDAO.findSubProjectById(subProjectId);
 
     const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
 
@@ -144,12 +144,15 @@ const editSubProject = async (subProjectId,subproject) => {
     try {
         const result = await subProjectDAO.editSubProject(subProjectId, subproject);
         if (result.modifiedCount === 1) {
-            const subProjectFromDB = await subProjectDAO.getSubProjectById(subProjectId);
-            await removeSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
-            await addSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
-            return {
-                success: true,
-            };
+            const subProjectFromDB = await subProjectDAO.findSubProjectById(subProjectId);
+            if(subProjectFromDB)
+            {
+                await removeSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
+                await addSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
+                return {
+                    success: true,
+                };
+            }
         }
         return {
             code:401,

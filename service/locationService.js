@@ -159,15 +159,21 @@ const addLocationMetadataInParent = async (locationId, location) => {
 const removeLocationFromParent = async (locationId, location) => {
   try {
     if (location.parenttype == "subproject") {
-      await subProjectDAO.removeSubProjectChild(location.parentid, locationId);
-      console.log(
-        `Removed Location with id ${locationId} in subProject id ${location.parentid} successfully`
-      );
+      const result = await subProjectDAO.removeSubProjectChild(location.parentid, locationId);
+      if(result.modifiedCount === 1)
+      {
+        console.log(
+          `Removed Location with id ${locationId} in subProject id ${location.parentid} successfully`
+        );
+      }
     } else if (location.parenttype == "project") {
-      await ProjectDAO.removeProjectChild(location.parentid, locationId);
-      console.log(
-        `Removed Location with id ${locationId} in Project id ${location.parentid} successfully`
-      );
+      const result = await ProjectDAO.removeProjectChild(location.parentid, locationId);
+      if(result.modifiedCount === 1)
+      {
+        console.log(
+          `Removed Location with id ${locationId} in Project id ${location.parentid} successfully`
+        );
+      }
     }
   } catch (error) {
     return handleError(error);

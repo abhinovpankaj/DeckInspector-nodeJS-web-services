@@ -74,10 +74,11 @@ module.exports = {
     },
 
     removeProjectChild: async (projectId, childId) => {
+        console.log(projectId,childId);
         return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
             $pull: {
                 children: {
-                    "_id": childId
+                    "_id": new ObjectId(childId)
                 }
             }
         });
