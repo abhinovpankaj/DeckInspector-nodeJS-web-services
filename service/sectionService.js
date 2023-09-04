@@ -12,7 +12,7 @@ const addSection = async (section) => {
       await addSectionMetadataInParent(result.insertedId, section);
 
       //if section is invasive ,it will mark entire parent hierarchy as invasive
-      await InvasiveUtil.markSectionInvasive(section.parentid);
+      await InvasiveUtil.markSectionInvasive(result.insertedId);
       return {
         success: true,
         id: result.insertedId,
@@ -199,7 +199,7 @@ const addSectionMetadataInParent = async (sectionId, section) => {
       "visualreview": section.visualreview,
       "coverUrl": section.coverUrl,
       "furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
-      "isInvasive": section.isInvasive,
+      "isInvasive": section.furtherinvasivereviewrequired,
       "visualsignsofleak": section.visualsignsofleak,
       "isuploading":false
     };
