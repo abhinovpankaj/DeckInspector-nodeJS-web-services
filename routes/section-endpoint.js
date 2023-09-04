@@ -100,7 +100,7 @@ router.route('/:id')
     {
       newData.visualsignsofleak = newData.visualsignsofleak.toLowerCase()==='true'
     }
-        
+
     var result = await SectionService.editSetion(sectionId,newData);
 
     if (result.reason) {
@@ -126,7 +126,7 @@ router.route('/:id')
     }
     if (result) {
       //console.debug(result);
-      return es.status(201).json(result);
+      return res.status(201).json(result);
     }
   }
   catch (exception) {
