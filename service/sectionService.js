@@ -197,11 +197,12 @@ const addSectionMetadataInParent = async (sectionId, section) => {
       "name": section.name,
       "conditionalassessment": section.conditionalassessment,
       "visualreview": section.visualreview,
-      "coverUrl": section.coverUrl,
+      "coverUrl": section.images ? section.images[0] : "",
       "furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
       "isInvasive": section.furtherinvasivereviewrequired,
       "visualsignsofleak": section.visualsignsofleak,
-      "isuploading":false
+      "isuploading":false,
+      "count": section.images.length,
     };
 
     await LocationDAO.addLocationChild(
