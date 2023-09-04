@@ -28,7 +28,7 @@ const getInvasiveSectionById = async (invasiveSectionId) => {
     if (result) {
       return {
         success: true,
-        invasiveSection: result,
+        section: result,
       };
     }
     return {
@@ -92,7 +92,7 @@ const getInvasiveSectionByParentId = async (parentId) => {
     if (result) {
       return {
         success: true,
-        invasiveSections: result,
+        sections: result,
       };
     }
     return {

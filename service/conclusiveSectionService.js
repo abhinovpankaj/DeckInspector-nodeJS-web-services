@@ -26,7 +26,7 @@ const getConclusiveSectionById = async (conclusiveSectionId) => {
         if (result) {
             return {
                 success: true,
-                conclusiveSection: result,
+                section: result,
             };
         }
         return {
@@ -84,7 +84,7 @@ const getConclusiveSectionByParentId = async (parentId)=>{
         if (result) {
             return {
                 success: true,
-                conclusiveSections: result,
+                sections: result,
             };
         }
         return {
