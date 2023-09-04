@@ -52,8 +52,8 @@ var deleteSectionPermanently = async function (sectionId) {
     //Delete Invasive Sections
     const invasiveSectionResult =
       await InvasiveSectionService.getInvasiveSectionByParentId(sectionId);
-    if (invasiveSectionResult.invasiveSections) {
-      for (let invasiveSection of invasiveSectionResult.invasiveSections) {
+    if (invasiveSectionResult.sections) {
+      for (let invasiveSection of invasiveSectionResult.sections) {
         await InvasiveSectionService.deleteInvasiveSectionPermanently(
           invasiveSection._id
         );
@@ -65,8 +65,8 @@ var deleteSectionPermanently = async function (sectionId) {
       await ConclusiveSectionService.deleteConclusiveSectionPermanently(
         sectionId
       );
-    if (conclusiveSectionResult.conclusiveSections) {
-      for (let conclusiveSection of conclusiveSectionResult.conclusiveSections) {
+    if (conclusiveSectionResult.sections) {
+      for (let conclusiveSection of conclusiveSectionResult.sections) {
         await ConclusiveSectionService.deleteConclusiveSectionPermanently(
           conclusiveSection._id
         );
