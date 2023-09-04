@@ -60,12 +60,11 @@ var deleteSubProjectPermanently = async function (subProjectId) {
           subProjectId
         );
       }
-
-      const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
+      await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
 
       await removeSubprojectMetaDataInProject(subProjectId, subProject);
 
-      await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
+      const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
 
       if (finalResult.deletedCount === 1) {
         return {
@@ -174,7 +173,7 @@ const addSubprojectMetaDataInProject = async (subProjectId,subProject) => {
             "type": 'subproject',
             "url": subProject.url,
             "description": subProject.description,
-            "isInvasive": false,
+            "isInvasive": subProject.isInvasive,
         }
         await ProjectDAO.addProjectChild(subProject.parentid, subProjectId,subProjectDataInParent);
         console.log(`Added subproject with id ${subProjectId} in project id ${subProject.parentid} successfully`);
