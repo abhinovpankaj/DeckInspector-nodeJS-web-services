@@ -74,13 +74,13 @@ var deleteSectionPermanently = async function (sectionId) {
     }
 
     const section = await SectionDAO.getSectionById(sectionId);
+    //Mark parent as non-invasive if its all child are non invasive
+    InvasiveUtil.markLocationNonInvasive(section.parentid);
+
     //Update Parent for the section
     await removeSectionMetadataFromParent(sectionId, section);
 
     const result = await SectionDAO.deleteSection(sectionId);
-
-    //Mark parent as non-invasive if its all child are non invasive
-    InvasiveUtil.markLocationNonInvasive(section.parentid);
 
     if (result.deletedCount === 1) {
       return {

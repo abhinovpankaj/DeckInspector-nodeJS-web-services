@@ -4,7 +4,7 @@ const LocationDAO = require("../model/locationDAO");
 const subProjectDAO = require("../model/subProjectDAO");
 const SectionService = require("../service/sectionService");
 const InvasiveUtil = require("../service/invasiveUtil");
-
+const UpdateParentaHelper = require("../service/updateParentHelper");
 const addLocation = async (location) => {
   try {
     const result = await LocationDAO.addLocation(location);
@@ -57,8 +57,6 @@ var deleteLocationPermanently = async function (locationId) {
         }
       }
 
-      const result = await LocationDAO.deleteLocation(locationId);
-      await removeLocationFromParent(locationId, location);
 
       if (location.parenttype === "subproject") {
         await InvasiveUtil.markSubProjectNonInvasive(location.parentid);
@@ -66,6 +64,10 @@ var deleteLocationPermanently = async function (locationId) {
         await InvasiveUtil.markProjectNonInvasive(location.parentid);
       }
 
+      await removeLocationFromParent(locationId, location);
+
+      const result = await LocationDAO.deleteLocation(locationId);
+      
       if (result.deletedCount === 1) {
         return {
           success: true,
