@@ -89,7 +89,7 @@ const getInvasiveSectionByParentId = async (parentId) => {
     const result = await InvasiveSectionDAO.getInvasiveSectionByParentId(
       parentId
     );
-    if (result) {
+    if (result.length > 0) {
       return {
         success: true,
         sections: result,
