@@ -4,12 +4,13 @@ const LocationDAO = require("../model/locationDAO");
 const subProjectDAO = require("../model/subProjectDAO");
 const SectionService = require("../service/sectionService");
 const InvasiveUtil = require("../service/invasiveUtil");
-const UpdateParentaHelper = require("../service/updateParentHelper");
+const updateParentHelper = require("../service/updateParentHelper");
+
 const addLocation = async (location) => {
   try {
     const result = await LocationDAO.addLocation(location);
     if (result.insertedId) {
-      await addLocationMetadataInParent(result.insertedId, location);
+      await updateParentHelper.addLocationMetadataInParent(result.insertedId, location);
       return {
         success: true,
         id: result.insertedId,
@@ -56,7 +57,7 @@ var deleteLocationPermanently = async function (locationId) {
           await SectionService.deleteSectionPermanently(section._id);
         }
       }
-      
+
       const result = await LocationDAO.deleteLocation(locationId);
 
       if (location.parenttype === "subproject") {
@@ -65,7 +66,7 @@ var deleteLocationPermanently = async function (locationId) {
         await InvasiveUtil.markProjectNonInvasive(location.parentid);
       }
 
-      await removeLocationFromParent(locationId, location);
+      await updateParentHelper.removeLocationFromParent(locationId, location);
       
       if (result.deletedCount === 1) {
         return {
@@ -107,8 +108,8 @@ const editLocation = async (locationId, location) => {
     const result = await LocationDAO.editLocation(locationId, location);
     if (result.modifiedCount === 1) {
       const locationFromDB = await LocationDAO.getLocationById(locationId);
-      await removeLocationFromParent(locationId, locationFromDB);
-      await addLocationMetadataInParent(locationId, locationFromDB);
+      await updateParentHelper.removeLocationFromParent(locationId, locationFromDB);
+      await updateParentHelper.addLocationMetadataInParent(locationId, locationFromDB);
       return {
         success: true,
       };
@@ -118,64 +119,6 @@ const editLocation = async (locationId, location) => {
       success: false,
       reason: "No location found with the given ID",
     };
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
-const addLocationMetadataInParent = async (locationId, location) => {
-  try {
-    const locationDataInParent = {
-      "name": location.name,
-      "type": location.type,
-      "url": location.url,
-      "description": location.description,
-      "isInvasive": location.isInvasive ? location.isInvasive : false,
-    };
-
-    if (location.parenttype == "subproject") {
-      await subProjectDAO.addSubProjectChild(
-        location.parentid,
-        locationId,
-        locationDataInParent
-      );
-      console.log(
-        `Added Location with id ${locationId} in subProject id ${location.parentid} successfully`
-      );
-    } else if (location.parenttype == "project") {
-      await ProjectDAO.addProjectChild(
-        location.parentid,
-        locationId,
-        locationDataInParent
-      );
-      console.log(
-        `Added Location with id ${locationId} in Project id ${location.parentid} successfully`
-      );
-    }
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
-const removeLocationFromParent = async (locationId, location) => {
-  try {
-    if (location.parenttype == "subproject") {
-      const result = await subProjectDAO.removeSubProjectChild(location.parentid, locationId);
-      if(result.modifiedCount === 1)
-      {
-        console.log(
-          `Removed Location with id ${locationId} in subProject id ${location.parentid} successfully`
-        );
-      }
-    } else if (location.parenttype == "project") {
-      const result = await ProjectDAO.removeProjectChild(location.parentid, locationId);
-      if(result.modifiedCount === 1)
-      {
-        console.log(
-          `Removed Location with id ${locationId} in Project id ${location.parentid} successfully`
-        );
-      }
-    }
   } catch (error) {
     return handleError(error);
   }
