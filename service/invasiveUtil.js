@@ -10,7 +10,14 @@ const markSectionInvasive = async (sectionId) => {
     const section = await SectionDAO.getSectionById(sectionId);
     if (section) {
       if (section.furtherinvasivereviewrequired) {
-        await markLocationInvasive(section.parentid);
+
+        if(section.parenttype == "project")
+        {
+          await markProjectInvasive(section.parentid);
+        }
+        else{
+          await markLocationInvasive(section.parentid);
+        }
       }
     }
   } catch (err) {
@@ -163,29 +170,41 @@ const markSubProjectNonInvasive = async (subProjectId) => {
 
 const markProjectNonInvasive = async (projectId) => {
   try {
-    const locations = await LocationDAO.getLocationByParentId(projectId);
-    if (locations) {
-      for (const location of locations) {
-        if (location.isInvasive) {
-          return;
-        }
-      }
-    }
-
-    const subProjects = await SubProjectDAO.findSubProjectsByParentId(
-      projectId
-    );
-
-    if (subProjects) {
-      for (const subProject of subProjects) {
-        if (subProject.isInvasive) {
-          return;
-        }
-      }
-    }
-
     const project = await ProjectDAO.getProjectById(projectId);
+
     if (project) {
+      if (project.projecttype == "singlelevel") {
+        const sections = await SectionDAO.getSectionByParentId(projectId);
+        if (sections) {
+          for (const section of sections) {
+            if (section.furtherinvasivereviewrequired) {
+              return;
+            }
+          }
+        }
+      } else {
+        const locations = await LocationDAO.getLocationByParentId(projectId);
+        if (locations) {
+          for (const location of locations) {
+            if (location.isInvasive) {
+              return;
+            }
+          }
+        }
+
+        const subProjects = await SubProjectDAO.findSubProjectsByParentId(
+          projectId
+        );
+
+        if (subProjects) {
+          for (const subProject of subProjects) {
+            if (subProject.isInvasive) {
+              return;
+            }
+          }
+        }
+      }
+
       project.isInvasive = false;
       await ProjectDAO.editProject(projectId, project);
     }

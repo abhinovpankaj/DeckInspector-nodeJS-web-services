@@ -3,6 +3,7 @@ const ProjectDAO = require("../model/projectDAO");
 const LocationDAO = require("../model/locationDAO");
 const SubprojectService = require("../service/subProjectService");
 const LocationService = require("../service/locationService");
+const SectionService = require("../service/sectionService");
 /**
  *
  * @param {*} project
@@ -55,6 +56,14 @@ var getProjectById = async function (projectId) {
 //UMESH TODO -- ADD transaction in this
 var deleteProjectPermanently = async function (projectId) {
   try {
+    
+    //For single level Projects
+    const sectionsResult = SectionService.getSectionsByParentId(projectId);
+    if (sectionsResult.sections) {
+      for (const section of sectionsResult.sections) {
+        await SectionService.deleteSectionPermanently(section._id);
+      }
+    }
     //Delete projectLocations
     const locationResult = await LocationService.getLocationsByParentId(
       projectId

@@ -3,12 +3,13 @@ const ProjectDAO = require('../model/projectDAO');
 const subProjectDAO = require('../model/subProjectDAO'); 
 const LocationService = require('../service/locationService');
 const InvasiveUtil = require('../service/invasiveUtil');
+const updateParentHelper = require('../service/updateParentHelper');
 
 const addSubProject = async (subproject) => {
     try {
         const result = await subProjectDAO.insertSubProject(subproject);
         if (result.insertedId) {
-            await addSubprojectMetaDataInProject(result.insertedId,subproject);
+            await updateParentHelper.addSubprojectMetaDataInProject(result.insertedId,subproject);
             return {
                 success: true,
                 id: result.insertedId,
@@ -63,7 +64,7 @@ var deleteSubProjectPermanently = async function (subProjectId) {
       const finalResult = await subProjectDAO.deleteSubProject(subProjectId);
       await InvasiveUtil.markProjectNonInvasive(subProject.parentid);
 
-      await removeSubprojectMetaDataInProject(subProjectId, subProject);
+      await updateParentHelper.removeSubprojectMetaDataInProject(subProjectId, subProject);
 
       
 
@@ -149,8 +150,8 @@ const editSubProject = async (subProjectId,subproject) => {
             const subProjectFromDB = await subProjectDAO.findSubProjectById(subProjectId);
             if(subProjectFromDB)
             {
-                await removeSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
-                await addSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
+                await updateParentHelper.removeSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
+                await updateParentHelper.addSubprojectMetaDataInProject(subProjectId,subProjectFromDB);
                 return {
                     success: true,
                 };
@@ -165,36 +166,6 @@ const editSubProject = async (subProjectId,subproject) => {
         return handleError(error);
     }
 };
-
-    
-const addSubprojectMetaDataInProject = async (subProjectId,subProject) => {
-    try {
-       const subProjectDataInParent = {
-            "name": subProject.name,
-            "type": 'subproject',
-            "url": subProject.url,
-            "description": subProject.description,
-            "isInvasive": subProject.isInvasive,
-        }
-        await ProjectDAO.addProjectChild(subProject.parentid, subProjectId,subProjectDataInParent);
-        console.log(`Added subproject with id ${subProjectId} in project id ${subProject.parentid} successfully`);
-    }
-    catch (error) {
-        return handleError(error);
-    }
-};
-        
-const removeSubprojectMetaDataInProject = async (subProjectId,subProject) => {
-    try {
-        await ProjectDAO.removeProjectChild(subProject.parentid,subProjectId);
-        console.log(`Removed subproject with id ${subProjectId} in project successfully`);
-    }
-    catch (error) {
-        return handleError(error);
-    }
-};
-
-    
 
 const handleError = (error) => {
     console.error('An error occurred:', error);
