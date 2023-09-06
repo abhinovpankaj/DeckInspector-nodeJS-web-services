@@ -162,6 +162,8 @@ router.route('/update')
   try {
       // Get user input
       const user = req.body; 
+      if("password" in user)
+        user.password = await bcrypt.hash(user.password, 10);
       users.updateUser(user,function(err,result){
         if(err){
           res.status(err.status).send(err.message);
