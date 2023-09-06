@@ -18,6 +18,7 @@ var Connect = async function () {
         module.exports.Locations = client.db(dbName).collection('LocalLocation');
         module.exports.Sections = client.db(dbName).collection('LocalVisualSection');
         module.exports.Users = client.db(dbName).collection('users');
+        module.exports.ProjectDocuments = client.db(dbName).collection('ProjectDocuments');
         module.exports.InvasiveSections = client.db(dbName).collection('LocalInvasiveSection');
         module.exports.ConclusiveSections = client.db(dbName).collection('LocalConclusiveSection');
         // //module.exports.ClientInfo = db.collection('clientInfo');       
