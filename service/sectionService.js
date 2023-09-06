@@ -4,12 +4,14 @@ const SectionDAO = require("../model/sectionDAO");
 const InvasiveSectionService = require("../service/invasiveSectionService");
 const ConclusiveSectionService = require("../service/conclusiveSectionService");
 const InvasiveUtil = require("../service/invasiveUtil");
+const ProjectDAO = require("../model/projectDAO");
+const updateParentHelper = require("../service/updateParentHelper");
 
 const addSection = async (section) => {
   try {
     const result = await SectionDAO.addSection(section);
     if (result.insertedId) {
-      await addSectionMetadataInParent(result.insertedId, section);
+      await updateParentHelper.addSectionMetadataInParent(result.insertedId, section);
 
       //if section is invasive ,it will mark entire parent hierarchy as invasive
       await InvasiveUtil.markSectionInvasive(result.insertedId);
@@ -75,10 +77,19 @@ var deleteSectionPermanently = async function (sectionId) {
 
     const section = await SectionDAO.getSectionById(sectionId);
     const result = await SectionDAO.deleteSection(sectionId);
+
+
     //Mark parent as non-invasive if its all child are non invasive
-    InvasiveUtil.markLocationNonInvasive(section.parentid);
+
+    if(section.parenttype == "project")
+    {
+      await InvasiveUtil.markProjectNonInvasive(section.parentid);
+    }
+    else{
+      await InvasiveUtil.markLocationNonInvasive(section.parentid);
+    }
     //Update Parent for the section
-    await removeSectionMetadataFromParent(sectionId, section);
+    await updateParentHelper.removeSectionMetadataFromParent(sectionId, section);
 
   
 
@@ -122,15 +133,24 @@ const editSetion = async (sectionId, section) => {
     const result = await SectionDAO.editSection(sectionId, section);
     if (result.modifiedCount === 1) {
       const sectionFromDB = await SectionDAO.getSectionById(sectionId);
-      await removeSectionMetadataFromParent(sectionId, sectionFromDB);
-      await addSectionMetadataInParent(sectionId, sectionFromDB);
+      await updateParentHelper.removeSectionMetadataFromParent(
+        sectionId,
+        sectionFromDB
+      );
+      await updateParentHelper.addSectionMetadataInParent(
+        sectionId,
+        sectionFromDB
+      );
       //if section is invasive ,it will mark entire parent hierarchy as invasive
-      if (
-        sectionFromDB.furtherinvasivereviewrequired
-      ) {
+      if (sectionFromDB.furtherinvasivereviewrequired) {
         await InvasiveUtil.markSectionInvasive(sectionId);
       } else {
-        await InvasiveUtil.markLocationNonInvasive(section.parentid);
+        if (sectionFromDB.parenttype == "project") {
+          await InvasiveUtil.markProjectNonInvasive(section.parentid);
+        }
+        else {
+          await InvasiveUtil.markLocationNonInvasive(section.parentid);
+        }
       }
       return {
         success: true,
@@ -178,52 +198,6 @@ const removeImageFromSection = async (sectionId, imageUrl) => {
       success: false,
       reason: "No Section found with the given ID",
     };
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
-
-/**
- *
- * @param
- * @param {*} section
- * @returns
- */
-
-const addSectionMetadataInParent = async (sectionId, section) => {
-  try {
-    const sectionDataInParent = {
-      "name": section.name,
-      "conditionalassessment": section.conditionalassessment,
-      "visualreview": section.visualreview,
-      "coverUrl": section.images ? section.images[0] : "",
-      "furtherinvasivereviewrequired": section.furtherinvasivereviewrequired,
-      "isInvasive": section.furtherinvasivereviewrequired,
-      "visualsignsofleak": section.visualsignsofleak,
-      "isuploading":false,
-      "count": section.images.length,
-    };
-
-    await LocationDAO.addLocationChild(
-      section.parentid,
-      sectionId,
-      sectionDataInParent
-    );
-    console.log(
-      `Added section with id ${sectionId} in location id ${section.parentid} successfully`
-    );
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
-const removeSectionMetadataFromParent = async (sectionId, section) => {
-  try {
-    await LocationDAO.removeLocationChild(section.parentid, sectionId);
-    console.log(
-      `Removed section with id ${sectionId} from location id ${section.parentid} successfully`
-    );
   } catch (error) {
     return handleError(error);
   }

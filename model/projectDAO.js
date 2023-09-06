@@ -82,5 +82,26 @@ module.exports = {
                 }
             }
         });
-    }
+    },
+
+    addChildInSingleLevelProject: async (projectId, childId,childData) => {
+        return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
+            $push: {
+                sections: {
+                    "_id": new ObjectId(childId),
+                    ...childData
+                }
+            }
+        });
+    },
+
+   removeChildFromSingleLevelProject: async (projectId, childId) => {
+        return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
+            $pull: {
+                sections: {
+                    "_id": new ObjectId(childId)
+                }
+            }
+        });
+   }    
 };
