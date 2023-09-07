@@ -11,12 +11,11 @@ const cors = require('cors');
 //var router   = require('routes');
 var mongo = require('./database/mongo');
 
-
+app.use(cors());
 
 require('./routes')(app);
 
 app.use(bodyParser.json());
-app.use(cors());
 //app.use('/api', router);
 
 // ERROR Handler 400
