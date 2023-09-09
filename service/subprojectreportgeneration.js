@@ -33,14 +33,17 @@ const generateReportForSubProject = async function generateReportForSubProject(s
     const subProjectData = await subProject.getSubProjectById(subProjectId);
     const promises = [];
     const locsHtmls = [];
-    const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
-    for (let key in orderdLocationsInSubProject) {
-        const promise = generateReportForLocation(orderdLocationsInSubProject[key]._id,sectionImageProperties,reportType)
-            .then((loc_html) => {
-             locsHtmls[key] = loc_html;
-            });
-        promises.push(promise);
-        
+    if(subProject.data && subProject.data.item && subProject.data.item.children && subProject.data.item.children.length > 0)
+    {
+        const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
+        for (let key in orderdLocationsInSubProject) {
+            const promise = generateReportForLocation(orderdLocationsInSubProject[key]._id,sectionImageProperties,reportType)
+                .then((loc_html) => {
+                locsHtmls[key] = loc_html;
+                });
+            promises.push(promise);
+            
+        }
     }
     await Promise.all(promises);
     let subProjectHtml = '';
