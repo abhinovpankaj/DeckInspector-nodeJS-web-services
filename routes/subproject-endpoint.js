@@ -205,15 +205,15 @@ router.route('/getSubprojectsDataByProjectId')
     const projectId = req.body.projectid;
     var result = await SubProjectService.getSubProjectByParentId(projectId);
     
-    const subprojectsData = result.subprojects;
-    for(const subProject of subprojectsData){
-      const subProjectId = subProject._id;
-      const locationresult = await LocationService.getLocationsByParentId(subProjectId);
-      if(locationresult.locations)
-      {
-        subProject.children = locationresult.locations;
-      }
-    }
+    // const subprojectsData = result.subprojects;
+    // for(const subProject of subprojectsData){
+    //   const subProjectId = subProject._id;
+    //   const locationresult = await LocationService.getLocationsByParentId(subProjectId);
+    //   if(locationresult.locations)
+    //   {
+    //     subProject.children = locationresult.locations;
+    //   }
+    // }
     if (result.reason) {
       return res.status(result.code).json(result);
     }
