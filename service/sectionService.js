@@ -6,6 +6,8 @@ const ConclusiveSectionService = require("../service/conclusiveSectionService");
 const InvasiveUtil = require("../service/invasiveUtil");
 const ProjectDAO = require("../model/projectDAO");
 const updateParentHelper = require("../service/updateParentHelper");
+const RatingMapping  = require("../model/ratingMapping.js");
+
 
 const addSection = async (section) => {
   try {
@@ -33,6 +35,7 @@ const addSection = async (section) => {
 var getSectionById = async function (sectionId) {
   try {
     const result = await SectionDAO.getSectionById(sectionId);
+    transformData(result);
     if (result) {
       return {
         success: true,
@@ -112,6 +115,9 @@ var deleteSectionPermanently = async function (sectionId) {
 var getSectionsByParentId = async function (parentId) {
   try {
     const result = await SectionDAO.getSectionByParentId(parentId);
+    for (let section of result) {
+      transformData(section);
+    }
     if (result) {
       return {
         success: true,
@@ -210,6 +216,26 @@ const handleError = (error) => {
     success: false,
     reason: `An error occurred: ${error.message}`,
   };
+};
+
+
+var transformData = function(section) {
+  section.visualreview = capitalizeWords(section.visualreview);
+  section.visualsignsofleak = capitalizeWords(section.visualsignsofleak.toString());
+  section.furtherinvasivereviewrequired = capitalizeWords(section.furtherinvasivereviewrequired.toString());
+  section.conditionalassessment = capitalizeWords(section.conditionalassessment.toString());
+  section.eee = RatingMapping[section.eee];
+  section.lbc = RatingMapping[section.lbc];
+  section.awe = RatingMapping[section.awe];
+
+};
+
+var capitalizeWords = function (word) {
+  if (word) {
+    var finalWord = word[0].toUpperCase() + word.slice(1);
+    return finalWord;
+  }
+  return word;
 };
 
 module.exports = {
