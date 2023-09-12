@@ -45,6 +45,10 @@ async function addCommonLocations(projectId,worksheet,headerMapping)
 {
     locations = await Location.getLocationByParentId(projectId);
 
+    if(!(locations && locations.data && locations.data.item))
+        return;
+    
+
     for(location of locations.data.item)
     {
         const commonLocationData = {
@@ -94,19 +98,22 @@ async function addDataByLocationType(projectId, worksheet, headerMapping, locati
                     [mapping.locationKey]: location.name
                 };
 
-                for (const section of location.sections) {
-                    const sectionData = await Section.getSectionById(section._id);
-                    const sectionName = { [mapping.sectionNameKey]: sectionData.data.item.name };
-                    const sectionExcelData = generateSectionData(sectionData);
-
-                    const finalData = { ...buildingData, ...sectionExcelData, ...sectionName, ...buildingLocationData };
-                    const rowData = Object.keys(headerMapping).map(key => finalData[key] || '');
-                    const flattenedRowData = rowData.map(item => Array.isArray(item) ? item.join(', ') : item);
-
-                    try {
-                        await worksheet.addRow(flattenedRowData);
-                    } catch (err) {
-                        console.log(err);
+                if(location.sections)
+                {
+                    for (const section of location.sections) {
+                        const sectionData = await Section.getSectionById(section._id);
+                        const sectionName = { [mapping.sectionNameKey]: sectionData.data.item.name };
+                        const sectionExcelData = generateSectionData(sectionData);
+    
+                        const finalData = { ...buildingData, ...sectionExcelData, ...sectionName, ...buildingLocationData };
+                        const rowData = Object.keys(headerMapping).map(key => finalData[key] || '');
+                        const flattenedRowData = rowData.map(item => Array.isArray(item) ? item.join(', ') : item);
+    
+                        try {
+                            await worksheet.addRow(flattenedRowData);
+                        } catch (err) {
+                            console.log(err);
+                        }
                     }
                 }
             }
