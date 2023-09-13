@@ -37,6 +37,9 @@ router.route('/upload')
                     'owner': entityName
                 }
             };
+            if (containerName.length < 3) {
+                containerName = `${containerName}__${uploader}`;
+              }
             if (!(containerName && filetoUpload)) {
                 errResponse = new ErrorResponse(400, "containerName, blobName, filePath is required", "");
                 res.status(400).json(errResponse);

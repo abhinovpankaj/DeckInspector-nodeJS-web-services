@@ -43,6 +43,13 @@ var getUser = async function (emailId, callback) {
 
 var getUserbyUsername = async function (username, callback) {
     
+    if (username===undefined) {
+
+        var error1 = new Error("getUser(). \nMessage: No User Found. username undefined.");
+            error1.status = 404;
+            callback (error1);
+            return; 
+    }
     var result = await mongo.Users.findOne({ username: username });    
         
         if (result === null) {

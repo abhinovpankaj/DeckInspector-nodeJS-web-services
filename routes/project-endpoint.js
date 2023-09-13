@@ -138,7 +138,7 @@ router.route('/generateexcel')
         }
       });
     } catch (err) {
-      console.error('Error generating Excel:', exception);
+      console.error('Error generating Excel:', err);
       return res.status(500).send('Error generating Excel');
     }
   });

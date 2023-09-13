@@ -9,6 +9,7 @@ const addLocationMetadataInParent = async (locationId, location) => {
     url: location.url,
     description: location.description,
     isInvasive: location.isInvasive ? location.isInvasive : false,
+    sequenceNumber: location.sequenceNumber !== undefined ? location.sequenceNumber : null,
   };
 
   if (location.parenttype == "subproject") {
@@ -67,6 +68,7 @@ const addSectionMetadataInParent = async (sectionId, section) => {
     visualsignsofleak: section.visualsignsofleak,
     isuploading: false,
     count: section.images.length,
+    sequenceNumber: section.sequenceNumber !== undefined ? section.sequenceNumber : null,
   };
 
   if (section.parenttype == "project") {
@@ -114,6 +116,7 @@ const addSubprojectMetaDataInProject = async (subProjectId, subProject) => {
     url: subProject.url,
     description: subProject.description,
     isInvasive: subProject.isInvasive,
+    sequenceNumber: subProject.sequenceNumber !== undefined ? subProject.sequenceNumber : null,
   };
   await ProjectDAO.addProjectChild(
     subProject.parentid,
