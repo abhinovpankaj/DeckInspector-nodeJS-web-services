@@ -22,7 +22,6 @@ var getProjectDocumentsbyProjectId = async function (project_id, callback) {
         
         const res = [];
         for await (const doc of result){
-            doc.timestamp = new Date(doc.timestamp).toLocaleString();
             res.push(doc);
         }
 
