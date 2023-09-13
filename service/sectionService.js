@@ -221,8 +221,8 @@ const handleError = (error) => {
 
 var transformData = function(section) {
   section.visualreview = capitalizeWords(section.visualreview);
-  section.visualsignsofleak = capitalizeWords(section.visualsignsofleak.toString());
-  section.furtherinvasivereviewrequired = capitalizeWords(section.furtherinvasivereviewrequired.toString());
+  section.visualsignsofleak = capitalizeWords(convertBooleanToString(section.visualsignsofleak));
+  section.furtherinvasivereviewrequired = capitalizeWords(convertBooleanToString((section.furtherinvasivereviewrequired)));
   section.conditionalassessment = capitalizeWords(section.conditionalassessment.toString());
   section.eee = RatingMapping[section.eee];
   section.lbc = RatingMapping[section.lbc];
@@ -237,6 +237,15 @@ var capitalizeWords = function (word) {
   }
   return word;
 };
+
+var convertBooleanToString = function (word) {
+  if (word) {
+    var finalWord = word === true ? "Yes" : "No";
+    return finalWord;
+  }
+  return word;
+};
+
 
 module.exports = {
   addSection,
