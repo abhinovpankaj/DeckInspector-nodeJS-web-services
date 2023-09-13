@@ -13,7 +13,7 @@ router.route('/add')
 .post( function(req, res)  {  
 try {
     // Get document input
-    const { project_id, name, url } = req.body;
+    const { project_id, name, url, uploader } = req.body;
     var timestamp = (new Date(Date.now())).toISOString();
     // Validate document input
     if (!(project_id && name && url)) {
@@ -25,6 +25,7 @@ try {
         project_id,
         name,
         url,
+        uploader,
         timestamp
     },function(err,result){
         if (err) { 
@@ -60,6 +61,27 @@ router.route('/:project_id')
   catch{
     res.status(500).send("Internal server error.");
   }
-})
+});
+
+router.route('/delete')
+.post(async function(req,res){
+  try {
+      // Get user input
+      const document = req.body; 
+      projectDocuments.removeDocument(document._id,function(err,result){
+        if(err){
+          res.status(err.status).send(err.message);
+        }
+        else{
+          res.status(result.status).send(result.message);      
+        }
+      })          
+      
+     }     
+  catch (err) {    
+    console.log(err);
+    res.status(500).send(`Internal server error ${err}`)
+  }
+});
 
 module.exports = router ;
