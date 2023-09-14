@@ -1,125 +1,89 @@
 const ExcelJS = require('exceljs');
-const Project = require('../model/project');
-const Location = require('../model/location');
-const Section = require('../model/sections');
-const SubProject = require('../model/subproject');
-const LocationType = require('../model/locationType');
 const path = require('path');
+const SectionService = require('../service/sectionService');
+const LocationService = require('../service/locationService');
+const SubProjectService = require('../service/subProjectService');
+const ProjectService = require('../service/projectService');
+const LocationType = require('../model/locationType');
 
 async function generateExcelForProject(projectId) {
-
-    const projectData = await Project.getProjectById(projectId);
-
-
-    // Create a new instance of a Workbook
+    const { project: projectData } = await ProjectService.getProjectById(projectId);
     const workbook = new ExcelJS.Workbook();
-
-    // Add a Worksheet to the Workbook
     const worksheet = workbook.addWorksheet('Sheet 1');
 
-    worksheet.getCell('A1').value = projectData.data.item.name;
-
-    //headers
+    worksheet.getCell('A1').value = projectData.name;
     const { headerMapping, headerRow } = await createHeaderRow(worksheet);
     styleHeaderRow(headerRow);
 
-    //add project Locations
-    await addCommonLocations(projectId,worksheet,headerMapping);    
+    if (projectData.projecttype === "singlelevel") {
+        await addSectionsForSingleLevelProject(projectId, worksheet, headerMapping);
+    } else {
+        await addCommonLocations(projectId, worksheet, headerMapping);
+        await addBuildingLocations(projectId, worksheet, headerMapping);
+        await addBuildingApartments(projectId, worksheet, headerMapping);
+    }
 
-    //add building locations
-    await addBuildingLocations(projectId,worksheet,headerMapping);
-
-    //add building apartments
-    await addBuildingApartments(projectId,worksheet,headerMapping);
-
-    //Save the file
-    const excelFileName = path.join(__dirname, projectData.data.item.name + '.xlsx');
+    const excelFileName = path.join(__dirname, `${projectData.name}.xlsx`);
     await workbook.xlsx.writeFile(excelFileName);
-
-    
     return excelFileName;
 }
 
+async function addDataToWorksheet(data, worksheet, headerMapping) {
+    const rowData = Object.keys(headerMapping).map(key => data[key] || '');
+    const flattenedRowData = rowData.map(item => Array.isArray(item) ? item.join(', ') : item);
+    try {
+        await worksheet.addRow(flattenedRowData);
+    } catch (err) {
+        console.error(err);
+    }
+}
 
-async function addCommonLocations(projectId,worksheet,headerMapping)
-{
-    locations = await Location.getLocationByParentId(projectId);
-
-    if(!(locations && locations.data && locations.data.item))
-        return;
-    
-
-    for(location of locations.data.item)
-    {
-        const commonLocationData = {
-            'cLoc':location.name
-        }   
-        for(section of location.sections)
-        {
-            const sectionData = await Section.getSectionById(section._id);
-            const sectionName = {'cLocName': sectionData.data.item.name};
-            const sectionExcelData = generateSectionData(sectionData);
-
-            const finalData = {...sectionName,...commonLocationData,...sectionExcelData};
-
-            const rowData = Object.keys(headerMapping).map(key => finalData[key] || '');
-
-            const flattenedRowData = rowData.map(item => Array.isArray(item) ? item.join(', ') : item);
-            try{
-                const addedRow = await worksheet.addRow(flattenedRowData);
-            }
-            catch(err){console.log(err);}
-        }
+async function addSectionsForSingleLevelProject(projectId, worksheet, headerMapping) {
+    const { sections } = await SectionService.getSectionsByParentId(projectId);
+    for (const section of sections || []) {
+        const sectionData = {
+            cLocName: section.name,
+            ...await generateSectionDataNew(section)
+        };
+        await addDataToWorksheet(sectionData, worksheet, headerMapping);
     }
 }
 
 async function addDataByLocationType(projectId, worksheet, headerMapping, locationType, mapping) {
-    const subProjects = await SubProject.getSubProjectsByParentId(projectId);
+    const { subprojects } = await SubProjectService.getSubProjectByParentId(projectId);
+    for (const subProject of subprojects || []) {
+        const buildingData = { [mapping.buildingKey]: subProject.name };
+        const { locations } = await LocationService.getLocationsByParentId(subProject._id);
+        const filteredLocations = locations.filter(location => location.type === locationType);
 
-    if (!(subProjects && subProjects.data && subProjects.data.item)) {
-        return;
-    }
-
-    try {
-        for (const subProject of subProjects.data.item) {
-            const buildingData = {
-                [mapping.buildingKey]: subProject.name
-            };
-
-            const allLocations = await Location.getLocationByParentId(subProject._id);
-            if (!(allLocations && allLocations.data && allLocations.data.item)) {
-                continue;
-            }
-
-            const filteredLocations = allLocations.data.item.filter(location => location.type === locationType);
-
-            for (const location of filteredLocations) {
-                const buildingLocationData = {
-                    [mapping.locationKey]: location.name
+        for (const location of filteredLocations) {
+            const locationData = { [mapping.locationKey]: location.name };
+            const { sections } = await SectionService.getSectionsByParentId(location._id);
+            for (const section of sections || []) {
+                const sectionData = {
+                    [mapping.sectionNameKey]: section.name,
+                    ...await generateSectionDataNew(section)
                 };
-
-                if(location.sections)
-                {
-                    for (const section of location.sections) {
-                        const sectionData = await Section.getSectionById(section._id);
-                        const sectionName = { [mapping.sectionNameKey]: sectionData.data.item.name };
-                        const sectionExcelData = generateSectionData(sectionData);
-    
-                        const finalData = { ...buildingData, ...sectionExcelData, ...sectionName, ...buildingLocationData };
-                        const rowData = Object.keys(headerMapping).map(key => finalData[key] || '');
-                        const flattenedRowData = rowData.map(item => Array.isArray(item) ? item.join(', ') : item);
-    
-                        try {
-                            await worksheet.addRow(flattenedRowData);
-                        } catch (err) {
-                            console.log(err);
-                        }
-                    }
-                }
+                const finalData = { ...buildingData, ...locationData, ...sectionData };
+                await addDataToWorksheet(finalData, worksheet, headerMapping);
             }
         }
-    } catch (err) {
-        console.log(err);
+    }
+}
+
+async function addCommonLocations(projectId, worksheet, headerMapping) {
+    const { locations } = await LocationService.getLocationsByParentId(projectId);
+    for (const location of locations || []) {
+        const commonLocationData = { 'cLoc': location.name };
+        const { sections } = await SectionService.getSectionsByParentId(location._id);
+        for (const section of sections || []) {
+            const sectionData = {
+                'cLocName': section.name,
+                ...await generateSectionDataNew(section)
+            };
+            const finalData = { ...commonLocationData, ...sectionData };
+            await addDataToWorksheet(finalData, worksheet, headerMapping);
+        }
     }
 }
 
@@ -141,6 +105,21 @@ async function addBuildingApartments(projectId, worksheet, headerMapping) {
     await addDataByLocationType(projectId, worksheet, headerMapping, LocationType.APARTMENT, mapping);
 }
 
+async function generateSectionDataNew(sectionData) {
+    return {
+        'unitUnavailable': sectionData.isunitunavailable ? 'Yes' : 'No',
+        'extElem': sectionData.exteriorelements,
+        'wpElem': sectionData.waterproofingelements,
+        'visRev': sectionData.visualreview,
+        'visLeaks': sectionData.visualsignsofleak,
+        'furtherInvRev': sectionData.furtherinvasivereviewrequired,
+        'condAssess': sectionData.conditionalassessment,
+        'addConcerns': sectionData.additionalconsiderations,
+        'lifeEEE': sectionData.eee,
+        'lifeLBC': sectionData.lbc,
+        'lifeAWE': sectionData.awe
+    }
+}
 
 async function createHeaderRow(worksheet) {
     const headerMapping = {
@@ -151,6 +130,7 @@ async function createHeaderRow(worksheet) {
         'bldLocName': 'Building Location Name',
         'bldApt': 'Building Apartment',
         'bldAptName': 'Building Apartment Name',
+        'unitUnavailable': 'Is Unit Unavailable',
         'extElem': 'Exterior Elements',
         'wpElem': 'Water Proofing Elements',
         'visRev': 'Visual Review',
@@ -163,10 +143,7 @@ async function createHeaderRow(worksheet) {
         'lifeAWE': 'Life Expectancy (AWE)'
     };
 
-    // Extract the full descriptive headers from the mapping
     const headers = Object.values(headerMapping);
-
-    // Add headers to the worksheet and get the header row
     const headerRow = await worksheet.addRow(headers);
     return { headerMapping, headerRow };
 }
@@ -176,7 +153,7 @@ function styleHeaderRow(headerRow) {
         cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF90EE90' } // Light Green color
+            fgColor: { argb: 'FF90EE90' }
         };
         cell.font = {
             color: { argb: 'FF000000' },
@@ -191,24 +168,4 @@ function styleHeaderRow(headerRow) {
     });
 }
 
-
-function generateSectionData(sectionData)
-{
-    return {
-        'extElem': sectionData.data.item.exteriorelements,
-        'wpElem': sectionData.data.item.waterproofingelements,
-        'visRev': sectionData.data.item.visualreview,
-        'visLeaks': sectionData.data.item.visualsignsofleak,
-        'furtherInvRev': sectionData.data.item.furtherinvasivereviewrequired,
-        'condAssess': sectionData.data.item.conditionalassessment,
-        'addConcerns': sectionData.data.item.additionalconsiderations,
-        'lifeEEE': sectionData.data.item.eee,
-        'lifeLBC': sectionData.data.item.lbc,
-        'lifeAWE': sectionData.data.item.awe
-    }
-}
-
-
 module.exports = { generateExcelForProject };
-
-
