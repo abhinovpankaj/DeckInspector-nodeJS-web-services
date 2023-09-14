@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: '1.0.0'
-  title: image upload API
+  title: image/document upload API
 components:
   schemas:
     image:
