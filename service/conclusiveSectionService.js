@@ -1,5 +1,6 @@
 "use strict";
 const ConclusiveSectionDAO = require('../model/conclusiveSectionDAO');
+const RatingMapping  = require("../model/ratingMapping.js");
 
 const addConclusiveSection = async (conclusiveSection) => {
     try {
@@ -24,6 +25,7 @@ const getConclusiveSectionById = async (conclusiveSectionId) => {
     try {
         const result = await ConclusiveSectionDAO.getConclusiveSectionById(conclusiveSectionId);
         if (result) {
+            transformData(result);
             return {
                 success: true,
                 section: result,
@@ -82,6 +84,9 @@ const getConclusiveSectionByParentId = async (parentId)=>{
     try{
         const result = await ConclusiveSectionDAO.getConclusiveSectionByParentId(parentId);
         if (result.length > 0) {
+            for(let conclusiveSection of result){
+                transformData(conclusiveSection);
+            }
             return {
                 success: true,
                 sections: result,
@@ -107,6 +112,30 @@ const handleError = (error) => {
     };
 };
 
+  var transformData = function(conclusiveSection) {
+    conclusiveSection.propowneragreed = capitalizeWords(convertBooleanToString(conclusiveSection.propowneragreed));
+    conclusiveSection.invasiverepairsinspectedandcompleted = capitalizeWords(convertBooleanToString(conclusiveSection.invasiverepairsinspectedandcompleted));
+    conclusiveSection.eeeconclusive = RatingMapping[conclusiveSection.eeeconclusive];
+    conclusiveSection.lbcconclusive = RatingMapping[conclusiveSection.lbcconclusive];
+    conclusiveSection.aweconclusive = RatingMapping[conclusiveSection.aweconclusive];
+  };
+
+  var convertBooleanToString = function (word) {
+    if (typeof word !== 'boolean') {
+        return; // this will return undefined by default
+    }
+    return word ? "Yes" : "No";
+  };
+  
+  
+  
+  var capitalizeWords = function (word) {
+    if (word) {
+      var finalWord = word[0].toUpperCase() + word.slice(1);
+      return finalWord;
+    }
+    return word;
+  };
 
 
 module.exports = {
