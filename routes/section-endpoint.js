@@ -16,7 +16,7 @@ var errResponse;
 
 const { name, exteriorelements, waterproofingelements,additionalconsiderations,
   visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
-awe,eee,lbc,images,createdby,parentid,parenttype } = req.body;
+awe,eee,lbc,images,createdby,parentid,parenttype,unitUnavailable } = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -44,7 +44,7 @@ var newSection = {
     "visualsignsofleak": visualsignsofleak.toLowerCase()==='true',
     "waterproofingelements":waterproofingelements,
     "images":images,
-    "unitUnavailable": false,
+    "unitUnavailable": unitUnavailable,
     "isuploading":false,
 } 
 var result = await SectionService.addSection(newSection);    
