@@ -107,7 +107,7 @@ async function addBuildingApartments(projectId, worksheet, headerMapping) {
 
 async function generateSectionDataNew(sectionData) {
     return {
-        'unitUnavailable': sectionData.isunitunavailable ? 'Yes' : 'No',
+        'unitUnavailable': sectionData.unitUnavailable ? 'Yes' : 'No',
         'extElem': sectionData.exteriorelements,
         'wpElem': sectionData.waterproofingelements,
         'visRev': sectionData.visualreview,
