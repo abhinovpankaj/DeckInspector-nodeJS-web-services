@@ -35,8 +35,8 @@ const addSection = async (section) => {
 var getSectionById = async function (sectionId) {
   try {
     const result = await SectionDAO.getSectionById(sectionId);
-    transformData(result);
     if (result) {
+      transformData(result);
       return {
         success: true,
         section: result,
@@ -115,10 +115,10 @@ var deleteSectionPermanently = async function (sectionId) {
 var getSectionsByParentId = async function (parentId) {
   try {
     const result = await SectionDAO.getSectionByParentId(parentId);
-    for (let section of result) {
-      transformData(section);
-    }
     if (result) {
+      for (let section of result) {
+        transformData(section);
+      }
       return {
         success: true,
         sections: result,
@@ -239,11 +239,10 @@ var capitalizeWords = function (word) {
 };
 
 var convertBooleanToString = function (word) {
-  if (word) {
-    var finalWord = word === true ? "Yes" : "No";
-    return finalWord;
+  if (typeof word !== 'boolean') {
+      return; // this will return undefined by default
   }
-  return word;
+  return word ? "Yes" : "No";
 };
 
 

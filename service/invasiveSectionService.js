@@ -26,6 +26,7 @@ const getInvasiveSectionById = async (invasiveSectionId) => {
       invasiveSectionId
     );
     if (result) {
+      transformData(result);
       return {
         success: true,
         section: result,
@@ -90,6 +91,9 @@ const getInvasiveSectionByParentId = async (parentId) => {
       parentId
     );
     if (result.length > 0) {
+      for(let invasiveSection of result){
+        transformData(invasiveSection);
+      }
       return {
         success: true,
         sections: result,
@@ -112,6 +116,27 @@ const handleError = (error) => {
     success: false,
     reason: `An error occurred: ${error.message}`,
   };
+};
+
+const transformData = (invasiveSection) => {  
+  invasiveSection.postinvasiverepairsrequired = capitalizeWords(convertBooleanToString(invasiveSection.postinvasiverepairsrequired));
+}
+
+var convertBooleanToString = function (word) {
+  if (typeof word !== 'boolean') {
+      return; // this will return undefined by default
+  }
+  return word ? "Yes" : "No";
+};
+
+
+
+var capitalizeWords = function (word) {
+  if (word) {
+    var finalWord = word[0].toUpperCase() + word.slice(1);
+    return finalWord;
+  }
+  return word;
 };
 
 module.exports = {
