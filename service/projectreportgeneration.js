@@ -43,6 +43,7 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
     }
     catch(err){
         console.log(err);
+        callback("");
     }
 }
 

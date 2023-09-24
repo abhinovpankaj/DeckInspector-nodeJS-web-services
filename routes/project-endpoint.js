@@ -385,6 +385,9 @@ router.route('/generatereport')
   const reportFormat = req.body.reportFormat;
   await generateProjectReport(projectId,sectionImageProperties,companyName,reportType,
     reportFormat,(docpath)=>{
+      if (docpath.length==0) {
+        return res.status(500).send('Error generating report file');
+      }
       console.log(docpath);
       const absolutePath = path.resolve(docpath);
       console.log(absolutePath);

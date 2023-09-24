@@ -5,120 +5,204 @@ const projectReportType = require("../../../../model/projectReportType.js");
 const docxTemplate = require('docx-templates');
 const path = require('path');
 const fs = require('fs');
+const ProjectReportType = require("../../../../model/projectReportType.js");
+const invasiveSections  = require("../../../../model/invasiveSections");
+const conclusiveSections  = require("../../../../model/conclusiveSections");
 
 const generateDocReportForLocation = async function (locationId,companyName, sectionImageProperties, reportType,subprojectName='') {
   try {
     const sectionDataDoc =
     [];
     const location = await locations.getLocationById(locationId);
+
     if (!location.data) {
       return "";
     } else {
+
+      var locationType='';
+      if( location.data.item.type==='buildinglocation'){
+          locationType = "Building Common"
+      }
+      if( location.data.item.type==='apartment'){
+        locationType = "Apartment"
+      }
+      if( location.data.item.type==='projectlocation'){
+        locationType = "Project Common"
+      }
+      var template;
+      if (companyName==='Wicr') {
+        if (subprojectName=='') {
+          template = fs.readFileSync('Wicr2AllData.docx');
+        }else{
+          template = fs.readFileSync('WicrAllData.docx');
+        }
+      }else{
+        if (subprojectName=='') {
+          template = fs.readFileSync('Deck2AllData.docx');
+        }else{
+          template = fs.readFileSync('DeckAllData.docx');
+        }
+      }
       if (reportType === projectReportType.INVASIVEONLY || reportType === projectReportType.INVASIVEVISUAL) {
         if (location.data.item.isInvasive && location.data.item.isInvasive === true) {
-          // const sectionHtmls = await getSectionshtmls(location, location.data.item.sections, sectionImageProperties, reportType);
-          // return Object.values(sectionHtmls).join("");
-        } else {
-          return "";
-        }
-      } else if (reportType === projectReportType.VISUALREPORT) {
-
-        var mysections = location.data.item.sections;
-        //create document
-        if(!mysections)
-        {
-          return "";
-        }
-        const newSections = mysections.filter(section =>  isSectionIncluded(reportType, section));
-        var locationType='';
-        if( location.data.item.type==='buildinglocation'){
-           locationType = "Building Common"
-        }
-        if( location.data.item.type==='apartment'){
-          locationType = "Apartment"
-       }
-       if( location.data.item.type==='projectlocation'){
-        locationType = "Project Common"
-     }
-        await Promise.all(newSections.map(async (section, index) => {
+          var mysections = location.data.item.sections;
+        
+          if(!mysections)
+          {
+            return "";
+          }
+          const newSections = mysections.filter(section =>  isSectionIncluded(reportType, section));
+          await Promise.all(newSections.map(async (section, index) => {
             const sectionData =  await sections.getSectionById(section._id);
-
+            const invasiveSectionData = await invasiveSections.getInvasiveSectionByParentId(section._id);
             if(sectionData.data && sectionData.data.item)
             {
-              // var htmlData = `+++HTML
-              // <p style="color: red;">${sectionData.data.item.eee}</p>
-              // +++`;
-              var template;
-              if (companyName==='Wicr') {
-                if (subprojectName=='') {
-                  template = fs.readFileSync('Wicr2VisualDetails.docx');
-               }else{
-                  template = fs.readFileSync('WicrVisualDetails.docx');
-               }
-              }else{
-                if (subprojectName=='') {
-                  template = fs.readFileSync('Deck2VisualDetails.docx');
-               }else{
-                  template = fs.readFileSync('DeckVisualDetails.docx');
-               }
-              }
-              
-              const buffer = await docxTemplate.createReport({
-              template,
-              failFast:false,
-              data: {
-                  section:{
-                    reportType : reportType,
-                    buildingName: subprojectName,
+              var sectionDocValues;
+
+              if (reportType===ProjectReportType.INVASIVEONLY) {
+                if (invasiveSectionData.data && invasiveSectionData.data.item) {
+                  const conclusiveSectionData = await conclusiveSections.getConclusiveSectionByParentId(section._id);
+                  if (conclusiveSectionData.data && conclusiveSectionData.data.item) {
+                    sectionDocValues = {
+                      isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
+                      reportType : reportType,
+                      buildingName: subprojectName,
+                      parentType: locationType,
+                      parentName: location.data.item.name,
+                      name: sectionData.data.item.name,
+                      furtherInvasiveRequired: invasiveSectionData.data.item.postinvasiverepairsrequired?'true':'false',
+                      invasiveDesc: invasiveSectionData.data.item.invasiveDescription,
+                      invasiveImages : invasiveSectionData.data.item.invasiveimages,
+                      conclusiveImages : conclusiveSectionData.data.item.conclusiveimages,
+                      propowneragreed:conclusiveSectionData.data.item.propowneragreed?'true':'false',
+                      invasiverepairsinspectedandcompleted:conclusiveSectionData.data.item.invasiverepairsinspectedandcompleted?'true':'false',
+                      };
+                  }else{
+                    sectionDocValues = {
+                      isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
+                      reportType : reportType,
+                      buildingName: subprojectName,
+                      parentType: locationType,
+                      parentName: location.data.item.name,
+                      name: sectionData.data.item.name,
+                      furtherInvasiveRequired: invasiveSectionData.data.item.postinvasiverepairsrequired?'true':'false',
+                      invasiveDesc: invasiveSectionData.data.item.invasiveDescription,
+                      invasiveImages : invasiveSectionData.data.item.invasiveimages,   
+                      invasiverepairsinspectedandcompleted:false
+                      };
+                  }
+                  
+                  };
+                }else{
+                  if (invasiveSectionData.data && invasiveSectionData.data.item) {
+                    sectionDocValues = {
+                      isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
+                      reportType : reportType,
+                      buildingName: subprojectName,
                       parentType: locationType,
                       parentName: location.data.item.name,
                       name: sectionData.data.item.name,
                       exteriorelements: sectionData.data.item.exteriorelements.toString().replaceAll(',',', '),
                       waterproofing:sectionData.data.item.waterproofingelements.toString().replaceAll(',',', '),
                       visualreview:sectionData.data.item.visualreview,
-                      signsofleak : sectionData.data.item.visualsignsofleak?'Yes':'No',
-                      furtherinvasive:sectionData.data.item.furtherinvasivereviewrequired?'Yes':'No',
-                      conditionalassesment:sectionData.data.item.conditionalassessment,
+                      signsofleak : sectionData.data.item.visualsignsofleak=='True'?'Yes':'No',
+                      furtherinvasive:sectionData.data.item.furtherinvasivereviewrequired=='True'?'Yes':'No',
+                      conditionalassesment:sectionData.data.item.conditionalassessment=='Futureinspection'?'Future Inspection':sectionData.data.item.conditionalassessment,
                       additionalconsiderations:sectionData.data.item.additionalconsiderations,
                       eee:sectionData.data.item.eee,
                       lbc:sectionData.data.item.lbc,
                       awe:sectionData.data.item.awe,
-                      images:sectionData.data.item.images
-                      
-                  }               
-              },
-              additionalJsContext: {
-                
-                getChunks : async (imageArray,chunk_size=4) => {
-                  var index = 0;
-                  var arrayLength = imageArray.length;
-                  var tempArray = [];
+                      images:sectionData.data.item.images,
+                      furtherInvasiveRequired: false,
+                      invasiveDesc: invasiveSectionData.data.item.invasiveDescription,
+                      invasiveImages : invasiveSectionData.data.item.invasiveimages,   
+                      invasiverepairsinspectedandcompleted:false
+                      };
+                  }else{
+                    sectionDocValues = {
+                      isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
+                      reportType : reportType,
+                      buildingName: subprojectName,
+                      parentType: locationType,
+                      parentName: location.data.item.name,
+                      name: sectionData.data.item.name,
+                      exteriorelements: sectionData.data.item.exteriorelements.toString().replaceAll(',',', '),
+                      waterproofing:sectionData.data.item.waterproofingelements.toString().replaceAll(',',', '),
+                      visualreview:sectionData.data.item.visualreview,
+                      signsofleak : sectionData.data.item.visualsignsofleak=='True'?'Yes':'No',
+                      furtherinvasive:sectionData.data.item.furtherinvasivereviewrequired=='True'?'Yes':'No',
+                      conditionalassesment:sectionData.data.item.conditionalassessment=='Futureinspection'?'Future Inspection':sectionData.data.item.conditionalassessment,
+                      additionalconsiderations:sectionData.data.item.additionalconsiderations,
+                      eee:sectionData.data.item.eee,
+                      lbc:sectionData.data.item.lbc,
+                      awe:sectionData.data.item.awe,
+                      images:sectionData.data.item.images,
+                      furtherInvasiveRequired: false,
+                      invasiveDesc: 'Invasive inspection not done',//invasiveSectionData.data.item.invasiveDescription,
+                      invasiveImages : ['https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png'],//invasiveSectionData.data.item.invasiveimages,   
+                      invasiverepairsinspectedandcompleted:false
+                      };
+                  }                 
+              }
+              var filename = await getLocationDoc(sectionData.data.item._id,template,sectionDocValues) ;
+              sectionDataDoc.push(filename);  
+            }  
+            
+            
+          }));
+          return sectionDataDoc;
+        }else{
+          return "";
+        }
+      } else if (reportType === projectReportType.VISUALREPORT) {
+          var mysections = location.data.item.sections;
+          
+          if(!mysections)
+          {
+            return "";
+          }
+          const newSections = mysections.filter(section =>  isSectionIncluded(reportType, section));
+          
+          await Promise.all(newSections.map(async (section, index) => {
+          const sectionData =  await sections.getSectionById(section._id);
+          
+          if(sectionData.data && sectionData.data.item)
+          {
+
+            var sectionDocValues;
+            
+            if (sectionData.data.item.unitUnavailable) {
+              sectionDocValues = {
+                isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
+                reportType : reportType,
+                buildingName: subprojectName,
+                parentType: locationType,
+                parentName: location.data.item.name,
+                name: sectionData.data.item.name,                  
+              };
+            }else{
+                sectionDocValues = {
+                  isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
+                  reportType : reportType,
+                  buildingName: subprojectName,
+                  parentType: locationType,
+                  parentName: location.data.item.name,
+                  name: sectionData.data.item.name,
+                  exteriorelements: sectionData.data.item.exteriorelements.toString().replaceAll(',',', '),
+                  waterproofing:sectionData.data.item.waterproofingelements.toString().replaceAll(',',', '),
+                  visualreview:sectionData.data.item.visualreview,
+                  signsofleak : sectionData.data.item.visualsignsofleak=='True'?'Yes':'No',
+                  furtherinvasive:sectionData.data.item.furtherinvasivereviewrequired=='True'?'Yes':'No',
+                  conditionalassesment:sectionData.data.item.conditionalassessment=='Futureinspection'?'Future Inspection':sectionData.data.item.conditionalassessment,
+                  additionalconsiderations:sectionData.data.item.additionalconsiderations,
+                  eee:sectionData.data.item.eee,
+                  lbc:sectionData.data.item.lbc,
+                  awe:sectionData.data.item.awe,
+                  images:sectionData.data.item.images
                   
-                  for (index = 0; index < arrayLength; index += chunk_size) {
-                      myChunk = imageArray.slice(index, index+chunk_size);
-                      
-                      tempArray.push(myChunk);
-                    }
-                  
-                  return tempArray;
-                },
-                tile: async (imageurl) => {
-                  if (imageurl===undefined) {
-                    return;
-                  }
-                  const resp = await fetch(
-                    imageurl
-                  );
-                  const buffer = resp.arrayBuffer
-                    ? await resp.arrayBuffer()
-                    : await resp.buffer();
-                  const extension  = path.extname(imageurl);
-                  return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
-                }, 
+              };
             }
-          });
-            var filename = sectionData.data.item._id +'.docx'
-            fs.writeFileSync(filename, buffer);
+            var filename = await getLocationDoc(sectionData.data.item._id,template,sectionDocValues) ;
             sectionDataDoc.push(filename);
         }
         }));
@@ -127,9 +211,71 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
     }
   } catch (error) {
     console.log("Error is " + error);
+    return "";
   }
 }
 
+const getLocationDoc = async function(sectionId,template,sectionDocValues){
+  try {
+    const buffer = await docxTemplate.createReport({
+      template,
+      failFast:false,
+      data: {
+          section: sectionDocValues      
+      },
+      additionalJsContext: {
+        
+        getChunks : async (imageArray,chunk_size=4) => {
+          var index = 0;
+          var tempArray = [];
+          if (imageArray===undefined) {
+            return tempArray;
+          }
+          var arrayLength = imageArray.length;
+          for (index = 0; index < arrayLength; index += chunk_size) {
+              myChunk = imageArray.slice(index, index+chunk_size);
+              
+              tempArray.push(myChunk);
+            }
+          
+          return tempArray;
+        },
+        tile: async (imageurl) => {
+          
+          if (imageurl===undefined) {
+            
+            return;
+          }
+          if (!imageurl.startsWith('http')) {
+            //imageurl = 'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png';
+            return;
+          }
+          console.log(imageurl);
+          const resp = await fetch(
+            imageurl
+          );
+          if (resp.ok) {
+            const buffer = resp.arrayBuffer
+            ? await resp.arrayBuffer()
+            : await resp.buffer();
+          const extension  = path.extname(imageurl);
+          return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
+          }else{
+            return;
+          }
+          
+        }, 
+    }
+  });
+    var filename = sectionId +'.docx'
+    fs.writeFileSync(filename, buffer);
+    return filename;
+  } catch (error) {
+    console.log(error);
+    return "";
+  }
+  
+}
 
 const generateReportForLocation = async function (locationId, sectionImageProperties, reportType) {
   try {

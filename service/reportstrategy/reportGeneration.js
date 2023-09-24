@@ -43,13 +43,15 @@ class ReportGeneration{
             },
             additionalJsContext: {
                 tile: async () => {
+                    var projurl = project.data.item.url===''?'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png':
+                    project.data.item.url;
                   const resp = await fetch(
-                    project.data.item.url
+                    projurl
                   );
                   const buffer = resp.arrayBuffer
                     ? await resp.arrayBuffer()
                     : await resp.buffer();
-                  return { height: 16,width: 19.8,  data: buffer, extension: '.png' };
+                  return { height: 15,width: 19.8,  data: buffer, extension: '.png' };
                 },
                
               },
