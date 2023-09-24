@@ -15,7 +15,7 @@ var errResponse;
 // Get user input
 
 const { name, exteriorelements, waterproofingelements,additionalconsiderations,
-  visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
+  additionalconsiderationshtml,visualreview,visualsignsofleak,furtherinvasivereviewrequired,conditionalassessment,
 awe,eee,lbc,images,createdby,parentid,parenttype,unitUnavailable } = req.body;
 
 // Validate user input
@@ -27,6 +27,7 @@ if (!(name&&parentid)) {
 var creationtime= (new Date(Date.now())).toISOString();
 var newSection = {
     "additionalconsiderations":additionalconsiderations,
+    "additionalconsiderationshtml":additionalconsiderationshtml? additionalconsiderationshtml: "",
     "awe":awe, 
     "conditionalassessment":conditionalassessment,
     "createdat":creationtime,
