@@ -12,11 +12,10 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
 {
     try{
         const project  = await projects.getProjectById(projectId);
-        const projectHtml =  await getProjectHtml(project, sectionImageProperties, reportType);
-
+        
         const fileName = project.data.item.name.split(' ').join('_') + "_"+ reportType;
         if (reportFormat==='pdf') {
-            
+            const projectHtml =  await getProjectHtml(project, sectionImageProperties, reportType);
             const path = await generatePdfFile(fileName,projectHtml,companyName);
             callback( path);
         }else{
