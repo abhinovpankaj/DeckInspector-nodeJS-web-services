@@ -251,18 +251,24 @@ const getLocationDoc = async function(sectionId,template,sectionDocValues){
             return;
           }
           console.log(imageurl);
-          const resp = await fetch(
-            imageurl
-          );
-          if (resp.ok) {
-            const buffer = resp.arrayBuffer
-            ? await resp.arrayBuffer()
-            : await resp.buffer();
-          const extension  = path.extname(imageurl);
-          return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
-          }else{
-            return;
+          try {
+            const resp = await fetch(
+              imageurl
+            );
+            if (resp.ok) {
+              const buffer = resp.arrayBuffer
+              ? await resp.arrayBuffer()
+              : await resp.buffer();
+            const extension  = path.extname(imageurl);
+            return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
+            }else{
+              return;
+            }
+          } catch (error) {
+            console.log(error);
+            return ;
           }
+          
           
         }, 
     }
