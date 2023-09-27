@@ -38,7 +38,8 @@ router.route('/add')
       "children": [],
       "projecttype": projecttype,
       "createdat": new Date().toISOString(),
-      "iscomplete":false
+      "iscomplete":false,
+      "isInvasive":false
     }
 
     // Save the new project to the database
