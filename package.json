@@ -41,6 +41,7 @@
     "puppeteer": "^20.7.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "jpeg-autorotate": "^9.0.0",
   }
 }
