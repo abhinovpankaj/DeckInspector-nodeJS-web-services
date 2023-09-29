@@ -15,17 +15,17 @@ const generateDocReportForSubProject = async function generateDocReportForSubPro
     for (let key in orderdLocationsInSubProject) {
         const promise = generateDocReportForLocation(orderdLocationsInSubProject[key]._id,companyName,sectionImageProperties,reportType,subprojectName)
             .then((loc_html) => {
-                subProjectdoc.push(...loc_html);
+                subProjectdoc[key]= loc_html;
             });
         promises.push(promise);
         
     }
     await Promise.all(promises);
-    // let subProjectHtml = '';
-    // for (let key in locsHtmls) {
-    //     subProjectHtml += locsHtmls[key];
-    // }
-    return subProjectdoc;
+    let subProjectdocSorted = [];
+    for (let key in subProjectdoc) {
+        subProjectdocSorted.push (...subProjectdoc[key]);
+    }
+    return subProjectdocSorted;
 }
 
 const generateReportForSubProject = async function generateReportForSubProject(subProjectId,sectionImageProperties,reportType)
@@ -67,6 +67,11 @@ const reordersubProjectLocations = function(locations){
             subProjectLocations.push(locations[key]);
         }
     }
+    subProjectApartments.sort(function(apt1,apt2){
+            return (apt1.sequenceNumber-apt2.sequenceNumber);
+        });
+    subProjectLocations.sort(function(loc1,loc2){
+                return (loc1.sequenceNumber-loc2.sequenceNumber)});
     orderedlocationsInSubProjects.push(...subProjectApartments);
     orderedlocationsInSubProjects.push(...subProjectLocations);
     return orderedlocationsInSubProjects;

@@ -15,9 +15,9 @@ class ReportGeneration{
         try{
          //   console.time("generateReportDocs");
             const promises = [];
-            const reportDocList = ['projectheader.docx']; 
+            const reportDocList = []; 
             project.data.item.projectHeader = this.getProjectHeader(reportType);
-            let projectHtml = [];//ejs.render(template, project.data.item);
+            let projectHtml = ['projectheader.docx'];//ejs.render(template, project.data.item);
             //create project header docx
             var template;
             if (companyName=='Wicr') {
@@ -62,32 +62,20 @@ class ReportGeneration{
             const orderedProjects = this.reOrderProjects(project.data.item.children);
             for (let key in orderedProjects) {
                 const promise = this.getReportDoc(orderedProjects[key],companyName,sectionImageProperties,reportType)
-                .then((loc_html) => {
-                 //locsHtmls[key] = loc_html;
-                 reportDocList.push(...loc_html);
+                .then((loc_doc) => {
+                 
+                 reportDocList[key]=loc_doc;
                 });
               promises.push(promise);
             }
             await Promise.all(promises);
             
-            // for (let key in locsHtmls) {
-            //     projectHtml.push( locsHtmls[key]);
-            // }
+            for (let key in reportDocList) {
+                projectHtml.push(...reportDocList[key]);
+            }
             //console.timeEnd("generateReportDoc");
-            return reportDocList;
-            // var fileList=[];
-            // reportDocList.forEach(reportChunk => {
-            //     fileList.push(fs.readFileSync(reportChunk, 'binary'));
-            // });
-            // var docx = new DocxMerger({},fileList);
-            // const docFilePath = `${fileName}.docx`;
-            // docx.save('nodebuffer',function (data) {
-                
-            //     fs.writeFile(`${fileName}.docx`, data, function(err){
-            //         console.log(err);
-            //     });
-            //     callback( docFilePath);
-            // });
+            return projectHtml;
+            
         }
         catch(err){
             console.log(err);
@@ -138,6 +126,12 @@ class ReportGeneration{
                 locations.push(projects[key]);
             }
         }
+        subProjects.sort(function(subProj1,subProj2){
+            return (subProj1.sequenceNumber-subProj2.sequenceNumber);
+        });
+        locations.sort(function(loc1,loc2){
+            return (loc1.sequenceNumber-loc2.sequenceNumber);
+        });
         orderedProjects.push(...subProjects);
         orderedProjects.push(...locations);
         return orderedProjects;

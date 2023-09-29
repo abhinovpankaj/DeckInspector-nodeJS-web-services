@@ -8,6 +8,7 @@ const fs = require('fs');
 const ProjectReportType = require("../../../../model/projectReportType.js");
 const invasiveSections  = require("../../../../model/invasiveSections");
 const conclusiveSections  = require("../../../../model/conclusiveSections");
+const jo = require('jpeg-autorotate')
 
 const generateDocReportForLocation = async function (locationId,companyName, sectionImageProperties, reportType,subprojectName='') {
   try {
@@ -216,6 +217,10 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
 }
 
 const getLocationDoc = async function(sectionId,template,sectionDocValues){
+  const options = {
+    
+    jpegjsMaxResolutionInMP: 2048,
+  }
   try {
     const buffer = await docxTemplate.createReport({
       template,
@@ -256,20 +261,26 @@ const getLocationDoc = async function(sectionId,template,sectionDocValues){
               imageurl
             );
             if (resp.ok) {
-              const buffer = resp.arrayBuffer
+              const imagebuffer = resp.arrayBuffer
               ? await resp.arrayBuffer()
               : await resp.buffer();
-            const extension  = path.extname(imageurl);
-            return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
+              const extension  = path.extname(imageurl);
+              //fix image rotation
+              try {
+                var {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality:50});
+                
+                return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
+              } catch (error) {
+                console.log('An error occurred when rotating the file: ' + error);
+                return { height: 6.2,width: 4.85,  data: imagebuffer, extension: extension };
+              }
             }else{
               return;
             }
           } catch (error) {
             console.log(error);
             return ;
-          }
-          
-          
+          }   
         }, 
     }
   });
