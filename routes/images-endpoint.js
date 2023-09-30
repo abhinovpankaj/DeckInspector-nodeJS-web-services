@@ -37,15 +37,16 @@ router.route('/upload')
                     'owner': entityName
                 }
             };
+            var newContainerName=containerName;
             if (containerName.length < 3) {
-                containerName = `${containerName}__${uploader}`;
+                newContainerName = `${containerName}__${uploader}`;
               }
-            if (!(containerName && filetoUpload)) {
+            if (!(newContainerName && filetoUpload)) {
                 errResponse = new ErrorResponse(400, "containerName, blobName, filePath is required", "");
                 res.status(400).json(errResponse);
                 return;
             }
-            var result = await uploadBlob.uploadFile(containerName, filetoUpload.originalname, filetoUpload.path, uploadOptions);
+            var result = await uploadBlob.uploadFile(newContainerName, filetoUpload.originalname, filetoUpload.path, uploadOptions);
             var response = JSON.parse(result);
             if (response.error) {
                 responseError = new ErrorResponse(500, 'Internal server error', result.error);
