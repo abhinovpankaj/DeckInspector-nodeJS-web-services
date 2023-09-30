@@ -32,8 +32,8 @@ const generateReportForSubProject = async function generateReportForSubProject(s
 {
     const subProjectData = await subProject.getSubProjectById(subProjectId);
     const promises = [];
-    const locsHtmls = [];
-    if(subProject.data && subProject.data.item && subProject.data.item.children && subProject.data.item.children.length > 0)
+    const locsHtmls = []; 
+    if(subProjectData.data && subProjectData.data.item && subProjectData.data.item.children && subProjectData.data.item.children.length > 0)
     {
         const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
         for (let key in orderdLocationsInSubProject) {
