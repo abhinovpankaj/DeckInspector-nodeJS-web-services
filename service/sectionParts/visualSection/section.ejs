@@ -35,7 +35,7 @@
                 <p><strong>Exterior Elements</strong></p>
             </td>
             <td style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <p >&nbsp;<%= exteriorelements %></p>
+                <p >&nbsp;<%= typeof exteriorelements !== 'undefined' ? exteriorelements : '' %></p>
             </td>
         </tr>
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
@@ -43,7 +43,7 @@
                 <p ><strong>Water Proofing Elements</strong></p>
             </td>
             <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <p>&nbsp;<%= waterproofingelements %></p>
+                <p>&nbsp;<%= typeof waterproofingelements !== 'undefined' ? waterproofingelements : '' %></p>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
@@ -51,7 +51,7 @@
                 <p ><strong>Visual Review</strong></p>
             </td>
             <td  class="<%= visualreview === 'Bad' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <%= visualreview %>
+                <%= visualreview || '' %>
             </td>
         </tr>
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
@@ -75,7 +75,7 @@
                 <p ><strong>Condition Assessment</strong></p>
             </td>
             <td class="<%= conditionalassessment === 'Fail' ? 'bad' : 'good' %>"  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <%= conditionalassessment %>
+                <%= conditionalassessment || '' %>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
@@ -83,7 +83,7 @@
                 <p ><strong>Additional Considerations or Concerns</strong></p>
             </td>
             <td  style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <p >&nbsp;<%= additionalconsiderations %></p>
+                <p >&nbsp;<%= additionalconsiderations || '' %></p>
             </td>
         </tr>
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
@@ -91,7 +91,7 @@
                 <p ><strong>Life Expectancy (EEE)</strong></p>
             </td>
             <td  class="<%= eee === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <%= eee %>
+                <%= eee || '' %>
             </td>
         </tr>
         <tr style=" font-size: 12px; border: 1px solid #E3F1D5;">
@@ -99,7 +99,7 @@
                 <p ><strong>Life Expectancy (LBC)</strong></p>
             </td>
             <td class="<%= lbc === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px; border-left: groove; ">
-                <%= lbc %>
+                <%= lbc || '' %>
             </td>
         </tr>
         <tr style="background: #C0C0C0; font-size: 12px; border: 1px solid #E3F1D5;">
@@ -107,7 +107,7 @@
                 <p><strong>Life Expectancy (AWE)</strong></p>
             </td>
             <td class="<%= awe === '0-1 Years' ? 'bad' : 'good' %>" style="width: 50%; text-align: left; padding: 8px;  border-left: groove;  ">
-                <%= awe %>
+                <%= awe || '' %>
             </td>            
         </tr>
     </tbody>
