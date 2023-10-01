@@ -33,20 +33,14 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
       }
       var template;
       if (companyName==='Wicr') {
-        if (reportType === projectReportType.INVASIVEVISUAL){
-          template = fs.readFileSync('WICR_FinalTemplate.docx');
-        }
-        else if (subprojectName=='') {
+       if (subprojectName=='') {
           template = fs.readFileSync('Wicr2AllData.docx');
         }
         else{
           template = fs.readFileSync('WicrAllData.docx');
         }
       }else{
-        if (reportType === projectReportType.INVASIVEVISUAL){
-          template = fs.readFileSync('Deck_FinalTemplate.docx');
-        }
-        else if (subprojectName=='') {
+       if (subprojectName=='') {
           template = fs.readFileSync('Deck2AllData.docx');
         }else{
           template = fs.readFileSync('DeckAllData.docx');
