@@ -8,6 +8,7 @@ const fs = require('fs');
 const ProjectReportType = require("../../../../model/projectReportType.js");
 const invasiveSections  = require("../../../../model/invasiveSections");
 const conclusiveSections  = require("../../../../model/conclusiveSections");
+const blobManager = require("../../../../database/uploadimage");
 const jo = require('jpeg-autorotate')
 
 const generateDocReportForLocation = async function (locationId,companyName, sectionImageProperties, reportType,subprojectName='') {
@@ -215,7 +216,9 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
     return "";
   }
 }
-
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 const getLocationDoc = async function(sectionId,template,sectionDocValues){
   const options = {
     
@@ -255,29 +258,40 @@ const getLocationDoc = async function(sectionId,template,sectionDocValues){
             //imageurl = 'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png';
             return;
           }
-          console.log(imageurl);
+          
           try {
-            const resp = await fetch(
-              imageurl
-            );
-            if (resp.ok) {
-              const imagebuffer = resp.arrayBuffer
-              ? await resp.arrayBuffer()
-              : await resp.buffer();
-              const extension  = path.extname(imageurl);
-              //fix image rotation
-              try {
-                var {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality:50});
-                
-                return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
-              } catch (error) {
-                console.log('An error occurred when rotating the file: ' + error);
-                return { height: 6.2,width: 4.85,  data: imagebuffer, extension: extension };
+              
+              // const resp = await fetch(
+              //   imageurl,
+              //   {setTimeout:16000}
+              // );
+
+              //const resp = await fetchPlus(imageurl,{keepAlive: true },3);
+              var urlArray = imageurl.toString().split('/');
+              const imagebuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2])
+              if (imagebuffer===undefined) {
+                console.log('Failed to load image .');
+                return;
               }
-            }else{
-              return;
-            }
+              // if (resp) {
+              //   const imagebuffer = resp.arrayBuffer
+              //   ? await resp.arrayBuffer()
+              //   : await resp.buffer();
+                const extension  = path.extname(imageurl);
+                //fix image rotation
+                try {
+                  var {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality:50});
+                  
+                  return { height: 6,width: 4.8,  data: buffer, extension: extension };
+                } catch (error) {
+                  console.log('An error occurred when rotating the file: ' + error);
+                  return { height: 6,width: 4.8,  data: imagebuffer, extension: extension };
+                }
+              // }else{
+              //   return;
+              // }                        
           } catch (error) {
+             console.log(imageurl);
             console.log(error);
             return ;
           }   
@@ -316,6 +330,26 @@ const generateReportForLocation = async function (locationId, sectionImageProper
     console.log("Error is " + error);
   }
 }
+
+const fetchPlus = (url, options = {setTimeout:20000}, retries) =>
+  fetch(url, options)
+    .then(res => {
+      if (res.ok) {
+        return res;
+      }
+      if (retries > 0) {
+        sleep(2000);
+        return fetchPlus(url, options, retries - 1)
+      }
+      return res.status;
+    })
+    .catch(error => 
+      {
+        console.log(url);
+        console.log(error);
+      }
+      );
+
 
 const getSectionshtmls = async function (location, sections, sectionImageProperties, reportType) {
   try {
