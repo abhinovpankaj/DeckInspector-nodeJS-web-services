@@ -141,7 +141,7 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                       images:sectionData.data.item.images,
                       furtherInvasiveRequired: false,
                       invasiveDesc: 'Invasive inspection not done',//invasiveSectionData.data.item.invasiveDescription,
-                      invasiveImages : ['https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png'],//invasiveSectionData.data.item.invasiveimages,   
+                      invasiveImages : [],//invasiveSectionData.data.item.invasiveimages,   
                       invasiverepairsinspectedandcompleted:false
                       };
                   }                 
