@@ -433,8 +433,7 @@ router.route('/finalreport')
 .post(async function (req, res){
   try{
     const {companyName} = req.body;
-    const absolutePath = (companyName === 'Wicr')? '/WICR_FinalTemplate.docx' :'/Deck_FinalTemplate.docx';
-
+    const absolutePath = path.join(__dirname, '..', (companyName === 'Wicr')? 'WICR_FinalTemplate.docx' :'Deck_FinalTemplate.docx');
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.sendFile(absolutePath, {}, (err) => {
         if (err) {
