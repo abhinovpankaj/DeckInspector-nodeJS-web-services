@@ -52,9 +52,17 @@
       <tr>
         <% for (var j = i; j < Math.min(i + factor, images.length); j++) { %>
           <td>
-            <img class="image" src="<%= images[j].compressedUrl %>" />
+              <!-- Add debugging here -->
+              <!--p><%= "i: " + i + ", j: " + j + ", factor: " + factor %></p>
+              <p><%= "image is: " +images[j]%> </p-->
+              <% if(images[j]) { %>
+                <img class="image" src="<%= images[j].compressedUrl %>" />
+            <% } else { %>
+                <!-- Some default value or handle the error case -->
+                <img class="image" src="<%= logoPath %>" />
+            <% } %>
           </td>
-        <% } %>
+      <% } %>
       </tr>
     </tbody>
     <% if ((i + factor) % (16 * factor) === 0 && i + factor < images.length) { %>
