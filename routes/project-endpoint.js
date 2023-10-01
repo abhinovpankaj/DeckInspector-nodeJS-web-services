@@ -429,4 +429,25 @@ router.route('/generatereporthtml').post(async function (req, res) {
   }
 });
 
+router.route('/finalreport')
+.post(async function (req, res){
+  try{
+    const {companyName} = req.body;
+    const absolutePath = path.join(__dirname, '..', (companyName === 'Wicr')? 'WICR_FinalTemplate.docx' :'Deck_FinalTemplate.docx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.sendFile(absolutePath, {}, (err) => {
+        if (err) {
+          console.error('Error sending file:', err);
+          return res.status(500).send('Error sending file');
+        } else {
+          console.log('Report sent successfully');
+        }
+      }); 
+
+  } catch(err){
+    console.error('Error generating final report: ', err);
+    return res.status(500).send('Error generating final report');
+  }
+})
+
 module.exports = router;
