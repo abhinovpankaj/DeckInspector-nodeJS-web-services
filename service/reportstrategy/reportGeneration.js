@@ -8,6 +8,8 @@ const ProjectReportType = require("../../model/projectReportType.js");
 const filePath = path.join(__dirname, 'projectfile.ejs');
 const template = fs.readFileSync(filePath, 'utf8');
 const docxTemplate = require('docx-templates');
+const blobManager = require("../../database/uploadimage");
+const jo = require('jpeg-autorotate');
 
 
 class ReportGeneration{
@@ -45,13 +47,22 @@ class ReportGeneration{
                 tile: async () => {
                     var projurl = project.data.item.url===''?'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png':
                     project.data.item.url;
-                  const resp = await fetch(
-                    projurl
-                  );
-                  const buffer = resp.arrayBuffer
-                    ? await resp.arrayBuffer()
-                    : await resp.buffer();
-                  return { height: 15,width: 19.8,  data: buffer, extension: '.png' };
+
+                    var urlArray = projurl.toString().split('/');
+                    const imageBuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
+                    if (imageBuffer===undefined) {
+                      console.log('Failed to load image .');
+                      return;
+                    }
+                  
+                  const extension  = path.extname(projurl);
+                  try {
+                    var {buffer} = await jo.rotate(Buffer.from(imageBuffer), {quality:50});
+                    return { height: 15,width: 19.8,  data: buffer, extension: extension };
+                  } catch (error) {
+                    //console.log('An error occurred when rotating the file: ' + error);
+                    return { height: 15,width: 19.8,  data: imageBuffer, extension: extension };
+                  }                                                  
                 },
                
               },

@@ -9,7 +9,7 @@ const ProjectReportType = require("../../../../model/projectReportType.js");
 const invasiveSections  = require("../../../../model/invasiveSections");
 const conclusiveSections  = require("../../../../model/conclusiveSections");
 const blobManager = require("../../../../database/uploadimage");
-const jo = require('jpeg-autorotate')
+const jo = require('jpeg-autorotate');
 
 const generateDocReportForLocation = async function (locationId,companyName, sectionImageProperties, reportType,subprojectName='') {
   try {
@@ -77,6 +77,10 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                       invasiveImages : invasiveSectionData.data.item.invasiveimages,
                       conclusiveImages : conclusiveSectionData.data.item.conclusiveimages,
                       propowneragreed:conclusiveSectionData.data.item.propowneragreed?'true':'false',
+                      additionalconsiderations:conclusiveSectionData.data.item.conclusiveconsiderations,
+                      conclusiveeee:conclusiveSectionData.data.item.eeeconclusive,
+                      conclusivelbc:conclusiveSectionData.data.item.lbcconclusive,
+                      conclusiveawe:conclusiveSectionData.data.item.aweconclusive,
                       invasiverepairsinspectedandcompleted:conclusiveSectionData.data.item.invasiverepairsinspectedandcompleted?'true':'false',
                       };
                   }else{
@@ -93,8 +97,9 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                       invasiverepairsinspectedandcompleted:false
                       };
                   }
-                  
-                  };
+                  var filename = await getLocationDoc(sectionData.data.item._id,template,sectionDocValues) ;
+                  sectionDataDoc.push(filename);  
+                  }
                 }else{
                   if (invasiveSectionData.data && invasiveSectionData.data.item) {
                     sectionDocValues = {
@@ -144,10 +149,12 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                       invasiveImages : [],//invasiveSectionData.data.item.invasiveimages,   
                       invasiverepairsinspectedandcompleted:false
                       };
-                  }                 
+                  }           
+                  var filename = await getLocationDoc(sectionData.data.item._id,template,sectionDocValues) ;
+                  sectionDataDoc.push(filename);  
+                
               }
-              var filename = await getLocationDoc(sectionData.data.item._id,template,sectionDocValues) ;
-              sectionDataDoc.push(filename);  
+              
             }  
             
             

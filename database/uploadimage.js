@@ -40,8 +40,9 @@ async function uploadFile(containerName, blobName, localFileWithPath, uploadOpti
 
 async function getBlobBuffer(blobName,containerName) {
   const containerClient = blobServiceClient.getContainerClient(containerName);
+  blobName= blobName.replace('%20',' ');
   const blobClient = containerClient.getBlobClient(blobName);
-
+  
   // Get blob content from position 0 to the end
   // In Node.js, get downloaded data by accessing downloadBlockBlobResponse.readableStreamBody
   const downloadBlockBlobResponse = await blobClient.download();
