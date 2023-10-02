@@ -11,6 +11,8 @@ const {getProjectHierarchyMetadata,getSingleProjectMetadata} = require('../servi
 const {generateExcelForProject} = require('../service/generateExcelForProject.js');
 const projectService = require('../service/projectService');
 require("dotenv").config();
+const multer = require('multer');
+const upload = multer({ dest: path.join(__dirname, '..') });
 
 router.route('/add')
 .post(async function (req, res) {
@@ -449,5 +451,40 @@ router.route('/finalreport')
     return res.status(500).send('Error generating final report');
   }
 })
+
+router.route('/replacefinalreporttemplate')
+.post(upload.single('file'), async function (req, res){
+  try{
+    console.log("started upload");
+    const uploadedFile = req.file;
+
+    if (!uploadedFile) {
+      return res.status(400).json({ message: 'No file uploaded.' });
+    }
+
+    const {companyName} = req.body;
+
+    if (!companyName) {
+      return res.status(400).json({ message: 'Company name is missing.' });
+    }
+
+    const existingFileName = (companyName === 'Wicr')? 'WICR_FinalTemplate.docx' :'Deck_FinalTemplate.docx';
+    const filePath = path.join(__dirname, '..', existingFileName);
+
+      // Check if the file to be replaced exists
+      if (fs.existsSync(filePath)) {
+        // Delete the existing file
+        fs.unlinkSync(filePath);
+      }
+
+    //Rename the uploaded file
+    fs.renameSync(uploadedFile.path, filePath);
+    res.status(200).json({ message: 'File replaced successfully.' });
+  } catch(err){
+    console.error('Error replacing final report template: ', err);
+    return res.status(500).send('Error replacing final report template');
+  }
+})
+
 
 module.exports = router;
