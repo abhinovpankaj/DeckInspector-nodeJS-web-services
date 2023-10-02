@@ -30,6 +30,7 @@
     "html-docx-js": "^0.3.1",
     "html-to-docx": "^1.8.0",
     "jimp": "^0.22.7",
+    "jpeg-autorotate": "^9.0.0",
     "jsonwebtoken": "^9.0.0",
     "jspdf": "^2.5.1",
     "mongodb": "^4.13.0",
@@ -41,7 +42,6 @@
     "puppeteer": "^20.7.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.0",
-    "uuid": "^9.0.0",
-    "jpeg-autorotate": "^9.0.0"
+    "uuid": "^9.0.0"
   }
 }
