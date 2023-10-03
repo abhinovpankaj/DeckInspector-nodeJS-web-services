@@ -27,7 +27,9 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
             });
             //unlink all
             projectDocxList.forEach(filechunk=>{
-                fs.unlinkSync(filechunk);
+                if (fs.existsSync(filechunk)) {
+                    fs.unlinkSync(filechunk);
+                }              
             });
             var docx = new DocxMerger({},fileList);
             const docFilePath = `${fileName}.docx`;
