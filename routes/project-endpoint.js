@@ -13,6 +13,7 @@ const projectService = require('../service/projectService');
 require("dotenv").config();
 const multer = require('multer');
 const upload = multer({ dest: path.join(__dirname, '..') });
+const {v4 : uuidv4} = require('uuid');
 
 router.route('/add')
 .post(async function (req, res) {
@@ -386,35 +387,60 @@ router.route('/generatereport')
   const companyName = req.body.companyName;
   const reportType = req.body.reportType;
   const reportFormat = req.body.reportFormat;
-  await generateProjectReport(projectId,sectionImageProperties,companyName,reportType,
-    reportFormat,(docpath)=>{
-      if (docpath.length==0) {
-        return res.status(500).send('Error generating report file');
+  const requestType = req.body.requestType;
+  // const reportId = uuidv4();
+  // console.log(`reportID: ${reportId}`);
+  const projectName = req.body.projectName;
+  // const docpath = `${projectName}_${reportType}_${reportId}`;
+  
+  if(requestType === 'init'){
+    const reportId = uuidv4();
+    const docpath = `${projectName}_${reportType}_${reportId}`;
+    generateProjectReport(projectId,sectionImageProperties,companyName,reportType, reportFormat, docpath);
+    res.status(200).send({reportId: reportId ,message: 'report generation started'});
+  } else{
+    const reportId = req.body.reportId;
+    const docpath = `${projectName}_${reportType}_${reportId}`;
+    console.log(docpath);
+    const absolutePath = path.resolve(`${docpath}.${reportFormat}`);
+    console.log(absolutePath);
+    reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  
+    res.setHeader('Content-Disposition', `attachment; filename="${docpath}"`);
+    res.sendFile(absolutePath, {}, (err) => {
+      if (err) {
+        console.error('Error sending file:', err);
+        return res.status(500).send('Error sending file');
+      } else {
+        console.log('Report sent successfully');
+        fs.unlinkSync(absolutePath);
       }
-      console.log(docpath);
-      const absolutePath = path.resolve(docpath);
-      console.log(absolutePath);
-      reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    
-      res.setHeader('Content-Disposition', `attachment; filename="${docpath}"`);
-      res.sendFile(absolutePath, {}, (err) => {
-        if (err) {
-          console.error('Error sending file:', err);
-          return res.status(500).send('Error sending file');
-        } else {
-          console.log('Report sent successfully');
-          fs.unlinkSync(absolutePath);
-        }
-      });     
     });
-
+  }
   
 } catch (err) {
   console.error('Error generating Report:', err);
   return res.status(500).send('Error generating Report');
 }
 });
+
+router.route('/getReportStatus')
+.post(async function (req, res){
+  const reportId = req.body.reportId;
+  const reportType = req.body.reportType;
+  const projectName = req.body.projectName;
+  const reportFormat = req.body.reportFormat;
+  const filename = `${projectName}_${reportType}_${reportId}.${reportFormat}`;
+  const absolutePath = path.join(__dirname, '..',filename);
+  console.log(`Report file: ${absolutePath}`);
+  if (fs.existsSync(absolutePath)){
+    res.status(200).send({reportStatus: true});
+  }
+  else{
+    res.status(200).send({reportStatus: false});
+  }
+})
 
 router.route('/generatereporthtml').post(async function (req, res) {
   try {
