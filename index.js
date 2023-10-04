@@ -12,6 +12,7 @@ const cors = require('cors');
 var mongo = require('./database/mongo');
 
 app.use(cors());
+app.timeout = 600000;
 
 require('./routes')(app);
 
