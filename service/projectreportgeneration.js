@@ -8,16 +8,16 @@ const fs = require('fs');
 
 
 const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName,reportType,
-    reportFormat,callback)
+    reportFormat, fileName)
 {
     try{
         const project  = await projects.getProjectById(projectId);
         
-        const fileName = project.data.item.name.split(' ').join('_') + "_"+ reportType;
+        // const fileName = project.data.item.name.split(' ').join('_') + "_"+ reportType;
         if (reportFormat==='pdf') {
             const projectHtml =  await getProjectHtml(project, sectionImageProperties, reportType);
             const path = await generatePdfFile(fileName,projectHtml,companyName);
-            callback( path);
+            // callback( path);
         }else{
             
             var projectDocxList=  await getProjectDoc(project, sectionImageProperties,companyName, reportType,reportFormat);
@@ -37,14 +37,14 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
             
                 console.log('inside document save');
                  fs.writeFileSync(`${fileName}.docx`, data);
-                 callback(docFilePath);
+                //  callback(docFilePath);
             });         
         }
         
     }
     catch(err){
         console.log(err);
-        callback("");
+        // callback("");
     }
 }
 
