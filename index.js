@@ -38,7 +38,7 @@ const options = {
   
       servers: [
         {
-          url: "https://deckinspectors-dev.azurewebsites.net",
+          url: "https://deckinspectorswebapi.azurewebsites.net",
           description: "Prod Deck Inspectors Documentation",
         },
         {
