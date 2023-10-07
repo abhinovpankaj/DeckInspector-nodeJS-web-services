@@ -17,7 +17,7 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdBy,url,parentid,parenttype,type,isInvasive} = req.body;
+const { name, description, createdBy,url,parentid,parenttype,type,isInvasive, sequenceNumber} = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -39,7 +39,8 @@ try{
       "sections":[],
       "lasteditedBy":createdBy,
       "editedat":creationtime,
-      "isInvasive":isInvasive
+      "isInvasive":isInvasive,
+      "sequenceNumber": sequenceNumber
   }
 }catch(ex){
   console.log(ex);
