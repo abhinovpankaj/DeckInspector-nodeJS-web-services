@@ -1,7 +1,9 @@
 "use strict";
 const { MongoClient } = require('mongodb');
 
-const uri = "mongodb+srv://deckDbAdmin:deckadmin91@cluster0.60uuo.mongodb.net/?retryWrites=true&w=majority";
+//const uri = "mongodb+srv://deckDbAdmin:deckadmin91@cluster0.60uuo.mongodb.net/?retryWrites=true&w=majority";
+
+const uri = "mongodb+srv://webappuser:EFQGiY42QWSvt8mB@deckinspectorcluster.g1uf6.mongodb.net/?retryWrites=true&w=majority";
 const dbName = "DeckInspectors";
 function getDBConnectionString(){
     return uri;
@@ -12,15 +14,15 @@ var Connect = async function () {
     try {
         // Connect to the MongoDB cluster
         await client.connect();
-        // // module.exports.Software = db.collection('software');
-        module.exports.Projects = client.db(dbName).collection('LocalProject');
-        module.exports.SubProjects = client.db(dbName).collection('LocalSubProject');
-        module.exports.Locations = client.db(dbName).collection('LocalLocation');
-        module.exports.Sections = client.db(dbName).collection('LocalVisualSection');
-        module.exports.Users = client.db(dbName).collection('users');
+       
+        module.exports.Projects = client.db(dbName).collection('Project');
+        module.exports.SubProjects = client.db(dbName).collection('SubProject');
+        module.exports.Locations = client.db(dbName).collection('Location');
+        module.exports.Sections = client.db(dbName).collection('VisualSection');
+        module.exports.Users = client.db(dbName).collection('Users');
         module.exports.ProjectDocuments = client.db(dbName).collection('ProjectDocuments');
-        module.exports.InvasiveSections = client.db(dbName).collection('LocalInvasiveSection');
-        module.exports.ConclusiveSections = client.db(dbName).collection('LocalConclusiveSection');
+        module.exports.InvasiveSections = client.db(dbName).collection('InvasiveSection');
+        module.exports.ConclusiveSections = client.db(dbName).collection('ConclusiveSection');
         // //module.exports.ClientInfo = db.collection('clientInfo');       
         console.log('Connected to MongoDB');
     } catch (e) {
