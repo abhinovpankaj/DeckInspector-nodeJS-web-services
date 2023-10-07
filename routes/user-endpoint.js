@@ -21,6 +21,7 @@ try {
     // Validate user input
     if (!(email && password && first_name && last_name&&username)) {
       res.status(400).send("All input is required");
+      return;
     }
 
     // check if user already exist
@@ -29,40 +30,50 @@ try {
     users.getUser(email, async function (err, record) {
   
       if (record) {
-            res.status(409).send("User Already Exist. Please Login");
-      }else{        
-        //Encrypt user password
-        var encryptedPassword =  await bcrypt.hash(password, 10);
+            res.status(409).send("User with this email already exist.");
+            return;
+      }else{
+        
+        users.getUserbyUsername(username, async function (err, record){
+          if (record){
+            res.status(409).send("Username already exist.");
+            return;
+          }
+          else{
+            //Encrypt user password
+            var encryptedPassword =  await bcrypt.hash(password, 10);
 
-        // Create user in our database
-        users.addUser({
-          first_name,
-          last_name,
-          username,
-          access_type,      
-          email: email.toLowerCase(), // sanitize: convert email to lowercase
-          password: encryptedPassword,
-        },function(err,result){
-            if (err) { 
-              res.status(err.status).send(err.message); 
-            }
-            else {
-                const user = result;
-                // Create token
-                const token = jwt.sign(
-                { 
-                  user_id: user._id, email 
-                },
-                process.env.TOKEN_KEY,
-                {
-                  expiresIn: "30d",
-                });
-                // save user token
-                user.token = token          
-                // return new user
-                res.status(201).json(user);
-            }
-        });
+            // Create user in our database
+            users.addUser({
+              first_name,
+              last_name,
+              username,
+              access_type,      
+              email: email.toLowerCase(), // sanitize: convert email to lowercase
+              password: encryptedPassword,
+            },function(err,result){
+                if (err) { 
+                  res.status(err.status).send(err.message); 
+                }
+                else {
+                    const user = result;
+                    // Create token
+                    const token = jwt.sign(
+                    { 
+                      user_id: user._id, email 
+                    },
+                    process.env.TOKEN_KEY,
+                    {
+                      expiresIn: "30d",
+                    });
+                    // save user token
+                    user.token = token          
+                    // return new user
+                    res.status(201).json(user);
+                }
+            });
+          }
+        })
      }
   });
     

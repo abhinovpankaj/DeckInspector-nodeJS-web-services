@@ -45,7 +45,7 @@ class ReportGeneration{
             },
             additionalJsContext: {
                 tile: async () => {
-                    var projurl = project.data.item.url===''?'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png':
+                    var projurl = project.data.item.url===''?'https://deckinspectors.blob.core.windows.net/testproject/deck_logo.jpg':
                     project.data.item.url;
 
                     var urlArray = projurl.toString().split('/');
