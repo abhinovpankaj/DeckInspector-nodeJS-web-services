@@ -38,7 +38,7 @@ class ReportGeneration{
                     name: project.data.item.name,
                     address: project.data.item.address,
                     description:project.data.item.description,
-                    createdBy:project.data.item.createdby,
+                    createdBy:companyName,
                     createdAt : date.toLocaleString(),
                     
                 }               
