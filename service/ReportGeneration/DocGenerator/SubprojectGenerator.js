@@ -1,0 +1,124 @@
+const {getSubProjectById} = require("../../../model/subproject");
+const {SubprojectDoc, Doc} = require("../Models/ProjectDocs");
+const ReportGenerationUtil = require("../ReportGenerationUtil");
+const LocationType = require("../../../model/locationType");
+const LocationGenerator = require("./LocationGenerator");
+
+class SubprojectGenerator{
+    async createSubProject(subProjectId) {
+        const subProjectData = await getSubProjectById(subProjectId);
+        const subprojectName = subProjectData.data.item.name;
+        const subProjectDoc = new SubprojectDoc();
+        const subProjectMetadataHashCode = ReportGenerationUtil.calculateHash(subProjectData);
+        let subprojectLocationsHashCode = [];
+        let locationPath = [];
+        subprojectLocationsHashCode.push(subProjectMetadataHashCode);
+        const {subProjectApartments, subProjectLocations } = this.reordersubProjectLocations(subProjectData.data.item.children);
+        for (let key in subProjectApartments) {
+            let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,subprojectName);
+            subProjectDoc.buildingApartmentMap.set(subProjectApartments[key]._id.toString(), locationDoc);
+            subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
+            locationPath.push(locationDoc.doc.filePath);
+        }
+
+        for (let key in subProjectLocations) {
+            let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,subprojectName);
+            subProjectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
+            subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
+            locationPath.push(locationDoc.doc.filePath);
+        }
+
+        let subProjectHashCode = ReportGenerationUtil.combineHashesInArray(subprojectLocationsHashCode);
+        const filePath = await ReportGenerationUtil.mergeDocxArray(locationPath, subProjectId);
+
+        subProjectDoc.doc = new Doc(subProjectHashCode, filePath);
+        return subProjectDoc;
+
+    }
+
+    async updateSubProject(subProjectId, subprojectDoc) {
+        const subProjectData = await getSubProjectById(subProjectId);
+        const subprojectName = subProjectData.data.item.name;
+        const subProjectMetadataHashCode = ReportGenerationUtil.calculateHash(subProjectData);
+        const originalHashCode = subprojectDoc.doc.hashCode;
+        const subprojectLocationsHashCode = [];
+        subprojectLocationsHashCode.push(subProjectMetadataHashCode);
+        let locationPath = [];
+        const {subProjectApartments, subProjectLocations } = this.reordersubProjectLocations(subProjectData.data.item.children);
+        let buildingLocationMap = new Map();
+        let buildingApartmentMap = new Map();
+        for (let key in subProjectApartments) {
+            if (subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString())) {
+                let locationDoc = await LocationGenerator.updateLocation(subProjectApartments[key]._id,
+                    subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString()),
+                    subprojectName);
+                if (locationDoc !== null) {
+                    subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString()).doc= locationDoc;
+                }
+            } else {
+                console.log("New subproject apartment is added")
+                let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,subprojectName);
+                subprojectDoc.buildingApartmentMap.set(subProjectApartments[key]._id.toString(), locationDoc);
+            }
+
+            let newLocationDoc = subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString());
+            buildingApartmentMap.set(subProjectApartments[key]._id.toString(), newLocationDoc);
+            subprojectLocationsHashCode.push(newLocationDoc.doc.hashCode);
+            locationPath.push(newLocationDoc.doc.filePath)
+
+        }
+        for (let key in subProjectLocations) {
+            if (subprojectDoc.buildingLocationMap.has(subProjectLocations[key]._id.toString())) {
+                let locationDoc = await LocationGenerator.updateLocation(subProjectLocations[key]._id,
+                    subprojectDoc.buildingLocationMap.get(subProjectLocations[key]._id.toString()),
+                    subprojectName);
+                if (locationDoc !== null) {
+                    subprojectDoc.buildingLocationMap.get(subProjectLocations[key]._id.toString()).doc=locationDoc;
+                }
+            } else {
+                console.log("New subproject location is added");
+                let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,subprojectName);
+                subprojectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
+            }
+
+            let newLocationDoc = subprojectDoc.buildingLocationMap.get(subProjectLocations[key]._id.toString());
+            buildingLocationMap.set(subProjectLocations[key]._id.toString(), newLocationDoc);
+            subprojectLocationsHashCode.push(newLocationDoc.doc.hashCode);
+            locationPath.push(newLocationDoc.doc.filePath);
+        }
+        subprojectDoc.buildingLocationMap = buildingLocationMap;
+        subprojectDoc.buildingApartmentMap = buildingApartmentMap;
+
+        const subProjectHashCode = ReportGenerationUtil.combineHashesInArray(subprojectLocationsHashCode);
+        if (subProjectHashCode !== originalHashCode) {
+            console.log('SubProject Doc is changed');
+            const filePath = await ReportGenerationUtil.mergeDocxArray(locationPath, subProjectId);
+            subprojectDoc.doc = new Doc(subProjectHashCode, filePath);
+            return subprojectDoc;
+        }
+        return null;  // No update needed.  SubProject doc is unchanged.
+    }
+
+    reordersubProjectLocations (locations){
+        const subProjectApartments = [];
+        const subProjectLocations = [];
+        for(let key in locations)
+        {
+            if(locations[key].type === LocationType.APARTMENT)
+            {
+                subProjectApartments.push(locations[key]);
+            }
+            else if(locations[key].type === LocationType.BUILDINGLOCATION){
+                subProjectLocations.push(locations[key]);
+            }
+        }
+        subProjectApartments.sort(function(apt1,apt2){
+            return (apt1.sequenceNumber-apt2.sequenceNumber);
+        });
+        subProjectLocations.sort(function(loc1,loc2){
+            return (loc1.sequenceNumber-loc2.sequenceNumber)});
+        return {subProjectApartments,subProjectLocations};
+    }
+}
+
+module.exports = new SubprojectGenerator();

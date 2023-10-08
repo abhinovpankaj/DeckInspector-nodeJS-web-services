@@ -19,6 +19,7 @@
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "docx-merger": "^1.2.2",
     "docx-templates": "^4.11.3",
     "docxtemplater": "^3.38.0",
