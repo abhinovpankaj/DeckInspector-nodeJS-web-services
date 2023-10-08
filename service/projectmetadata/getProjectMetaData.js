@@ -54,6 +54,10 @@ async function getSingleProjectMetadata(projectId)
         return response;
     }catch(error){
         console.log(error);
+        return {
+            "error": error,
+            "code": 500
+        }
     }
 }
 
