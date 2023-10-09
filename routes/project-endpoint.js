@@ -14,6 +14,8 @@ require("dotenv").config();
 const multer = require('multer');
 const upload = multer({ dest: path.join(__dirname, '..') });
 const {v4 : uuidv4} = require('uuid');
+var uploadBlob = require('../database/uploadimage');
+const projectDocuments = require("../model/projectDocuments");
 
 router.route('/add')
 .post(async function (req, res) {
@@ -387,60 +389,75 @@ router.route('/generatereport')
   const companyName = req.body.companyName;
   const reportType = req.body.reportType;
   const reportFormat = req.body.reportFormat;
-  const requestType = req.body.requestType;
+  // const requestType = req.body.requestType;
   // const reportId = uuidv4();
   // console.log(`reportID: ${reportId}`);
   const projectName = req.body.projectName;
+  const uploader = req.body.user;
   // const docpath = `${projectName}_${reportType}_${reportId}`;
   
-  if(requestType === 'init'){
-    const reportId = uuidv4();
-    const docpath = `${projectName}_${reportType}_${reportId}`;
-    generateProjectReport(projectId,sectionImageProperties,companyName,reportType, reportFormat, docpath);
-    res.status(200).send({reportId: reportId ,message: 'report generation started'});
-  } else{
-    const reportId = req.body.reportId;
-    const docpath = `${projectName}_${reportType}_${reportId}`;
-    console.log(docpath);
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}`;
+    const docpath = `${projectName}_${reportType}_${timestamp}`;
+    res.status(200).json({message: 'Generating report'});
+    await generateProjectReport(projectId,sectionImageProperties,companyName,reportType, reportFormat, docpath);
     const absolutePath = path.resolve(`${docpath}.${reportFormat}`);
     console.log(absolutePath);
-    reportFormat =='pdf'?res.setHeader('Content-Type', 'application/pdf'):
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-  
-    res.setHeader('Content-Disposition', `attachment; filename="${docpath}"`);
-    res.sendFile(absolutePath, {}, (err) => {
-      if (err) {
-        console.error('Error sending file:', err);
-        return res.status(500).send('Error sending file');
-      } else {
-        console.log('Report sent successfully');
-        fs.unlinkSync(absolutePath);
+    const containerName = projectName;
+    const uploadOptions = {
+      metadata: {
+          'uploader': uploader,
+      },
+      tags: {
+          'project': containerName,
+          'owner': projectName
       }
-    });
-  }
+  };
+    const newContainerName = containerName.replace(/\s+/g, '').toLowerCase();
+    const fileName = `${docpath}.${reportFormat}`
+    var result = await uploadBlob.uploadFile(newContainerName, fileName, absolutePath, uploadOptions);
+    var response = JSON.parse(result);
+    if (response.error) {
+        responseError = new ErrorResponse(500, 'Internal server error', result.error);
+        console.log(response);
+        // res.status(500).json(responseError);
+        return;
+    }
+    if (response.message) {
+      fs.unlinkSync(absolutePath);
+        //Update images Url
+        let url = response.url;
+        let project_id = projectId;
+        let name = projectName;
+        console.log(response);
+        let timestamp = (new Date(Date.now())).toISOString();
+        projectDocuments.addProjectDocument({
+          project_id,
+          name,
+          url,
+          uploader,
+          timestamp
+        },function(err,result){
+            if (err) { 
+                console.log(err)
+            }
+            if (result){
+                console.log(result)
+            }
+        });
+        console.log(projectId);
+        console.log('report uploaded');
+    }
+    // else
+    //     res.status(409).json(response);
+      
+  
   
 } catch (err) {
   console.error('Error generating Report:', err);
   return res.status(500).send('Error generating Report');
 }
 });
-
-router.route('/getReportStatus')
-.post(async function (req, res){
-  const reportId = req.body.reportId;
-  const reportType = req.body.reportType;
-  const projectName = req.body.projectName;
-  const reportFormat = req.body.reportFormat;
-  const filename = `${projectName}_${reportType}_${reportId}.${reportFormat}`;
-  const absolutePath = path.join(__dirname, '..',filename);
-  console.log(`Report file: ${absolutePath}`);
-  if (fs.existsSync(absolutePath)){
-    res.status(200).send({reportStatus: true});
-  }
-  else{
-    res.status(200).send({reportStatus: false});
-  }
-})
 
 router.route('/generatereporthtml').post(async function (req, res) {
   try {
