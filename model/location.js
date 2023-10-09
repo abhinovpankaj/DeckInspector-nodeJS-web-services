@@ -485,7 +485,7 @@ var getLocationByParentId = async function(parentId){
         var result = await mongo.Locations.find(
             {parentid:new ObjectId(parentId)}
             ).toArray();
-            console.log(result);
+            //console.log(result);
             if (result.length>0) {
                 response = {
                     "data": {
