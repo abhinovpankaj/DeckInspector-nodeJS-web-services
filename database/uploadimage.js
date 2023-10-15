@@ -68,5 +68,5 @@ async function streamToBuffer(readableStream) {
     readableStream.on("error", reject);
   });
 }
-module.exports = { uploadFile ,getBlobBuffer,getBlobBufferFromOld};
+module.exports = { uploadFile ,getBlobBuffer};
 
