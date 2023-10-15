@@ -15,7 +15,7 @@ const multer = require('multer');
 const upload = multer({ dest: path.join(__dirname, '..') });
 const {v4 : uuidv4} = require('uuid');
 var uploadBlob = require('../database/uploadimage');
-const projectDocuments = require("../model/projectDocuments");
+const projectReports = require("../model/projectReports");
 
 router.route('/add')
 .post(async function (req, res) {
@@ -431,7 +431,7 @@ router.route('/generatereport')
         let name = projectName;
         console.log(response);
         let timestamp = (new Date(Date.now())).toISOString();
-        projectDocuments.addProjectDocument({
+        projectReports.addProjectReport({
           project_id,
           name,
           url,
