@@ -11,6 +11,7 @@ const conclusiveSections  = require("../../../../model/conclusiveSections");
 const blobManager = require("../../../../database/uploadimage");
 const jo = require('jpeg-autorotate');
 
+
 const generateDocReportForLocation = async function (locationId,companyName, sectionImageProperties, reportType,subprojectName='') {
   try {
     const sectionDataDoc =
@@ -210,6 +211,7 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                   furtherinvasive:sectionData.data.item.furtherinvasivereviewrequired=='True'?'Yes':'No',
                   conditionalassesment:sectionData.data.item.conditionalassessment=='Futureinspection'?'Future Inspection':sectionData.data.item.conditionalassessment,
                   additionalconsiderations:sectionData.data.item.additionalconsiderations,
+                  //additionalconsiderationshtml:sectionData.data.item.additionalconsiderationshtml,
                   eee:sectionData.data.item.eee,
                   lbc:sectionData.data.item.lbc,
                   awe:sectionData.data.item.awe,
@@ -261,6 +263,16 @@ const getLocationDoc = async function(sectionId,template,sectionDocValues){
           
           return tempArray;
         },
+        // getadditionalconsiderations: ()=>{
+        //     console.log('inside html fetch');
+        //     // if (sectionDocValues.additionalconsiderationshtml===null ||sectionDocValues.additionalconsiderationshtml===undefined) {
+        //     //   return sectionDocValues.additionalconsiderations;
+        //     // }else{
+        //       return '<font face="Nunito"><b>This</b> is a Test <u>text in html</u> <font color="#e31c1c">format</font> with different <span>colors</span> and <i>combinations</i>.</font>';
+        //       return sectionDocValues.additionalconsiderationshtml;
+
+        //     //}            
+        // },
         tile: async (imageurl) => {
           
           if (imageurl===undefined) {
