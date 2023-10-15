@@ -99,22 +99,32 @@ async function getSubProjectsData(projectId) {
             subProjectData._id = subProject._id;
             subProjectData.name = subProject.name;
             subProjectData.isInvasive = subProject.isInvasive?subProject.isInvasive:false;
+            subProjectData.sequenceNumber = subProject.sequenceNumber;
             const subProjectLocations = [];
             const subProjectChildren = await location.getLocationByParentId(subProject._id);
-            //console.log(subProjectChildren);
+            
             if (subProjectChildren.data) {
                 for (const loc of subProjectChildren.data.item) {
                     const locId = loc._id;
                     const locName = loc.name;
                     const locType = loc.type;
+                    const sequenceNumber = loc.sequenceNumber;
                     const isInvasive = loc.isInvasive?loc.isInvasive:false;
-                    subProjectLocations.push({ locationId: locId, locationName: locName, locationType: locType,isInvasive:isInvasive });
+                    subProjectLocations.push({ locationId: locId, sequenceNumber:sequenceNumber, locationName: locName,
+                         locationType: locType,isInvasive:isInvasive });
                 }
             }
-            subProjectData.subProjectLocations = subProjectLocations;
+            subProjectData.subProjectLocations = subProjectLocations
+            .sort(function(subProj1,subProj2){
+                return (subProj1.sequenceNumber-subProj2.sequenceNumber)
+            });
             subProjects.push(subProjectData);
+            
         }
     }
+    subProjects.sort(function(subProj1,subProj2){
+        return (subProj1.sequenceNumber-subProj2.sequenceNumber)
+    });
     return subProjects;
 }
 
