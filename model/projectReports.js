@@ -36,7 +36,7 @@ var getProjectReportsbyProjectId = async function (project_id, callback) {
 };
 
 var removeReport = async  function (id, callback) {
-    var result = await mongo.projectReports.deleteOne({_id: ObjectId(id)});
+    var result = await mongo.ProjectReports.deleteOne({_id: ObjectId(id)});
     if(result.deletedCount==1){
         callback(null,{status:201,message:"Document deleted successfully."});
     }
