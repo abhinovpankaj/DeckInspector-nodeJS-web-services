@@ -281,7 +281,12 @@ const getLocationDoc = async function(sectionId,template,sectionDocValues){
 
               //const resp = await fetchPlus(imageurl,{keepAlive: true },3);
               var urlArray = imageurl.toString().split('/');
-              const imagebuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2])
+              var imagebuffer;
+              if (imageurl.includes('deckinspectorsappdata')) {
+                 imagebuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
+              }else
+               imagebuffer = await blobManager.getBlobBufferFromOld(urlArray[urlArray.length-1],urlArray[urlArray.length-2])
+              
               if (imagebuffer===undefined) {
                 console.log('Failed to load image .');
                 return;
