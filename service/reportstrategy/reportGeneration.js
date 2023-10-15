@@ -19,12 +19,15 @@ class ReportGeneration{
             const promises = [];
             const reportDocList = []; 
             project.data.item.projectHeader = this.getProjectHeader(reportType);
-            let projectHtml = ['projectheader.docx'];//ejs.render(template, project.data.item);
+            let projectHtml = ['projectheader.docx'];
             //create project header docx
             var template;
+            var createdBy='WICR  Waterproofing & Construction';
+
             if (companyName=='Wicr') {
                 template = fs.readFileSync('WicrProjectHeader.docx');
             }else{
+                createdBy ='Deck Inspectors Inc.';
                 template = fs.readFileSync('DeckProjectHeader.docx');
             }
             
@@ -38,7 +41,7 @@ class ReportGeneration{
                     name: project.data.item.name,
                     address: project.data.item.address,
                     description:project.data.item.description,
-                    createdBy:companyName,
+                    createdBy:createdBy,
                     createdAt : date.toLocaleString(),
                     
                 }               
