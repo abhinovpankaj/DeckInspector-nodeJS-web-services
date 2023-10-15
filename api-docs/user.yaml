@@ -41,7 +41,7 @@ components:
         - email
         - password
         - username
-        - appsecret
+        - appSecret
       properties:
         first_name:
           type: string
@@ -63,7 +63,7 @@ components:
           type: string
           format: password
           description: The user's password
-        appsecret:
+        appSecret:
           type: string
           format: string
           description: app secret for creating admins.
