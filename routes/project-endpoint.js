@@ -455,7 +455,7 @@ router.route('/generatereport')
   
 } catch (err) {
   console.error('Error generating Report:', err);
-  return res.status(500).send('Error generating Report');
+  //return res.status(500).send('Error generating Report');
 }
 });
 
