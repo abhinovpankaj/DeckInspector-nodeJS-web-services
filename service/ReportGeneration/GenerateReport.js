@@ -1,21 +1,20 @@
 const ProjectGenerator = require("./DocGenerator/ProjectGenerator");
+const ProjectReportHashCodeService = require("../projectReportHashCodeService");
 
 class GenerateReport {
     constructor() {
         this.projects = new Map();
     }
 
-    async generateReport(projectId) {
+    async generateReport(projectId,reportType) {
         // check if project exist in DB/List
-        if  (!this.projects.has(projectId)) {
+        const existingDoc = await ProjectReportHashCodeService.getProjctReportHashCodeByIdAndReportType(projectId,reportType);
+        if  ( existingDoc == null ) {
             console.log("Project not found");
-            let projectDoc = await ProjectGenerator.createProject(projectId);
-            this.projects.set(projectId.toString(), projectDoc);
+            return await ProjectGenerator.createProject(projectId,reportType);
         } else {
-            await ProjectGenerator.updateProject(projectId,this.projects);
+            return await ProjectGenerator.updateProject(projectId,existingDoc,reportType);
         }
-        return this.projects.get(projectId.toString()).doc.filePath;
-
     }
 }
 

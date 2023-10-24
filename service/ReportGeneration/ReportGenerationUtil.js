@@ -3,6 +3,8 @@ const docxTemplate = require('docx-templates');
 const fs = require('fs');
 const DocxMerger = require('docx-merger');
 const util = require('util');
+const objectHash = require('object-hash');
+const serialize = require("serialize-javascript");
 
 class ReportGenerationUtil {
     constructor() {
@@ -63,8 +65,8 @@ class ReportGenerationUtil {
     }
 
     calculateHash = (doc) => {
-        const str = JSON.stringify(doc, Object.keys(doc).sort());
-        // Create a SHA-256 hash of the string
+        const str = serialize(doc);
+         // Create a SHA-256 hash of the string
         const hash = crypto.createHash('sha256');
         hash.update(str);
 

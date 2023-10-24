@@ -22,8 +22,8 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
             const path = await generatePdfFile(fileName,projectHtml,companyName);
             // callback( path);
         }else{
-            const projectHeader = await getProjectDoc(projectId,project, sectionImageProperties, companyName, reportType, reportFormat);
-            const projectPath = await GenerateReport.generateReport(projectId);
+            const projectHeader = await getProjectDoc(projectId,project, sectionImageProperties, companyName, reportType);
+            const projectPath = await GenerateReport.generateReport(projectId,reportType);
             await ReportGenerationUtil.mergeDocxArray([projectHeader,projectPath], fileName);
         }
 
@@ -34,7 +34,7 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
     }
 }
 
-async function getProjectDoc(projectId,project, sectionImageProperties,companyName, reportType,reportFormat='pdf') {
+async function getProjectDoc(projectId,project, sectionImageProperties,companyName, reportType) {
     if (project.data.item.projecttype === "singlelevel") {
         return await SingleProjectReportGeneration.generateReportDoc(project,companyName, sectionImageProperties, reportType);
     }

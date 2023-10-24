@@ -5,7 +5,7 @@ const LocationType = require("../../../model/locationType");
 const LocationGenerator = require("./LocationGenerator");
 
 class SubprojectGenerator{
-    async createSubProject(subProjectId) {
+    async createSubProject(subProjectId,reportType) {
         const subProjectData = await getSubProjectById(subProjectId);
         const subprojectName = subProjectData.data.item.name;
         const subProjectDoc = new SubprojectDoc();
@@ -15,14 +15,14 @@ class SubprojectGenerator{
         subprojectLocationsHashCode.push(subProjectMetadataHashCode);
         const {subProjectApartments, subProjectLocations } = this.reordersubProjectLocations(subProjectData.data.item.children);
         for (let key in subProjectApartments) {
-            let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,subprojectName);
+            let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,reportType,subprojectName);
             subProjectDoc.buildingApartmentMap.set(subProjectApartments[key]._id.toString(), locationDoc);
             subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
             locationPath.push(locationDoc.doc.filePath);
         }
 
         for (let key in subProjectLocations) {
-            let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,subprojectName);
+            let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,reportType,subprojectName);
             subProjectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
             subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
             locationPath.push(locationDoc.doc.filePath);
@@ -36,7 +36,7 @@ class SubprojectGenerator{
 
     }
 
-    async updateSubProject(subProjectId, subprojectDoc) {
+    async updateSubProject(subProjectId, subprojectDoc,reportType) {
         const subProjectData = await getSubProjectById(subProjectId);
         const subprojectName = subProjectData.data.item.name;
         const subProjectMetadataHashCode = ReportGenerationUtil.calculateHash(subProjectData);
@@ -51,13 +51,14 @@ class SubprojectGenerator{
             if (subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString())) {
                 let locationDoc = await LocationGenerator.updateLocation(subProjectApartments[key]._id,
                     subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString()),
+                    reportType,
                     subprojectName);
                 if (locationDoc !== null) {
                     subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString()).doc= locationDoc;
                 }
             } else {
                 console.log("New subproject apartment is added")
-                let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,subprojectName);
+                let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,reportType,subprojectName);
                 subprojectDoc.buildingApartmentMap.set(subProjectApartments[key]._id.toString(), locationDoc);
             }
 
@@ -71,13 +72,14 @@ class SubprojectGenerator{
             if (subprojectDoc.buildingLocationMap.has(subProjectLocations[key]._id.toString())) {
                 let locationDoc = await LocationGenerator.updateLocation(subProjectLocations[key]._id,
                     subprojectDoc.buildingLocationMap.get(subProjectLocations[key]._id.toString()),
+                    reportType,
                     subprojectName);
                 if (locationDoc !== null) {
                     subprojectDoc.buildingLocationMap.get(subProjectLocations[key]._id.toString()).doc=locationDoc;
                 }
             } else {
                 console.log("New subproject location is added");
-                let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,subprojectName);
+                let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,reportType,subprojectName);
                 subprojectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
             }
 

@@ -4,7 +4,7 @@ const ReportGenerationUtil = require("../ReportGenerationUtil");
 const SectionGenerator = require("./SectionGenerator");
 
 class LocationGenerator{
-    async createLocation(locationId, subprojectName='') {
+    async createLocation(locationId, reportType,subprojectName='') {
         const location = await locations.getLocationById(locationId);
         let locationSections = location.data.item.sections;
         let locationDoc = new LocationDoc();
@@ -13,7 +13,7 @@ class LocationGenerator{
             let locationSectionHashCodes = [];
             let sectionPath = [];
             for (const section of locationSections) {
-                const sectionDoc = await SectionGenerator.createSection(section._id,location,subprojectName);
+                const sectionDoc = await SectionGenerator.createSection(section._id,location,subprojectName,reportType);
                 locationSectionHashCodes.push(sectionDoc.hashCode);
                 locationDoc.sectionMap.set(section._id.toString(), sectionDoc);
                 sectionPath.push(sectionDoc.filePath);
@@ -28,7 +28,7 @@ class LocationGenerator{
         }
     }
 
-    async updateLocation(locationId,locationDoc,subprojectName='') {
+    async updateLocation(locationId,locationDoc,reportType,subprojectName='') {
         const location = await locations.getLocationById(locationId);
         let locationSections = location.data.item.sections;
         let originalHashCode = locationDoc.doc.hashCode;
@@ -41,14 +41,14 @@ class LocationGenerator{
             let sectionPath = [];
             for (const section of locationSections) {
                 if (sectionMap.has(section._id.toString())){
-                    const sectionDoc = await SectionGenerator.updateSection(section._id, sectionMap.get(section._id.toString()).hashCode,location,subprojectName);
+                    const sectionDoc = await SectionGenerator.updateSection(section._id, sectionMap.get(section._id.toString()).hashCode,location,subprojectName,reportType);
                     if (sectionDoc !== null) {
                         // Section Doc is updated
                         sectionMap.set(section._id.toString(), sectionDoc);
                     }
                 } else {
                     console.log("New Section is added");
-                    const sectionDoc = await SectionGenerator.createSection(section._id,location,subprojectName);
+                    const sectionDoc = await SectionGenerator.createSection(section._id,location,subprojectName,reportType);
                     sectionMap.set(section._id.toString(), sectionDoc);
                 }
 
