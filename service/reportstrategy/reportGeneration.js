@@ -27,7 +27,7 @@ class ReportGeneration{
             if (companyName=='Wicr') {
                 template = fs.readFileSync('WicrProjectHeader.docx');
             }else{
-                createdBy ='Deck Inspectors Inc.';
+                createdBy ='E3 Inspection Reporting Solutions.';
                 template = fs.readFileSync('DeckProjectHeader.docx');
             }
             
