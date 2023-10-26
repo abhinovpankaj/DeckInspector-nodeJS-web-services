@@ -3,6 +3,8 @@ const {SubprojectDoc, Doc} = require("../Models/ProjectDocs");
 const ReportGenerationUtil = require("../ReportGenerationUtil");
 const LocationType = require("../../../model/locationType");
 const LocationGenerator = require("./LocationGenerator");
+const ProjectReportUploader = require("../projectReportUploader");
+const fs = require("fs");
 
 class SubprojectGenerator{
     async createSubProject(subProjectId,reportType) {
@@ -30,8 +32,12 @@ class SubprojectGenerator{
 
         let subProjectHashCode = ReportGenerationUtil.combineHashesInArray(subprojectLocationsHashCode);
         const filePath = await ReportGenerationUtil.mergeDocxArray(locationPath, subProjectId);
-
-        subProjectDoc.doc = new Doc(subProjectHashCode, filePath);
+        let fileS3url = null
+        if(filePath!= null) {
+            fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, subProjectId, reportType);
+            await fs.promises.unlink(filePath);
+        }
+        subProjectDoc.doc = new Doc(subProjectHashCode, fileS3url);
         return subProjectDoc;
 
     }
@@ -95,7 +101,12 @@ class SubprojectGenerator{
         if (subProjectHashCode !== originalHashCode) {
             console.log('SubProject Doc is changed');
             const filePath = await ReportGenerationUtil.mergeDocxArray(locationPath, subProjectId);
-            subprojectDoc.doc = new Doc(subProjectHashCode, filePath);
+            let fileS3url = null
+            if(filePath!= null) {
+                fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, subProjectId, reportType);
+                await fs.promises.unlink(filePath);
+            }
+            subprojectDoc.doc = new Doc(subProjectHashCode, fileS3url);
             return subprojectDoc;
         }
         return null;  // No update needed.  SubProject doc is unchanged.

@@ -5,6 +5,8 @@ const DocxMerger = require('docx-merger');
 const util = require('util');
 const objectHash = require('object-hash');
 const serialize = require("serialize-javascript");
+const axios = require('axios');
+const fspromises = require('fs').promises;
 
 class ReportGenerationUtil {
     constructor() {
@@ -24,28 +26,40 @@ class ReportGenerationUtil {
         });
     }
 
-    async mergeDocxArray(docxArray, fileName) {
+    async downloadFileFromURL(url) {
+        try {
+            const response = await axios.get(url, { responseType: 'arraybuffer' });  // Make sure to set responseType to 'arraybuffer' to handle binary data correctly
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching the file from URL: ${url}`, error);
+            throw error;
+        }
+    }
+
+    async mergeDocxArray(docxUrls, fileName) {
         try {
             const docFilePath = `${fileName}.docx`;
             const fileList = [];
 
-            for (const docx of docxArray) {
-                if (typeof docx === 'string' && fs.existsSync(docx)) {
-                    fileList.push(await this.readFileAsync(docx));
-                } else {
-                    console.error(`Invalid file path: ${docx}`);
+            for (const url of docxUrls) {
+                if(!url) continue;
+                try {
+                    const docxData = await this.downloadFileFromURL(url);
+                    fileList.push(docxData);
+                } catch (error) {
+                    console.error(`Error fetching the file from URL: ${url}`, error);
                 }
             }
 
             if (fileList.length === 0) {
                 console.error('No valid files to merge.');
-                return {};
+                return null;
             }
 
             const docx = new DocxMerger({}, fileList);
 
             const data = await this.saveDocxMerger(docx, 'nodebuffer');
-            await this.writeFileAsync(docFilePath, data);
+            await fspromises.writeFile(docFilePath, data);
             console.log('Merged DOCX file saved:', docFilePath);
             return docFilePath;
         } catch (error) {

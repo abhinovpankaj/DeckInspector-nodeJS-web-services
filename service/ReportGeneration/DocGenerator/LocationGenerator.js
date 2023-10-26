@@ -2,6 +2,8 @@ const locations = require("../../../model/location");
 const {LocationDoc, Doc} = require("../Models/ProjectDocs");
 const ReportGenerationUtil = require("../ReportGenerationUtil");
 const SectionGenerator = require("./SectionGenerator");
+const ProjectReportUploader = require("../projectReportUploader");
+const fs = require("fs");
 
 class LocationGenerator{
     async createLocation(locationId, reportType,subprojectName='') {
@@ -23,7 +25,12 @@ class LocationGenerator{
             locationSectionHashCodes.push(locationMetaDataHashCode);
             const locationHashCode = ReportGenerationUtil.combineHashesInArray(locationSectionHashCodes);
             const filePath = await ReportGenerationUtil.mergeDocxArray(sectionPath, locationId);
-            locationDoc.doc = new Doc(locationHashCode, filePath);
+            let fileS3url = null;
+            if(filePath!= null) {
+                fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, locationId, reportType);
+                await fs.promises.unlink(filePath);
+            }
+            locationDoc.doc = new Doc(locationHashCode, fileS3url);
             return locationDoc;
         }
     }
@@ -63,7 +70,12 @@ class LocationGenerator{
             if (locationHashCode !== originalHashCode) {
                 console.log('Location Doc is changed');
                 const filePath = await ReportGenerationUtil.mergeDocxArray(sectionPath, locationId);
-                return new Doc(locationHashCode, filePath);
+                let fileS3url = null;
+                if(filePath!= null) {
+                    fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, locationId, reportType);
+                    await fs.promises.unlink(filePath);
+                }
+                return new Doc(locationHashCode, fileS3url);
             }
         }
         return null;  // No update needed.  Location doc is unchanged.

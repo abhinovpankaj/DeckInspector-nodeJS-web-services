@@ -5,7 +5,6 @@ const SingleProjectReportGeneration = require("./reportstrategy/singleProjectRep
 const GenerateReport = require("./ReportGeneration/GenerateReport.js")
 const projects = require("../model/project");
 const DocxMerger = require("docx-merger");
-const fs = require('fs');
 const ReportGenerationUtil = require("./ReportGeneration/ReportGenerationUtil");
 const ReportDocGeneration = require("./ReportGeneration/ReportDocGeneration");
 

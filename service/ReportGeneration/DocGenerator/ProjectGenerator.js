@@ -6,6 +6,8 @@ const LocationGenerator = require("./LocationGenerator");
 const SubProjectGenerator = require("./SubProjectGenerator");
 const ProjectReportHashCodeService = require("../../projectReportHashCodeService");
 const serialize = require('serialize-javascript');
+const ProjectReportUploader = require("../projectReportUploader");
+const fs = require("fs");
 class ProjectGenerator{
     async createProject(projectId,reportType) {
 
@@ -28,12 +30,9 @@ class ProjectGenerator{
             projectHashcodeArray.push(locationDoc.doc.hashCode);
             docPath.push(locationDoc.doc.filePath);
         }
-
-
         projectHashcodeArray.push(ReportGenerationUtil.calculateHash(project));
         const projectHashCode = ReportGenerationUtil.combineHashesInArray(projectHashcodeArray);
-        const filePath = await ReportGenerationUtil.mergeDocxArray(docPath, projectId);
-        projectDoc.doc = new Doc(projectHashCode, filePath);
+        await this.saveFileToS3(docPath, projectId, reportType, projectDoc, projectHashCode);
         const projectDocToSave = this.getProjectReportHascodeDocToSave(projectDoc, projectId,reportType);
         await ProjectReportHashCodeService.addProjectReportHashCode(projectDocToSave);
         return projectDoc.doc.filePath;
@@ -90,13 +89,22 @@ class ProjectGenerator{
         const projectHashCode = ReportGenerationUtil.combineHashesInArray(projectHashcodeArray);
         if (projectHashCode !== projectDoc.doc.hashCode) {
             console.log("Project Hashcode changed.  Updating Project Doc");
-            const filePath = await ReportGenerationUtil.mergeDocxArray(docPath, projectId);
-            projectDoc.doc = new Doc(projectHashCode, filePath);
+            await this.saveFileToS3(docPath, projectId, reportType, projectDoc, projectHashCode);
         }
         await ProjectReportHashCodeService.deleteProjectReportHashCodeById(projectId,reportType);
         const projectDocToSave = this.getProjectReportHascodeDocToSave(projectDoc, projectId,reportType);
         await ProjectReportHashCodeService.addProjectReportHashCode(projectDocToSave);
         return projectDoc.doc.filePath
+    }
+
+    async saveFileToS3(docPath, projectId, reportType, projectDoc, projectHashCode) {
+        const filePath = await ReportGenerationUtil.mergeDocxArray(docPath, projectId);
+        let fileS3url = null;
+        if (filePath != null) {
+            fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, projectId, reportType);
+            await fs.promises.unlink(filePath);
+        }
+        projectDoc.doc = new Doc(projectHashCode, fileS3url);
     }
 
     reOrderAndGroupProjects (projects){
@@ -121,10 +129,13 @@ class ProjectGenerator{
     }
     getProjectReportHascodeDocToSave(projectDoc, projectId,reportType) {
         const serialized = serialize(projectDoc);
+        const now = new Date();
+        const indianTime = now.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
         return {
             projectId: projectId,
             data: serialized,
-            reportType: reportType
+            reportType: reportType,
+            createdAt: indianTime,
         };
     }
 }

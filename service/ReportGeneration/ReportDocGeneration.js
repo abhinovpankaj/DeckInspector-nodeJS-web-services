@@ -5,6 +5,7 @@ const SubprojectReportGeneration = require("./SubprojectReportGeneration.js");
 const LocationReportGeneration = require("./LocationReportGeneration.js");
 const ProjectChildType = require("../../model/projectChildType");
 const ProjectReportType = require("../../model/projectReportType");
+const ProjectReportUploader = require("./projectReportUploader");
 
 
 class ReportDocGeneration {
@@ -57,8 +58,8 @@ class ReportDocGeneration {
             };
             const buffer = await ReportGenerationUtil.createDocReportWithParams(template,data,additionalJsContext)
             fs.writeFileSync(filePath, buffer);
-
-            return filePath;
+            const filepath = await ProjectReportUploader.uploadToBlobStorage(filePath, projectId+"Header", reportType);
+            return filepath;
         }
         catch(err){
             console.log(err);
