@@ -23,9 +23,11 @@ class SubprojectDoc {
 class ProjectDocs {
     constructor(doc) {
         this.doc = doc;
+        this.projectHeaderDoc = null;
         this.locationMap = new Map();
         this.subprojectMap = new Map();
     }
 }
+
 
 module.exports = { Doc, LocationDoc, SubprojectDoc, ProjectDocs }

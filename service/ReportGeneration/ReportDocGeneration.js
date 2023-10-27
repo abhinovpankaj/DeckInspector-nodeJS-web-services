@@ -58,8 +58,7 @@ class ReportDocGeneration {
             };
             const buffer = await ReportGenerationUtil.createDocReportWithParams(template,data,additionalJsContext)
             fs.writeFileSync(filePath, buffer);
-            const filepath = await ProjectReportUploader.uploadToBlobStorage(filePath, projectId+"Header", reportType);
-            return filepath;
+            return filePath;
         }
         catch(err){
             console.log(err);

@@ -7,6 +7,7 @@ const SubProjectGenerator = require("./SubProjectGenerator");
 const ProjectReportHashCodeService = require("../../projectReportHashCodeService");
 const serialize = require('serialize-javascript');
 const ProjectReportUploader = require("../projectReportUploader");
+const ProjectHeaderDocGenerator = require("./ProjectHeaderDocGenerator");
 const fs = require("fs");
 class ProjectGenerator{
     async createProject(projectId,reportType) {
@@ -16,6 +17,12 @@ class ProjectGenerator{
         projectDoc.projectId = projectId;
         const projectHashcodeArray = [];
         const docPath = [];
+
+        // Create Project Header Doc
+        projectDoc.projectHeaderDoc = await ProjectHeaderDocGenerator.createProjectHeaderDoc(projectId, project, "DeckInspectors", reportType);
+        projectHashcodeArray.push(projectDoc.projectHeaderDoc.hashCode);
+        docPath.push(projectDoc.projectHeaderDoc.filePath);
+
         const {subProjects, locations } = this.reOrderAndGroupProjects(project.data.item.children);
         for(const mySubProject of subProjects) {
             const subProjectDoc = await SubProjectGenerator.createSubProject(mySubProject._id,reportType);
@@ -46,6 +53,22 @@ class ProjectGenerator{
         const {subProjects, locations } = this.reOrderAndGroupProjects(project.data.item.children);
         let locationMap = new Map();
         let subprojectMap = new Map();
+
+        //Project Header Doc
+        if(projectDoc.projectHeaderDoc)
+        {
+            const projectHeaderDoc = await ProjectHeaderDocGenerator.updateProjectHeaderDoc(projectId, project, "DeckInspectors", reportType,projectDoc.projectHeaderDoc);
+            if (projectHeaderDoc !== null) {
+                projectDoc.projectHeaderDoc = projectHeaderDoc;
+            }
+        }
+        else {
+            projectDoc.projectHeaderDoc = await ProjectHeaderDocGenerator.createProjectHeaderDoc(projectId, project, "DeckInspectors", reportType);
+        }
+        projectHashcodeArray.push(projectDoc.projectHeaderDoc.hashCode);
+        docPath.push(projectDoc.projectHeaderDoc.filePath)
+
+        //SubProjects
         for(const mySubProject of subProjects) {
             if (projectDoc.subprojectMap.has(mySubProject._id.toString())) {
                 const subProjectDoc = await SubProjectGenerator.updateSubProject(mySubProject._id, projectDoc.subprojectMap.get(mySubProject._id.toString()),reportType);
@@ -64,6 +87,7 @@ class ProjectGenerator{
             docPath.push(newSubprojectDoc.doc.filePath)
         }
 
+        // Project Locations
         for (const location of locations) {
             if (projectDoc.locationMap.has(location._id.toString())) {
                 const locationDoc = await LocationGenerator.updateLocation(location._id,

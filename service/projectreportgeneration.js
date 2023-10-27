@@ -19,11 +19,8 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
         if (reportFormat==='pdf') {
             const projectHtml =  await getProjectHtml(project, sectionImageProperties, reportType);
             const path = await generatePdfFile(fileName,projectHtml,companyName);
-            // callback( path);
         }else{
-            const projectHeader = await getProjectDoc(projectId,project, sectionImageProperties, companyName, reportType);
-            const projectPath = await GenerateReport.generateReport(projectId,reportType);
-            await ReportGenerationUtil.mergeDocxArray([projectHeader,projectPath], fileName);
+            return await GenerateReport.generateReport(projectId,reportType);
         }
 
     }

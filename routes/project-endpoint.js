@@ -383,80 +383,47 @@ router.route('/getProjectMetadata/:id')
  * */
 router.route('/generatereport')
     .post(async function (req, res) {
-      try{
-        const projectId = req.body.id;
-        const sectionImageProperties = req.body.sectionImageProperties;
-        const companyName = req.body.companyName;
-        const reportType = req.body.reportType;
-        const reportFormat = req.body.reportFormat;
-        // const requestType = req.body.requestType;
-        // const reportId = uuidv4();
-        // console.log(`reportID: ${reportId}`);
-        const projectName = req.body.projectName;
-        const uploader = req.body.user;
-        // const docpath = `${projectName}_${reportType}_${reportId}`;
+        try {
+            const projectId = req.body.id;
+            const sectionImageProperties = req.body.sectionImageProperties;
+            const companyName = req.body.companyName;
+            const reportType = req.body.reportType;
+            const reportFormat = req.body.reportFormat;
+            // const requestType = req.body.requestType;
+            // const reportId = uuidv4();
+            // console.log(`reportID: ${reportId}`);
+            const projectName = req.body.projectName;
+            const uploader = req.body.user;
+            // const docpath = `${projectName}_${reportType}_${reportId}`;
 
-        const now = new Date();
-        const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}`;
-        const docpath = `${projectName}_${reportType}_${timestamp}`;
-        res.status(200).json({message: 'Generating report'});
-        await generateProjectReport(projectId,sectionImageProperties,companyName,reportType, reportFormat, docpath);
-        const absolutePath = path.resolve(`${docpath}.${reportFormat}`);
-        console.log(absolutePath);
-        const containerName = projectName;
-        const uploadOptions = {
-          metadata: {
-            'uploader': uploader,
-          },
-          tags: {
-            'project': containerName,
-            'owner': projectName
-          }
-        };
-        const newContainerName = containerName.replace(/\s+/g, '').toLowerCase();
-        const fileName = `${docpath}.${reportFormat}`
-        var result = await uploadBlob.uploadFile(newContainerName, fileName, absolutePath, uploadOptions);
-        var response = JSON.parse(result);
-        if (response.error) {
-          responseError = new ErrorResponse(500, 'Internal server error', result.error);
-          console.log(response);
-          // res.status(500).json(responseError);
-          return;
+            const now = new Date();
+            const timestampTemp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}`;
+            const docpath = `${projectName}_${reportType}_${timestampTemp}`;
+            res.status(200).json({message: 'Generating report'});
+           const url = await generateProjectReport(projectId, sectionImageProperties, companyName, reportType, reportFormat, docpath);
+           const project_id = projectId;
+           const name = projectName;
+            let timestamp = (new Date(Date.now())).toISOString();
+            projectReports.addProjectReport({
+                project_id,
+                name,
+                url,
+                uploader,
+                timestamp
+            }, function (err, result) {
+                if (err) {
+                    console.log(err)
+                }
+                if (result) {
+                    console.log(result)
+                }
+            });
+            console.log(projectId);
+            console.log('report uploaded');
+        } catch (err) {
+            console.error('Error generating Report:', err);
+            //return res.status(500).send('Error generating Report');
         }
-        if (response.message) {
-          fs.unlinkSync(absolutePath);
-          //Update images Url
-          let url = response.url;
-          let project_id = projectId;
-          let name = projectName;
-          console.log(response);
-          let timestamp = (new Date(Date.now())).toISOString();
-          projectReports.addProjectReport({
-            project_id,
-            name,
-            url,
-            uploader,
-            timestamp
-          },function(err,result){
-            if (err) {
-              console.log(err)
-            }
-            if (result){
-              console.log(result)
-            }
-          });
-          console.log(projectId);
-          console.log('report uploaded');
-        }
-        // else
-        //     res.status(409).json(response);
-
-
-
-      } catch (err) {
-        console.error('Error generating Report:', err);
-        //return res.status(500).send('Error generating Report');
-      }
     });
 
 router.route('/generatereporthtml').post(async function (req, res) {
