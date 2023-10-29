@@ -115,7 +115,7 @@ class ProjectGenerator{
             console.log("Project Hashcode changed.  Updating Project Doc");
             await this.saveFileToS3(docPath, projectId, reportType, projectDoc, projectHashCode);
         }
-        await ProjectReportHashCodeService.deleteProjectReportHashCodeById(projectId,reportType);
+        await ProjectReportHashCodeService.deleteProjectReportHashCodeByIdAndReportType(projectId,reportType);
         const projectDocToSave = this.getProjectReportHascodeDocToSave(projectDoc, projectId,reportType);
         await ProjectReportHashCodeService.addProjectReportHashCode(projectDocToSave);
         return projectDoc.doc.filePath

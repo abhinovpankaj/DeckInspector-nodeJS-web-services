@@ -401,6 +401,7 @@ router.route('/generatereport')
             const docpath = `${projectName}_${reportType}_${timestampTemp}`;
             res.status(200).json({message: 'Generating report'});
            const url = await generateProjectReport(projectId, sectionImageProperties, companyName, reportType, reportFormat, docpath);
+           console.log(url);
            const project_id = projectId;
            const name = projectName;
             let timestamp = (new Date(Date.now())).toISOString();

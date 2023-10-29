@@ -1,11 +1,7 @@
 const sections = require("../../../model/sections");
 const ReportGenerationUtil = require("../ReportGenerationUtil");
-const LocationReportGeneration = require("../LocationReportGeneration");
-const projectReportType = require("../../../model/projectReportType");
 const {Doc} = require("../Models/ProjectDocs");
 const SectionWordGenerator = require("../WordGenerator/SectionWordGenerator");
-const uploadBlob = require("../../../database/uploadimage");
-const path = require("path");
 const fs = require("fs");
 
 const ProjectReportUploader = require("../../ReportGeneration/projectReportUploader");
