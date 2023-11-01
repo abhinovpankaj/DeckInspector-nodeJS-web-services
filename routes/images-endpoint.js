@@ -31,15 +31,15 @@ router.route('/upload')
             //replace all except alphanumeric
             var newcontainerName= containerName.replace(/[^a-zA-Z0-9 ]/g, '');
             newcontainerName = newcontainerName.toLowerCase();
-            var newentityName= entityName.replace(/[^a-zA-Z0-9 ]/g, '');
-            newentityName = newentityName.toLowerCase();
+            // var newentityName= entityName.replace(/[^a-zA-Z0-9 ]/g, '');
+            // newentityName = newentityName.toLowerCase();
             const uploadOptions = {
                 metadata: {
                     'uploader': uploader,
                 },
                 tags: {
-                    'project': newcontainerName,
-                    'owner': newentityName
+                    'project': newcontainerName
+                    // 'owner': newentityName
                 }
             };
             
