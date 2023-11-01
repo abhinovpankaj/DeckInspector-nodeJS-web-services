@@ -28,30 +28,35 @@ router.route('/upload')
                   lasteditedby, 
                  type, parentType} = req.body;
             const filetoUpload = req.file;
+            //replace all except alphanumeric
+            var newcontainerName= containerName.replace(/[^a-zA-Z0-9 ]/g, '');
+            newcontainerName = newcontainerName.toLowerCase();
+            var newentityName= entityName.replace(/[^a-zA-Z0-9 ]/g, '');
+            newentityName = newentityName.toLowerCase();
             const uploadOptions = {
                 metadata: {
                     'uploader': uploader,
                 },
                 tags: {
-                    'project': containerName,
-                    'owner': entityName
+                    'project': newcontainerName,
+                    'owner': newentityName
                 }
             };
-            var newContainerName=containerName;
-            if (containerName.length < 3) {
-                newContainerName = `${containerName}__${uploader}`;
+            
+            if (newcontainerName.length < 3) {
+                newcontainerName = `${newcontainerName}__${uploader}`;
               }
-            if (!(newContainerName && filetoUpload)) {
+            if (!(newcontainerName && filetoUpload)) {
                 errResponse = new ErrorResponse(400, "containerName, blobName, filePath is required", "");
                 res.status(400).json(errResponse);
                 return;
             }
-            var result = await uploadBlob.uploadFile(newContainerName, filetoUpload.originalname, filetoUpload.path, uploadOptions);
+            var result = await uploadBlob.uploadFile(newcontainerName, filetoUpload.originalname, filetoUpload.path, uploadOptions);
             var response = JSON.parse(result);
             if (response.error) {
-                responseError = new ErrorResponse(500, 'Internal server error', result.error);
+                errResponse = new ErrorResponse(500, 'Internal server error', result.error);
                 console.log(response);
-                res.status(500).json(responseError);
+                res.status(500).json(errResponse);
                 return;
             }
             if (response.message) {
