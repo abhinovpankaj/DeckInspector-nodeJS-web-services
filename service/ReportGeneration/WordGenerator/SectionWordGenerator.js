@@ -39,7 +39,8 @@ class SectionWordGenerator {
 
                         return;
                     }
-                    if (!imageUrl.startsWith('http')) {
+                    const extension  = path.extname(imageUrl);
+                    if (!imageUrl.startsWith('http') || !this.checkExtension(extension)){
                         //imageurl = 'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png';
                         return;
                     }
@@ -52,10 +53,10 @@ class SectionWordGenerator {
                             const imagebuffer = resp.arrayBuffer
                                 ? await resp.arrayBuffer()
                                 : await resp.buffer();
-                            const extension  = path.extname(imageUrl);
+
                             //fix image rotation
                             try {
-                                const {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality: 50});
+                                const {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality: 20});
 
                                 return { height: 6.2,width: 4.85,  data: buffer, extension: extension };
                             } catch (error) {
@@ -80,6 +81,11 @@ class SectionWordGenerator {
             return "";
         }
 
+    }
+
+    checkExtension(str) {
+        const validStrings = ['.png','.gif','.jpg','.jpeg','.svg']; // Add any other strings you want to check
+        return validStrings.includes(str.toLowerCase());
     }
     isSectionIncluded (reportType, section) {
         if (reportType === projectReportType.INVASIVEONLY || reportType === projectReportType.INVASIVEVISUAL) {
