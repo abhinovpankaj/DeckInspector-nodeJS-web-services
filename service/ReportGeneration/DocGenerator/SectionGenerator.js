@@ -13,14 +13,7 @@ class SectionGenerator{
         // Calculate Hashcode
         const hashCode = ReportGenerationUtil.calculateHash(sectionData);
         // Create a Document
-
-        const filePath = await SectionWordGenerator.createSectionDoc(sectionId,sectionData, reportType,subprojectName, location,'DeckInspectors');
-        let fileS3url = null;
-        if(filePath!= null) {
-            fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, sectionId, reportType);
-            await fs.promises.unlink(filePath);
-        }
-        return new Doc(hashCode, fileS3url);
+        return await this.createSectionDoc(sectionId, sectionData, reportType, subprojectName, location, hashCode);
     }
 
     async updateSection(sectionId, originalHashCode,location,subprojectName,reportType) {
@@ -30,17 +23,29 @@ class SectionGenerator{
         const hashCode = ReportGenerationUtil.calculateHash(sectionData);
         if (hashCode !== originalHashCode) {
             // Create a Document
-            console.log("Section Hashcode changed");
-            const filePath = await SectionWordGenerator.createSectionDoc(sectionId,sectionData, reportType,subprojectName, location,'DeckInspectors');
-            let fileS3url = null;
-            if(filePath!= null) {
-                fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, sectionId, reportType);
-                await fs.promises.unlink(filePath);
-            }
-            return new Doc(hashCode, fileS3url);
+            console.log("Section Hashcode changed for SectionID :"+sectionId);
+            return await this.createSectionDoc(sectionId, sectionData, reportType, subprojectName, location, hashCode);
         }
         return null;
 
+    }
+
+    async createSectionDoc(sectionId, sectionData, reportType, subprojectName, location, hashCode) {
+        try {
+            console.log("Creation of Section Doc started :", sectionId);
+            const filePath = await SectionWordGenerator.createSectionDoc(sectionId, sectionData, reportType, subprojectName, location, 'DeckInspectors');
+            let fileS3url = null;
+            if (filePath != null) {
+                fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, sectionId, reportType);
+                await fs.promises.unlink(filePath);
+            }
+            console.log("Section doc completed :", sectionId);
+            return new Doc(hashCode, fileS3url);
+        } catch (e) {
+            console.error(e);
+            console.error("Failed for section :", sectionId);
+            throw e;
+        }
     }
 }
 

@@ -11,7 +11,7 @@ const ProjectHeaderDocGenerator = require("./ProjectHeaderDocGenerator");
 const fs = require("fs");
 class ProjectGenerator{
     async createProject(projectId,reportType) {
-
+        console.log("Project Generation started", projectId);
         const project  = await projects.getProjectById(projectId);
         const projectDoc = new ProjectDocs();
         projectDoc.projectId = projectId;
@@ -26,16 +26,18 @@ class ProjectGenerator{
         const {subProjects, locations } = this.reOrderAndGroupProjects(project.data.item.children);
         for(const mySubProject of subProjects) {
             const subProjectDoc = await SubProjectGenerator.createSubProject(mySubProject._id,reportType);
-            projectDoc.subprojectMap.set(mySubProject._id.toString(), subProjectDoc);
-            projectHashcodeArray.push(subProjectDoc.doc.hashCode);
-            docPath.push(subProjectDoc.doc.filePath);
+            if (subProjectDoc.doc !== null && subProjectDoc.doc !== undefined) {
+                projectDoc.subprojectMap.set(mySubProject._id.toString(), subProjectDoc);
+                projectHashcodeArray.push(subProjectDoc.doc.hashCode);
+                docPath.push(subProjectDoc.doc.filePath);
+            }
         }
 
         for (const location of locations) {
             const locationDoc = await LocationGenerator.createLocation(location._id,reportType);
             if (locationDoc) {
-                projectDoc.locationMap.set(location._id.toString(), locationDoc);
                 if (locationDoc.doc !== null && locationDoc.doc !== undefined) {
+                    projectDoc.locationMap.set(location._id.toString(), locationDoc);
                     projectHashcodeArray.push(locationDoc.doc.hashCode);
                     docPath.push(locationDoc.doc.filePath)
                 }
@@ -86,9 +88,11 @@ class ProjectGenerator{
             }
 
             let newSubprojectDoc = projectDoc.subprojectMap.get(mySubProject._id.toString());
-            subprojectMap.set(mySubProject._id.toString(), newSubprojectDoc);
-            projectHashcodeArray.push(newSubprojectDoc.doc.hashCode);
-            docPath.push(newSubprojectDoc.doc.filePath)
+            if (newSubprojectDoc.doc !== null && newSubprojectDoc.doc !== undefined) {
+                subprojectMap.set(mySubProject._id.toString(), newSubprojectDoc);
+                projectHashcodeArray.push(newSubprojectDoc.doc.hashCode);
+                docPath.push(newSubprojectDoc.doc.filePath)
+            }
         }
 
         // Project Locations
@@ -105,8 +109,8 @@ class ProjectGenerator{
                 projectDoc.locationMap.set(location._id.toString(), locationDoc);
             }
             let newLocationDoc = projectDoc.locationMap.get(location._id.toString());
-            locationMap.set(location._id.toString(), newLocationDoc);
             if (newLocationDoc.doc !== null && newLocationDoc.doc !== undefined) {
+                locationMap.set(location._id.toString(), newLocationDoc);
                 projectHashcodeArray.push(newLocationDoc.doc.hashCode);
                 docPath.push(newLocationDoc.doc.filePath)
             }
