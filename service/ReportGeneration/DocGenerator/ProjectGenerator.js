@@ -33,9 +33,13 @@ class ProjectGenerator{
 
         for (const location of locations) {
             const locationDoc = await LocationGenerator.createLocation(location._id,reportType);
-            projectDoc.locationMap.set(location._id.toString(), locationDoc);
-            projectHashcodeArray.push(locationDoc.doc.hashCode);
-            docPath.push(locationDoc.doc.filePath);
+            if (locationDoc) {
+                projectDoc.locationMap.set(location._id.toString(), locationDoc);
+                if (locationDoc.doc !== null && locationDoc.doc !== undefined) {
+                    projectHashcodeArray.push(locationDoc.doc.hashCode);
+                    docPath.push(locationDoc.doc.filePath)
+                }
+            }
         }
         projectHashcodeArray.push(ReportGenerationUtil.calculateHash(project));
         const projectHashCode = ReportGenerationUtil.combineHashesInArray(projectHashcodeArray);
@@ -102,8 +106,10 @@ class ProjectGenerator{
             }
             let newLocationDoc = projectDoc.locationMap.get(location._id.toString());
             locationMap.set(location._id.toString(), newLocationDoc);
-            projectHashcodeArray.push(newLocationDoc.doc.hashCode);
-            docPath.push(newLocationDoc.doc.filePath)
+            if (newLocationDoc.doc !== null && newLocationDoc.doc !== undefined) {
+                projectHashcodeArray.push(newLocationDoc.doc.hashCode);
+                docPath.push(newLocationDoc.doc.filePath)
+            }
 
         }
         projectDoc.subprojectMap = subprojectMap;
