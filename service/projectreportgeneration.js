@@ -29,6 +29,18 @@ const generateProjectReport = async function generate(projectId,sectionImageProp
     }
 }
 
+const generateLocationReportDoc = async function generate(projectId,locationId,sectionImageProperties,companyName,reportType,
+                                                          reportFormat, fileName)
+{
+    try{
+        return await GenerateReport.generateLocationReport(projectId,locationId,reportType);
+    }
+    catch(err){
+        console.log(err);
+        // callback("");
+    }
+}
+
 async function getProjectDoc(projectId,project, sectionImageProperties,companyName, reportType) {
     if (project.data.item.projecttype === "singlelevel") {
         return await SingleProjectReportGeneration.generateReportDoc(project,companyName, sectionImageProperties, reportType);
@@ -47,4 +59,4 @@ async function getProjectHtml(project, sectionImageProperties, reportType) {
     }
 }
 
-module.exports = { generateProjectReport,getProjectHtml};
+module.exports = { generateProjectReport,getProjectHtml,generateLocationReportDoc};
