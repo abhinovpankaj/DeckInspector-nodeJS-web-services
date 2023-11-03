@@ -19,7 +19,6 @@ class LocationGenerator{
                 locationSectionHashCodes.push(sectionDoc.hashCode);
                 locationDoc.sectionMap.set(section._id.toString(), sectionDoc);
                 sectionPath.push(sectionDoc.filePath);
-
             }
 
             locationSectionHashCodes.push(locationMetaDataHashCode);
@@ -31,8 +30,8 @@ class LocationGenerator{
                 await fs.promises.unlink(filePath);
             }
             locationDoc.doc = new Doc(locationHashCode, fileS3url);
-            return locationDoc;
         }
+        return locationDoc;
     }
 
     async updateLocation(locationId,locationDoc,reportType,subprojectName='') {

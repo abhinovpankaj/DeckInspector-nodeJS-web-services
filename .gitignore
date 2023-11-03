@@ -7,3 +7,5 @@ package-lock.json
 test/*.log
 .env
 git rm --cached .env
+.cache/
+.gitignore

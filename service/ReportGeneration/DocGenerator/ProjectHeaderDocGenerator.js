@@ -1,9 +1,9 @@
 const SingleProjectReportGeneration = require("../../reportstrategy/singleProjectReportGeneration");
-const ReportDocGeneration = require("../ReportDocGeneration");
 const ReportGenerationUtil = require("../ReportGenerationUtil");
 const {Doc} = require("../Models/ProjectDocs");
 const ProjectReportUploader = require("../projectReportUploader");
 const fs = require("fs");
+const ReportDocGeneration = require("../ReportDocGeneration.js");
 
 class ProjectHeaderDocGenerator{
 
@@ -22,6 +22,7 @@ class ProjectHeaderDocGenerator{
     async updateProjectHeaderDoc(projectId,project,companyName, reportType,projectHeaderDoc) {
         const newProjectHeaderHashCode = ReportGenerationUtil.calculateHash(project);
         if (newProjectHeaderHashCode !== projectHeaderDoc.hashCode) {
+            console.log("Project header doc is changed");
             const projectHeaderDoc = await this.getProjectHeaderDoc(projectId, project, companyName, null, reportType);
             let fileS3url = null;
             if (projectHeaderDoc != null) {

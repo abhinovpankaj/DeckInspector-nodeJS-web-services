@@ -4,9 +4,8 @@ const ReportGeneration = require("./reportstrategy/reportGeneration.js")
 const SingleProjectReportGeneration = require("./reportstrategy/singleProjectReportGeneration.js")
 const GenerateReport = require("./ReportGeneration/GenerateReport.js")
 const projects = require("../model/project");
-const DocxMerger = require("docx-merger");
-const ReportGenerationUtil = require("./ReportGeneration/ReportGenerationUtil");
-const ReportDocGeneration = require("./ReportGeneration/ReportDocGeneration");
+require("docx-merger");
+require("./ReportGeneration/ReportGenerationUtil");
 
 
 const generateProjectReport = async function generate(projectId,sectionImageProperties,companyName,reportType,
