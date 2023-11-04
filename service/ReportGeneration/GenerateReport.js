@@ -1,6 +1,7 @@
 const ProjectGenerator = require("./DocGenerator/ProjectGenerator");
 const LocationGenerator = require("./DocGenerator/LocationGenerator");
 const ProjectReportHashCodeService = require("../projectReportHashCodeService");
+const LocationReportHashCodeService = require("../locationReportHashCodeService");
 const serialize = require("serialize-javascript");
 
 class GenerateReport {
@@ -21,20 +22,19 @@ class GenerateReport {
 
     async generateLocationReport(projectId,locationId,reportType) {
         // check if project exist in DB/List
-        const existingDoc = await ProjectReportHashCodeService.getProjctReportHashCodeByIdAndReportType(locationId,reportType);
+        const existingDoc = await LocationReportHashCodeService.getLocationReportHashCodeByIdAndReportType(locationId,reportType);
         if  ( existingDoc == null ) {
             let locationDoc = await LocationGenerator.createLocation(locationId,reportType);
             const serialized = serialize(locationDoc);
             const now = new Date();
             const indianTime = now.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
             let locationDocEntity = {
-                projectId: projectId,
                 locationId: locationId,
                 data: serialized,
                 reportType: reportType,
                 createdAt: indianTime,
             }
-            await ProjectReportHashCodeService.addProjectReportHashCode(locationDocEntity);
+            await LocationReportHashCodeService.addLocationReportHashCode(locationDocEntity);
             return locationDoc;
         }
     }

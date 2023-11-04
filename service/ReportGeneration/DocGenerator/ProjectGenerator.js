@@ -98,8 +98,10 @@ class ProjectGenerator{
         // Project Locations
         for (const location of locations) {
             if (projectDoc.locationMap.has(location._id.toString())) {
-                const locationDoc = await LocationGenerator.updateLocation(location._id,
-                    projectDoc.locationMap.get(location._id.toString()),reportType);
+                const locationDoc = await LocationGenerator.updateLocation(
+                    location._id,
+                    projectDoc.locationMap.get(location._id.toString()),
+                    reportType);
                 if (locationDoc !== null) {
                     projectDoc.locationMap.get(location._id.toString()).doc= locationDoc;
                 }

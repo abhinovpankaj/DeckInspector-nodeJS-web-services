@@ -4,15 +4,23 @@ const ReportGenerationUtil = require("../ReportGenerationUtil");
 const SectionGenerator = require("./SectionGenerator");
 const ProjectReportUploader = require("../projectReportUploader");
 const fs = require("fs");
+const LocationReportHashCodeService = require("../../locationReportHashCodeService");
+const serialize = require("serialize-javascript");
 
 class LocationGenerator {
     async createLocation(locationId, reportType, subprojectName = '') {
         console.log("Location creation started:", locationId);
+        let existingDoc = await LocationReportHashCodeService.getLocationReportHashCodeByIdAndReportType(locationId,reportType);
+        existingDoc = eval('(' + existingDoc + ')')
+        const existingHashCode = existingDoc ? existingDoc.doc.hashCode : null;
         const location = await locations.getLocationById(locationId);
         let locationSections = location.data.item.sections;
         let locationDoc = new LocationDoc();
         if (locationSections) {
             let locationMetaDataHashCode = ReportGenerationUtil.calculateHash(location);
+            if (existingHashCode != null) {
+                  return existingDoc;
+            }
             let locationSectionHashCodes = [];
             let sectionPath = [];
             try {
@@ -24,7 +32,6 @@ class LocationGenerator {
                         sectionPath.push(sectionDoc.filePath);
                     }
                 }
-
                 locationSectionHashCodes.push(locationMetaDataHashCode);
                 const locationHashCode = ReportGenerationUtil.combineHashesInArray(locationSectionHashCodes);
                 const filePath = await ReportGenerationUtil.mergeDocxArray(sectionPath, locationId);
@@ -34,6 +41,7 @@ class LocationGenerator {
                     await fs.promises.unlink(filePath);
                 }
                 locationDoc.doc = new Doc(locationHashCode, fileS3url);
+                await this.saveLocationDoc(locationId, locationDoc, reportType);
             } catch (e) {
                 console.error(e);
                 console.error("Location creation failed:", locationId)
@@ -86,6 +94,8 @@ class LocationGenerator {
                         await fs.promises.unlink(filePath);
                     }
                     console.log('Location update completed', locationId);
+                    locationDoc.doc = new Doc(locationHashCode, fileS3url);
+                    await this.saveLocationDoc(locationId, locationDoc, reportType)
                     return new Doc(locationHashCode, fileS3url);
                 }
             } catch (e) {
@@ -96,6 +106,20 @@ class LocationGenerator {
 
         }
         return null;  // No update needed.  Location doc is unchanged.
+    }
+
+     async saveLocationDoc(locationId,locationDoc, reportType) {
+        const serialized = serialize(locationDoc);
+        const now = new Date();
+        const indianTime = now.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        let locationDocEntity = {
+            locationId: locationId,
+            data: serialized,
+            reportType: reportType,
+            createdAt: indianTime,
+        }
+        await LocationReportHashCodeService.deleteLocationReportHashCodeByIdAndReportType(locationId,reportType);
+        await LocationReportHashCodeService.addLocationReportHashCode(locationDocEntity);
     }
 }
 

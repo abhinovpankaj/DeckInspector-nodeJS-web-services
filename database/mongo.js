@@ -26,7 +26,7 @@ var Connect = async function () {
         module.exports.InvasiveSections = client.db(dbName).collection('LocalInvasiveSection');
         module.exports.ConclusiveSections = client.db(dbName).collection('LocalConclusiveSection');
         module.exports.ProjectReportHashCode = client.db(dbName).collection('ProjectReportHashCode');
-
+        module.exports.LocationReportHashCode = client.db(dbName).collection('LocationReportHashCode');
         
         // //module.exports.ClientInfo = db.collection('clientInfo');       
         console.log('Connected to MongoDB');
