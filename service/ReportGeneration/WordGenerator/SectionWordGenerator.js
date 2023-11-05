@@ -33,6 +33,7 @@ class SectionWordGenerator {
                                     ...invasiveData,
                                     ...conclusiveData
                                 }
+                                return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
                             }
                             else {
                                 sectionDocValues = {
@@ -42,6 +43,7 @@ class SectionWordGenerator {
                                     furtherInvasiveRequired: false,
                                     invasiverepairsinspectedandcompleted: false
                                 }
+                                return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
                             }
                         }
                         else {
@@ -53,24 +55,26 @@ class SectionWordGenerator {
                                 invasiveImages: [],
                                 invasiveDesc: 'Invasive inspection not done'
                             }
+                            return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
                         }
                     }
                 }
-
             }
             else if (reportType === projectReportType.VISUALREPORT) {
                 if (sectionData.data.item.unitUnavailable) {
                     sectionDocValues = {
                         ...baseSectionDocValues,
                     };
+                    return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
                 }
                 const sectionDocValuesWhenUnitAvailable = this.getSectionDocValuesWhenUnitAvailable(sectionData);
                 sectionDocValues =  {
                     ...baseSectionDocValues,
                     ...sectionDocValuesWhenUnitAvailable,
                 };
+                return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
             }
-            return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
+            // return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
         }
     }
     getBaseSectionDocValues(sectionData, reportType, subprojectName, locationType, location) {
@@ -156,9 +160,6 @@ class SectionWordGenerator {
     }
     async getWord(sectionId, template, sectionDocValues) {
         try {
-
-
-
             let data = {
                 section: sectionDocValues
             }
@@ -176,13 +177,10 @@ class SectionWordGenerator {
 
                         tempArray.push(myChunk);
                     }
-
                     return tempArray;
                 },
                 tile: async (imageUrl) => {
-
                     if (imageUrl === undefined) {
-
                         return;
                     }
                     const extension = path.extname(imageUrl);
@@ -215,7 +213,6 @@ class SectionWordGenerator {
                         }
                     } catch (error) {
                         console.log(error);
-
                     }
                 },
             }
