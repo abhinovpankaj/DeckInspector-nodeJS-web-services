@@ -6,6 +6,7 @@ const util = require('util');
 const objectHash = require('object-hash');
 const serialize = require("serialize-javascript");
 const axios = require('axios');
+const {getBlobBuffer} = require("../../database/uploadimage");
 const fspromises = require('fs').promises;
 
 class ReportGenerationUtil {
@@ -26,15 +27,6 @@ class ReportGenerationUtil {
         });
     }
 
-    async downloadFileFromURL(url) {
-        try {
-            const response = await axios.get(url, { responseType: 'arraybuffer' });  // Make sure to set responseType to 'arraybuffer' to handle binary data correctly
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching the file from URL: ${url}`, error);
-            throw error;
-        }
-    }
 
     async mergeDocxArray(docxUrls, fileName) {
         try {
@@ -44,8 +36,9 @@ class ReportGenerationUtil {
             for (const url of docxUrls) {
                 if(!url) continue;
                 try {
-                    const docxData = await this.downloadFileFromURL(url);
-                    fileList.push(docxData);
+                    var urlArray = url.toString().split('/');
+                    const docxBuffer = await getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
+                    fileList.push(docxBuffer);
                 } catch (error) {
                     console.error(`Error fetching the file from URL: ${url}`, error);
                 }
