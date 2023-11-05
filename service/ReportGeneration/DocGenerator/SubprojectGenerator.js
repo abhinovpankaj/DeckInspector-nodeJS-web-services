@@ -20,16 +20,25 @@ class SubprojectGenerator{
         try {
             for (let key in subProjectApartments) {
                 let locationDoc = await LocationGenerator.createLocation(subProjectApartments[key]._id,reportType,subprojectName);
-                subProjectDoc.buildingApartmentMap.set(subProjectApartments[key]._id.toString(), locationDoc);
-                subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
-                locationPath.push(locationDoc.doc.filePath);
+                if (locationDoc) {
+                    if (locationDoc.doc !== null && locationDoc.doc !== undefined) {
+                        subProjectDoc.buildingApartmentMap.set(subProjectApartments[key]._id.toString(), locationDoc);
+                        subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
+                        locationPath.push(locationDoc.doc.filePath);
+                    }
+                }
+
             }
 
             for (let key in subProjectLocations) {
                 let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id,reportType,subprojectName);
-                subProjectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
-                subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
-                locationPath.push(locationDoc.doc.filePath);
+                if (locationDoc) {
+                    if (locationDoc.doc !== null && locationDoc.doc !== undefined) {
+                        subProjectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
+                        subprojectLocationsHashCode.push(locationDoc.doc.hashCode);
+                        locationPath.push(locationDoc.doc.filePath);
+                    }
+                }
             }
 
             let subProjectHashCode = ReportGenerationUtil.combineHashesInArray(subprojectLocationsHashCode);
@@ -79,10 +88,11 @@ class SubprojectGenerator{
                 }
 
                 let newLocationDoc = subprojectDoc.buildingApartmentMap.get(subProjectApartments[key]._id.toString());
-                buildingApartmentMap.set(subProjectApartments[key]._id.toString(), newLocationDoc);
-                subprojectLocationsHashCode.push(newLocationDoc.doc.hashCode);
-                locationPath.push(newLocationDoc.doc.filePath)
-
+                if (newLocationDoc.doc !== null && newLocationDoc.doc !== undefined) {
+                    buildingApartmentMap.set(subProjectApartments[key]._id.toString(), newLocationDoc);
+                    subprojectLocationsHashCode.push(newLocationDoc.doc.hashCode);
+                    locationPath.push(newLocationDoc.doc.filePath)
+                }
             }
             for (let key in subProjectLocations) {
                 if (subprojectDoc.buildingLocationMap.has(subProjectLocations[key]._id.toString())) {
@@ -98,11 +108,12 @@ class SubprojectGenerator{
                     let locationDoc = await LocationGenerator.createLocation(subProjectLocations[key]._id, reportType, subprojectName);
                     subprojectDoc.buildingLocationMap.set(subProjectLocations[key]._id.toString(), locationDoc);
                 }
-
                 let newLocationDoc = subprojectDoc.buildingLocationMap.get(subProjectLocations[key]._id.toString());
-                buildingLocationMap.set(subProjectLocations[key]._id.toString(), newLocationDoc);
-                subprojectLocationsHashCode.push(newLocationDoc.doc.hashCode);
-                locationPath.push(newLocationDoc.doc.filePath);
+                if (newLocationDoc.doc !== null && newLocationDoc.doc !== undefined) {
+                    buildingLocationMap.set(subProjectLocations[key]._id.toString(), newLocationDoc);
+                    subprojectLocationsHashCode.push(newLocationDoc.doc.hashCode);
+                    locationPath.push(newLocationDoc.doc.filePath);
+                }
             }
             subprojectDoc.buildingLocationMap = buildingLocationMap;
             subprojectDoc.buildingApartmentMap = buildingApartmentMap;
