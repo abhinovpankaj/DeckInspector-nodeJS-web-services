@@ -9,7 +9,6 @@ class LocationDoc {
         this.doc = doc;
         this.sectionMap = new Map();
     }
-
 }
 
 class SubprojectDoc {
@@ -22,6 +21,7 @@ class SubprojectDoc {
 
 class ProjectDocs {
     constructor(doc) {
+        this.projectId = null;
         this.doc = doc;
         this.projectHeaderDoc = null;
         this.locationMap = new Map();

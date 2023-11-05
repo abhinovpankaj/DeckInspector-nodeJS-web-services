@@ -16,6 +16,7 @@ const upload = multer({ dest: path.join(__dirname, '..') });
 const {v4 : uuidv4} = require('uuid');
 var uploadBlob = require('../database/uploadimage');
 const projectReports = require("../model/projectReports");
+const {generateLocationReportDoc} = require("../service/projectreportgeneration");
 
 router.route('/add')
     .post(async function (req, res) {
@@ -424,6 +425,30 @@ router.route('/generatereport')
         } catch (err) {
             console.error('Error generating Report:', err);
             //return res.status(500).send('Error generating Report');
+        }
+    });
+
+router.route('/generate-location-report')
+    .post(async function (req, res) {
+        try {
+            const projectId = req.body.projectId;
+            const locationID = req.body.id;
+            const sectionImageProperties = req.body.sectionImageProperties;
+            const companyName = req.body.companyName;
+            const reportType = req.body.reportType;
+            const reportFormat = req.body.reportFormat;
+            const projectName = req.body.projectName;
+            const uploader = req.body.user;
+
+            const now = new Date();
+            const timestampTemp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}`;
+            const docpath = `${projectName}_${reportType}_${timestampTemp}`;
+            res.status(200).json({message: 'Generating report'});
+            const url = await generateLocationReportDoc(projectId,locationID, sectionImageProperties, companyName, reportType, reportFormat, docpath);
+            console.log(url.doc.filePath);
+            console.log('report uploaded');
+        } catch (err) {
+            console.error('Error generating Report:', err);
         }
     });
 
