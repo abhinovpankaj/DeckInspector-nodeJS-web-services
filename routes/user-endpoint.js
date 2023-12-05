@@ -7,13 +7,15 @@ const users = require("../model/user");
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
 const Role=require('../model/role');
-
+const { requireAuth } = require('../middleware/authMiddleware');
+const cookieParser = require('cookie-parser');
 require("dotenv").config();
 
+const maxAge = 30 * 24 * 60 * 60; //30 days
+router.use(cookieParser());
 //#region Register user
-
 router.route('/register')
-.post( function(req, res)  {  
+.post(requireAuth, function(req, res)  {  
 try {
     // Get user input
     const { first_name, last_name, email, password,username,access_type } = req.body;
@@ -67,7 +69,8 @@ try {
                       expiresIn: "30d",
                     });
                     // save user token
-                    user.token = token          
+                    user.token = token  
+                    res.cookie('token', token, {httpOnly: true, maxAge: maxAge * 1000});       
                     // return new user
                     res.status(201).json(user);
                 }
@@ -114,7 +117,7 @@ try {
           
                 // save user token
                 user.token = token;
-          
+                res.cookie('token', token, {httpOnly: true, maxAge: maxAge * 1000});     
                 // user
                 res.status(201).json(user);
               }
@@ -132,7 +135,7 @@ try {
 
 //#region registerAdmin
 router.route('/registeradmin')
-.post( function(req, res)  {
+.post(requireAuth, function(req, res)  {
 
 try {
     // Get user input
@@ -166,12 +169,12 @@ try {
 });
 
 //#endregion
-
 //#region Update user
 router.route('/update')
-.post(async function(req,res){
+.post(requireAuth, async function(req,res){
   try {
       // Get user input
+      console.log("Started update");
       const user = req.body; 
       if("password" in user)
         user.password = await bcrypt.hash(user.password, 10);
@@ -194,7 +197,7 @@ router.route('/update')
 
 //#region delete user
 router.route('/delete')
-.post(async function(req,res){
+.post(requireAuth, async function(req,res){
   try {
       // Get user input
       const user = req.body; 
@@ -217,7 +220,7 @@ router.route('/delete')
 
 //#region getAllUsers
 router.route('/allusers')
-.get(async function(req,res){
+.get(requireAuth, async function(req,res){
   
 try{
   users.getAllUser(function(err,result){
@@ -256,7 +259,7 @@ router.route('/:username')
     res.status(500).send("Internal server error.");
   }
 })
-.delete(async function(req,res){
+.delete(requireAuth, async function(req,res){
   try{
     const username = req.params.username;
     users.removeUser( username ,async function(err,record){
