@@ -10,8 +10,17 @@ const cors = require('cors');
 
 //var router   = require('routes');
 var mongo = require('./database/mongo');
+const corsOptions = {
+  // set origin to a specific origin.
+  origin: 'http://localhost:4200',
+  
+  // or, set origin to true to reflect the request origin
+  //origin: true,
 
-app.use(cors());
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 app.timeout = 600000;
 
 require('./routes')(app);
