@@ -68,10 +68,10 @@ const reordersubProjectLocations = function(locations){
         }
     }
     subProjectApartments.sort(function(apt1,apt2){
-            return (apt1.sequenceNumber-apt2.sequenceNumber);
+            return (apt1.sequenceNo-apt2.sequenceNo);
         });
     subProjectLocations.sort(function(loc1,loc2){
-                return (loc1.sequenceNumber-loc2.sequenceNumber)});
+                return (loc1.sequenceNo-loc2.sequenceNo)});
     orderedlocationsInSubProjects.push(...subProjectApartments);
     orderedlocationsInSubProjects.push(...subProjectLocations);
     return orderedlocationsInSubProjects;
