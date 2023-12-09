@@ -34,7 +34,7 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy, sequenceNumber } = req.body;
+const { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy, sequenceNo } = req.body;
 
 // Validate user input
 if (!(name&&parentid)) {
@@ -67,7 +67,7 @@ try{
       "lasteditedby":createdBy,
       "children":[],
       "isInvasive": isInvasive,
-      "sequenceNumber": sequenceNumber
+      "sequenceNo": sequenceNo
     } 
 }catch(ex){
   console.log(ex);

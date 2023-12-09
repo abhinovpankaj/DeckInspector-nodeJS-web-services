@@ -99,7 +99,7 @@ async function getSubProjectsData(projectId) {
             subProjectData._id = subProject._id;
             subProjectData.name = subProject.name;
             subProjectData.isInvasive = subProject.isInvasive?subProject.isInvasive:false;
-            subProjectData.sequenceNumber = subProject.sequenceNumber;
+            subProjectData.sequenceNo = subProject.sequenceNo;
             const subProjectLocations = [];
             const subProjectChildren = await location.getLocationByParentId(subProject._id);
             
@@ -108,22 +108,22 @@ async function getSubProjectsData(projectId) {
                     const locId = loc._id;
                     const locName = loc.name;
                     const locType = loc.type;
-                    const sequenceNumber = loc.sequenceNumber;
+                    const sequenceNo = loc.sequenceNo;
                     const isInvasive = loc.isInvasive?loc.isInvasive:false;
-                    subProjectLocations.push({ locationId: locId, sequenceNumber:sequenceNumber, locationName: locName,
+                    subProjectLocations.push({ locationId: locId, sequenceNo:sequenceNo, locationName: locName,
                          locationType: locType,isInvasive:isInvasive });
                 }
             }
             subProjectData.subProjectLocations = subProjectLocations
             .sort(function(subProj1,subProj2){
-                return (subProj1.sequenceNumber-subProj2.sequenceNumber)
+                return (subProj1.sequenceNo-subProj2.sequenceNo)
             });
             subProjects.push(subProjectData);
             
         }
     }
     subProjects.sort(function(subProj1,subProj2){
-        return (subProj1.sequenceNumber-subProj2.sequenceNumber)
+        return (subProj1.sequenceNo-subProj2.sequenceNo)
     });
     return subProjects;
 }
