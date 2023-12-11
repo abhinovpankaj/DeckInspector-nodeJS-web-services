@@ -12,7 +12,7 @@ const cors = require('cors');
 var mongo = require('./database/mongo');
 const corsOptions = {
   // set origin to a specific origin.
-  origin: 'http://localhost:4200',
+  origin: 'true',
   
   // or, set origin to true to reflect the request origin
   //origin: true,
