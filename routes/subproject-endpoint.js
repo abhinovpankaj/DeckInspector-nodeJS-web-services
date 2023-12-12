@@ -34,8 +34,8 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy, sequenceNumber } = req.body;
-
+const { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy, sequenceNo } = req.body;
+sequenceNo = String(sequenceNo);
 // Validate user input
 if (!(name&&parentid)) {
   errResponse = new ErrorResponse(400,"Name and parentid is required","");
@@ -67,7 +67,7 @@ try{
       "lasteditedby":createdBy,
       "children":[],
       "isInvasive": isInvasive,
-      "sequenceNumber": sequenceNumber
+      "sequenceNo": sequenceNo
     } 
 }catch(ex){
   console.log(ex);
