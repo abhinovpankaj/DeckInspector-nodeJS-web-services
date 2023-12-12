@@ -147,10 +147,10 @@ class ReportGeneration{
             }
         }
         subProjects.sort(function(subProj1,subProj2){
-            return (subProj1.sequenceNumber-subProj2.sequenceNumber);
+            return (subProj1.sequenceNo-subProj2.sequenceNo);
         });
         locations.sort(function(loc1,loc2){
-            return (loc1.sequenceNumber-loc2.sequenceNumber);
+            return (loc1.sequenceNo-loc2.sequenceNo);
         });
         orderedProjects.push(...subProjects);
         orderedProjects.push(...locations);
