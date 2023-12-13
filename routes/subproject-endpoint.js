@@ -34,7 +34,7 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy, sequenceNo } = req.body;
+var { name, description, parentid,parenttype,isInvasive,url,assignedTo,createdBy, sequenceNo } = req.body;
 sequenceNo = String(sequenceNo);
 // Validate user input
 if (!(name&&parentid)) {
@@ -85,6 +85,7 @@ if (result) {
 }
 }
 catch (exception) {
+  console.log(exception);
 errResponse = new newErrorResponse(500, false, exception);
 return res.status(500).json(errResponse);
 }

@@ -44,7 +44,7 @@ router.route('/upload')
             };
             
             if (newcontainerName.length < 3) {
-                newcontainerName = `${newcontainerName}__${uploader}`;
+                newcontainerName = `${newcontainerName}-${uploader}`;
               }
             if (!(newcontainerName && filetoUpload)) {
                 errResponse = new ErrorResponse(400, "containerName, blobName, filePath is required", "");

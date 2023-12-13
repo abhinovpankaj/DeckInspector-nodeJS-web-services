@@ -17,8 +17,8 @@ router.route('/add')
 try{
 var errResponse;
 // Get user input
-const { name, description, createdBy,url,parentid,parenttype,type,isInvasive, sequenceNo} = req.body;
-
+var { name, description, createdBy,url,parentid,parenttype,type,isInvasive, sequenceNo} = req.body;
+sequenceNo = String(sequenceNo);
 // Validate user input
 if (!(name&&parentid)) {
   errResponse = new ErrorResponse(400,"Name,parenttype and parentid is required","");

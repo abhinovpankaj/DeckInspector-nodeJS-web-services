@@ -43,7 +43,6 @@ async function getSingleProjectMetadata(projectId)
 
         const projectResponse = await getProjectData(projectId);
         projects.push(projectResponse);
-
         response = {
             "data" :{
                 "item": projects,
@@ -77,14 +76,16 @@ async function getProjectData(projectId) {
 
 async function getProjectWiseLocationsMetaData(projectId) {
     const locationData = await location.getLocationByParentId(projectId);
-
     const locations = [];
     if(locationData.data && locationData.data.item)
     {
         for (const loc of locationData.data.item) {
-            locations.push({ locationId: loc._id, locationName: loc.name, locationType: loc.type ,isInvasive:loc.isInvasive?loc.isInvasive:false});
+            locations.push({ locationId: loc._id, locationName: loc.name, locationType: loc.type ,isInvasive:loc.isInvasive?loc.isInvasive:false, sequenceNo: loc.sequenceNo});
         }
     }
+    locations.sort(function(loc1,loc2){
+        return (loc1.sequenceNo-loc2.sequenceNo)
+    });
     return locations;
 }
 
