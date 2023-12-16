@@ -62,13 +62,12 @@ async function getSingleProjectMetadata(projectId)
 
 
 async function getProjectData(projectId) {
-    var projectResponse = {};
+    const projectResponse = {};
     const projectData = await project.getProjectById(projectId);
     projectResponse.id = projectData.data.item._id;
     projectResponse.name = projectData.data.item.name;
     projectResponse.isInvasive = projectData.data.item.isInvasive?projectData.data.item.isInvasive:false;
     projectResponse.projectType = projectData.data.item.projecttype;
-
     projectResponse.subProjects = await getSubProjectsData(projectId);
     projectResponse.locations = await getProjectWiseLocationsMetaData(projectId);
     return projectResponse;
@@ -132,5 +131,5 @@ async function getSubProjectsData(projectId) {
 
 
 
-module.exports = {getProjectHierarchyMetadata, getSingleProjectMetadata};
+module.exports = {getProjectHierarchyMetadata, getSingleProjectMetadata,getProjectData};
 

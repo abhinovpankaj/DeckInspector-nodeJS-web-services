@@ -85,7 +85,8 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                       conclusiveawe:conclusiveSectionData.data.item.aweconclusive,
                       invasiverepairsinspectedandcompleted:conclusiveSectionData.data.item.invasiverepairsinspectedandcompleted?'true':'false',
                       };
-                  }else{
+                  }
+                  else{
                     sectionDocValues = {
                       isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
                       reportType : reportType,
@@ -102,7 +103,8 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                   var filename = await getLocationDoc(sectionData.data.item._id,template,sectionDocValues) ;
                   sectionDataDoc.push(filename);  
                   }
-                }else{
+                }
+              else{
                   if (invasiveSectionData.data && invasiveSectionData.data.item) {
                     sectionDocValues = {
                       isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
@@ -127,7 +129,8 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                       invasiveImages : invasiveSectionData.data.item.invasiveimages,   
                       invasiverepairsinspectedandcompleted:false
                       };
-                  }else{
+                  }
+                  else{
                     sectionDocValues = {
                       isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
                       reportType : reportType,
@@ -157,15 +160,15 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                 
               }
               
-            }  
-            
-            
+            }
           }));
           return sectionDataDoc;
-        }else{
+        }
+        else{
           return "";
         }
-      } else if (reportType === projectReportType.VISUALREPORT) {
+      }
+      else if (reportType === projectReportType.VISUALREPORT) {
           var mysections = location.data.item.sections;
           
           if(!mysections)
@@ -177,8 +180,7 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
           await Promise.all(newSections.map(async (section, index) => {
           const sectionData =  await sections.getSectionById(section._id);
           
-          if(sectionData.data && sectionData.data.item)
-          {
+          if(sectionData.data && sectionData.data.item) {
 
             var sectionDocValues;
             
@@ -191,7 +193,8 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
                 parentName: location.data.item.name,
                 name: sectionData.data.item.name,                  
               };
-            }else{
+            }
+            else{
                 // var htmlData = `<meta charset="UTF-8">
                 // <body>
                 // <p>${sectionData.data.item.additionalconsiderations}</p>
@@ -292,12 +295,8 @@ const getLocationDoc = async function(sectionId,template,sectionDocValues){
               // );
 
               //const resp = await fetchPlus(imageurl,{keepAlive: true },3);
-              var urlArray = imageurl.toString().split('/');
-              var imagebuffer;
-              if (imageurl.includes('deckinspectorsappdata')) {
-                 imagebuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
-              }else
-               imagebuffer = await blobManager.getBlobBufferFromOld(urlArray[urlArray.length-1],urlArray[urlArray.length-2])
+              var urlArray = imageurl.toString().split('/');              
+              const imagebuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
               
               if (imagebuffer===undefined) {
                 console.log('Failed to load image .');

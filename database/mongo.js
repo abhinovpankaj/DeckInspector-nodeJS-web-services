@@ -23,9 +23,11 @@ var Connect = async function () {
         module.exports.ProjectDocuments = client.db(dbName).collection('ProjectDocuments');
 
         module.exports.ProjectReports = client.db(dbName).collection('ProjectReports');
-        module.exports.InvasiveSections = client.db(dbName).collection('InvasiveSection');
-        module.exports.ConclusiveSections = client.db(dbName).collection('ConclusiveSection');
+        module.exports.InvasiveSections = client.db(dbName).collection('LocalInvasiveSection');
+        module.exports.ConclusiveSections = client.db(dbName).collection('LocalConclusiveSection');
+        module.exports.ProjectReportHashCode = client.db(dbName).collection('ProjectReportHashCode');
 
+        
         // //module.exports.ClientInfo = db.collection('clientInfo');       
         console.log('Connected to MongoDB');
     } catch (e) {

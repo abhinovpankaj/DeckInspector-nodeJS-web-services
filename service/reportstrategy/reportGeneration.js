@@ -52,12 +52,9 @@ class ReportGeneration{
                     project.data.item.url;
 
                     var urlArray = projurl.toString().split('/');
-                    var imageBuffer ;
-                    if (projurl.includes('deckinspectorsappdata')) {
-                        imageBuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
-                    }else{
-                        imageBuffer = await blobManager.getBlobBufferFromOld(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
-                    }
+                    
+                    
+                    const imageBuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
                     
                     if (imageBuffer===undefined) {
                       console.log('Failed to load image .');
