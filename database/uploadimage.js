@@ -12,7 +12,7 @@ const account = process.env.AZURE_STORAGE_ACCOUNT_NAME;
 //const defaultAzureCredential = new DefaultAzureCredential();
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.STORAGE_CONNECTION_STRING);
-
+const blobServiceClientOld = BlobServiceClient.fromConnectionString(process.env.OLD_STORAGE_CONNECTION_STRING);
 async function uploadFile(containerName, blobName, localFileWithPath, uploadOptions) {
 
   try {
@@ -41,7 +41,7 @@ async function uploadFile(containerName, blobName, localFileWithPath, uploadOpti
 
 async function getBlobBuffer(blobName,containerName) {
   const containerClient = blobServiceClient.getContainerClient(containerName);
-  blobName= blobName.replace('%20',' ');
+  blobName= blobName.replaceAll('%20',' ');
   const blobClient = containerClient.getBlobClient(blobName);
   
   // Get blob content from position 0 to the end
@@ -54,7 +54,23 @@ async function getBlobBuffer(blobName,containerName) {
   
   return downloaded;
 }
+async function getBlobBufferFromOld(blobName,containerName) {
+  
 
+  const containerClient = blobServiceClientOld.getContainerClient(containerName);
+  blobName= blobName.replaceAll('%20',' ');
+  const blobClient = containerClient.getBlobClient(blobName);
+  
+  // Get blob content from position 0 to the end
+  // In Node.js, get downloaded data by accessing downloadBlockBlobResponse.readableStreamBody
+  const downloadBlockBlobResponse = await blobClient.download();
+  const downloaded = (
+    await streamToBuffer(downloadBlockBlobResponse.readableStreamBody)
+  );
+  
+  
+  return downloaded;
+};
   // [Node.js only] A helper method used to read a Node.js readable stream into a Buffer
 async function streamToBuffer(readableStream) {
   return new Promise((resolve, reject) => {
@@ -68,5 +84,5 @@ async function streamToBuffer(readableStream) {
     readableStream.on("error", reject);
   });
 }
-module.exports = { uploadFile ,getBlobBuffer};
+module.exports = { uploadFile ,getBlobBuffer,getBlobBufferFromOld};
 

@@ -153,11 +153,29 @@ class ProjectGenerator{
                 locations.push(projects[key]);
             }
         }
+        // subProjects.sort(function(subProj1,subProj2){
+        //     return (subProj1.sequenceNumber-subProj2.sequenceNumber);
+        // });
+        // locations.sort(function(loc1,loc2){
+        //     return (loc1.sequenceNumber-loc2.sequenceNumber);
+        // });
         subProjects.sort(function(subProj1,subProj2){
-            return (subProj1.sequenceNumber-subProj2.sequenceNumber);
+            console.log(subProj1.sequenceNo);
+            if (subProj1.sequenceNo===null||subProj1.sequenceNo===undefined) {
+                return subProj1._id-subProj2._id;
+            }else{
+                return (subProj1.sequenceNo-subProj2.sequenceNo);
+            }
+            
         });
         locations.sort(function(loc1,loc2){
-            return (loc1.sequenceNumber-loc2.sequenceNumber);
+            console.log(loc1.sequenceNo);
+            if (loc1.sequenceNo===null||loc1.sequenceNo===undefined) {
+                return (loc1._id-loc2._id);
+            }else{
+                return (loc1.sequenceNo-loc2.sequenceNo);
+            }
+            
         });
         return {subProjects,locations};
     }

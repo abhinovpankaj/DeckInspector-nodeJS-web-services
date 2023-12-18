@@ -9,7 +9,7 @@ class ProjectHeaderDocGenerator{
 
     async createProjectHeaderDoc(projectId,project,companyName, reportType) {
         const projectHeaderHashCode = ReportGenerationUtil.calculateHash(project);
-        const projectHeaderDoc = await this.getProjectHeaderDoc(projectId, project, companyName, null, reportType);
+        const projectHeaderDoc = await this.getProjectHeaderDoc(projectId, project, null,companyName, reportType);
 
         let fileS3url = null;
         if (projectHeaderDoc != null) {
@@ -23,9 +23,11 @@ class ProjectHeaderDocGenerator{
         const newProjectHeaderHashCode = ReportGenerationUtil.calculateHash(project);
         if (newProjectHeaderHashCode !== projectHeaderDoc.hashCode) {
             console.log("Project header doc is changed");
-            const projectHeaderDoc = await this.getProjectHeaderDoc(projectId, project, companyName, null, reportType);
+            const projectHeaderDoc = await this.getProjectHeaderDoc(projectId, project,null, companyName, reportType);
             let fileS3url = null;
             if (projectHeaderDoc != null) {
+                //TODO
+                //Replace the old document with the new one.
                 fileS3url = await ProjectReportUploader.uploadToBlobStorage(projectHeaderDoc, projectId + "-Header", reportType);
                 await fs.promises.unlink(projectHeaderDoc);
             }

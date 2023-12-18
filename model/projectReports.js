@@ -4,16 +4,58 @@ const { ObjectId } = require('mongodb');
 var mongo = require('../database/mongo');
 const Role = require('./role');
 
-var addProjectReport = function (projectReport, callback) {
-    mongo.ProjectReports.insertOne({project_id:projectReport.project_id,url: projectReport.url,name:projectReport.name,timestamp:projectReport.timestamp, uploader: projectReport.uploader}, {w: 1}, function (err, result) {
-        if (err) {
-            var error = new Error("addProjectReport()." + err.message);
-            error.status = err.status;
+
+var addProjectReport = async function (projectReport, callback) {
+    var result = await mongo.ProjectReports.findOne({ 'project_id': projectReport.project_id,
+     'reportType': projectReport.reportType });
+    if (result) {
+         var updateReult = await mongo.ProjectReports.updateOne({ _id: result._id },
+             { $set: projectReport },{upsert:true});
+        if (updateReult.modifiedCount=1) {
+            callback(null, result);
+        }
+        else{
+            var error = new Error("UpdateProjectReport()." );
+            error.status = 500;
             callback (error);
             return;
         }
-        callback(null, result);
-    });
+            
+    }
+    else{
+        mongo.ProjectReports.insertOne({project_id:projectReport.project_id,url: projectReport.url,name:projectReport.name,
+            timestamp:projectReport.timestamp,
+            reportType:projectReport.reportType,
+            isReportInProgress:true,
+            uploader: projectReport.uploader}, {w: 1}, function (err, result) {
+            if (err) {
+                var error = new Error("addProjectReport()." + err.message);
+                error.status = err.status;
+                callback (error);
+                return;
+            }
+            else{
+                callback (null,result);
+            }
+            
+        });
+    }
+    
+};
+
+var updateProjectReport = async function  (projectReport, callback) {
+    
+    var result = await mongo.ProjectReports.updateOne({ _id: projectReport._id }, { $set: projectReport },{upsert:true});
+    
+    if (result.modifiedCount==1) {
+        callback(null,result);
+    }
+    else{
+        var error = new Error("UpdateProjectReport()." );
+        error.status = 500;
+        callback (error);
+        return;
+    }   
 };
 
 var getProjectReportsbyProjectId = async function (project_id, callback) {
@@ -52,5 +94,6 @@ var removeReport = async  function (id, callback) {
 module.exports = {
     addProjectReport: addProjectReport,
     getProjectReportsbyProjectId: getProjectReportsbyProjectId,
-    removeReport: removeReport
+    removeReport: removeReport,
+    updateProjectReport
 };

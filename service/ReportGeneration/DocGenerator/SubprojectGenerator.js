@@ -153,10 +153,22 @@ class SubprojectGenerator{
             }
         }
         subProjectApartments.sort(function(apt1,apt2){
-            return (apt1.sequenceNumber-apt2.sequenceNumber);
+            if (apt1.sequenceNo===null||apt1.sequenceNo===undefined) {
+                return apt1._id- apt2._id;
+            }
+            else{
+                return (apt1.sequenceNo-apt2.sequenceNo);
+            }
+            
         });
-        subProjectLocations.sort(function(loc1,loc2){
-            return (loc1.sequenceNumber-loc2.sequenceNumber)});
+    subProjectLocations.sort(function(loc1,loc2){
+        if (loc1.sequenceNo===null||loc1.sequenceNo===undefined) {
+            return loc1._id- loc2._id;
+        }
+        else{
+            return (loc1.sequenceNo-loc2.sequenceNo);
+        }
+                });
         return {subProjectApartments,subProjectLocations};
     }
 }

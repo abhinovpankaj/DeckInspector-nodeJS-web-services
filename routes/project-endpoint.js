@@ -385,42 +385,62 @@ router.route('/getProjectMetadata/:id')
 router.route('/generatereport')
     .post(async function (req, res) {
         try {
-            const projectId = req.body.id;
+          
+            const project_id = req.body.id;
             const sectionImageProperties = req.body.sectionImageProperties;
             const companyName = req.body.companyName;
             const reportType = req.body.reportType;
             const reportFormat = req.body.reportFormat;
-            // const requestType = req.body.requestType;
-            // const reportId = uuidv4();
-            // console.log(`reportID: ${reportId}`);
-            const projectName = req.body.projectName;
-            const uploader = req.body.user;
-            // const docpath = `${projectName}_${reportType}_${reportId}`;
-
+            var projectReportId;
+            const name = req.body.projectName;
+            const uploader = req.body.user;           
             const now = new Date();
             const timestampTemp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}-${now.getSeconds().toString().padStart(2, '0')}`;
-            const docpath = `${projectName}_${reportType}_${timestampTemp}`;
-            res.status(200).json({message: 'Generating report'});
-           const url = await generateProjectReport(projectId, sectionImageProperties, companyName, reportType, reportFormat, docpath);
-           console.log(url);
-           const project_id = projectId;
-           const name = projectName;
-            let timestamp = (new Date(Date.now())).toISOString();
+            const docpath = `${name}_${reportType}_${timestampTemp}`;
+            //add entry to project report db
+            let reporttimestamp = (new Date(Date.now())).toISOString();
             projectReports.addProjectReport({
-                project_id,
-                name,
-                url,
-                uploader,
-                timestamp
-            }, function (err, result) {
-                if (err) {
-                    console.log(err)
-                }
-                if (result) {
-                    console.log(result)
-                }
-            });
-            console.log(projectId);
+              project_id,
+              name,
+              url:"",
+              reportType,
+              isReportInProgress:true,
+              uploader,
+              timestamp:reporttimestamp
+              },function(err,result){
+                  if (err) { 
+                      console.log(err)
+                  }
+                  if (result){
+                      if (result._id===undefined) {
+                          projectReportId = result.insertedId;
+                      }else{
+                          projectReportId = result._id;
+                      }
+                      
+                      console.log(result)
+                  }
+              });
+
+            res.status(200).json({message: 'Generating report'});
+
+           const url = await generateProjectReport(project_id, sectionImageProperties, companyName, reportType, reportFormat, docpath);
+           console.log(url);
+           
+            projectReports.updateProjectReport({
+              _id:projectReportId,
+              project_id,                   
+              url,
+              isReportInProgress:false                   
+              },function(err,result){
+                  if (err) { 
+                      console.log(err)
+                  }
+                  if (result){
+                      //context.log(result)
+                  }
+              });
+            console.log(project_id);
             console.log('report uploaded');
         } catch (err) {
             console.error('Error generating Report:', err);

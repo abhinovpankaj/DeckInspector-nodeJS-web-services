@@ -10,6 +10,16 @@ class LocationGenerator {
         console.log("Location creation started:", locationId);
         const location = await locations.getLocationById(locationId);
         let locationSections = location.data.item.sections;
+        //sort locations
+        
+          locationSections.sort(function(section1,section2){
+            
+            if (section1.sequenceNo===null||section1.sequenceNo===undefined) {
+                return section1._id-section2._id;
+            }else{
+                return (section1.sequenceNo-section2.sequenceNo);
+            }
+        });
         let locationDoc = new LocationDoc();
         if (locationSections) {
             let locationMetaDataHashCode = ReportGenerationUtil.calculateHash(location);

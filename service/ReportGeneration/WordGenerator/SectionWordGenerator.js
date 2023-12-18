@@ -2,10 +2,12 @@ const projectReportType = require("../../../model/projectReportType");
 const invasiveSections = require("../../../model/invasiveSections");
 const ProjectReportType = require("../../../model/projectReportType");
 const conclusiveSections = require("../../../model/conclusiveSections");
+const blobManager = require("../../../database/uploadimage");
 const fs = require("fs");
 const path = require("path");
 const jo = require("jpeg-autorotate");
 const ReportGenerationUtil = require("../ReportGenerationUtil");
+
 
 class SectionWordGenerator {
     async createSectionDoc(sectionId, sectionData, reportType, subprojectName, location, companyName) {
@@ -21,25 +23,28 @@ class SectionWordGenerator {
                         const invasiveSectionData = await invasiveSections.getInvasiveSectionByParentId(sectionId);
                         if (invasiveSectionData.data && invasiveSectionData.data.item) {
                             let invasiveData = this.getInvasiveData(invasiveSectionData);
-                            if (reportType === ProjectReportType.INVASIVEONLY) {
-                                const conclusiveSectionData = await conclusiveSections.getConclusiveSectionByParentId(sectionId);
+                            const conclusiveSectionData = await conclusiveSections.getConclusiveSectionByParentId(sectionId);
                                 const conclusiveData = conclusiveSectionData.data && conclusiveSectionData.data.item
                                     ? this.getConclusiveData(conclusiveSectionData)
                                     : {
                                         invasiverepairsinspectedandcompleted: false,
                                     };
+
+                            if (reportType === ProjectReportType.INVASIVEONLY) {
+                                
                                 sectionDocValues = {
                                     ...baseSectionDocValues,
                                     ...invasiveData,
                                     ...conclusiveData
                                 }
                                 return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
-                            }
+                           }
                             else {
                                 sectionDocValues = {
                                     ...baseSectionDocValues,
                                     ...sectionDocValuesWhenUnitAvailable,
                                     ...invasiveData,
+                                    ...conclusiveData,
                                     furtherInvasiveRequired: false,
                                     invasiverepairsinspectedandcompleted: false
                                 }
@@ -64,6 +69,7 @@ class SectionWordGenerator {
                 if (sectionData.data.item.unitUnavailable) {
                     sectionDocValues = {
                         ...baseSectionDocValues,
+                        additionalconsiderations: sectionData.data.item.additionalconsiderations,
                     };
                     return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
                 }
@@ -106,7 +112,8 @@ class SectionWordGenerator {
         return {
             furtherInvasiveRequired: invasiveSectionData.data.item.postinvasiverepairsrequired ? 'true' : 'false',
             invasiveDesc: invasiveSectionData.data.item.invasiveDescription,
-            invasiveImages: invasiveSectionData.data.item.invasiveimages
+            invasiveImages: invasiveSectionData.data.item.invasiveimages,
+            
         }
     }
     getConclusiveData(conclusiveSectionData) {
@@ -114,7 +121,7 @@ class SectionWordGenerator {
         return {
             conclusiveImages: conclusiveSectionData.data.item.conclusiveimages,
             propowneragreed: conclusiveSectionData.data.item.propowneragreed ? 'true' : 'false',
-            additionalconsiderations: conclusiveSectionData.data.item.conclusiveconsiderations,
+            conclusiveadditionalconsiderations: conclusiveSectionData.data.item.conclusiveconsiderations,
             conclusiveeee: conclusiveSectionData.data.item.eeeconclusive,
             conclusivelbc: conclusiveSectionData.data.item.lbcconclusive,
             conclusiveawe: conclusiveSectionData.data.item.aweconclusive,
@@ -179,37 +186,42 @@ class SectionWordGenerator {
                     }
                     return tempArray;
                 },
-                tile: async (imageUrl) => {
-                    if (imageUrl === undefined) {
+                tile: async (imageurl) => {
+                    if (imageurl === undefined) {
                         return;
                     }
-                    const extension = path.extname(imageUrl);
-
-                    if (!imageUrl.startsWith('http') ) {
+                    
+                    if (!imageurl.startsWith('http') ) {
                         //imageurl = 'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png';
                         return;
                     }
-                    console.log(imageUrl);
+                    //console.log(imageUrl);
                     try {
-                        const resp = await fetch(
-                            imageUrl
-                        );
-                        if (resp.ok) {
-                            const imagebuffer = resp.arrayBuffer
-                                ? await resp.arrayBuffer()
-                                : await resp.buffer();
-                            const extension = path.extname(imageUrl);
-                            //fix image rotation
-                            try {
-                                const {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality: 50});
-
-                                return {height: 6.2, width: 4.85, data: buffer, extension: '.jpg'};
-                            } catch (error) {
-                                console.log('An error occurred when rotating the file: ' + error);
-                                return {height: 6.2, width: 4.85, data: imagebuffer, extension: '.jpg'};
-                            }
-                        } else {
-
+                        var urlArray = imageurl.toString().split('/');
+                        var imagebuffer;
+                        if (imageurl.includes('deckinspectorsappdata')) {
+                            imagebuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
+                        }else
+                        imagebuffer = await blobManager.getBlobBufferFromOld(urlArray[urlArray.length-1],urlArray[urlArray.length-2])
+                    
+                        if (imagebuffer===undefined) {
+                            console.log('Failed to load image .');
+                            return;
+                        }
+              
+                        //console.log(imageurl);
+                        var extension  = path.extname(imageurl);
+                        if (extension==='.HEIC') {
+                            extension='.jpg';
+                        }
+                        //fix image rotation
+                        try {
+                            var {buffer} = await jo.rotate(Buffer.from(imagebuffer), {quality:50});
+                            
+                            return { height: 6,width: 4.8,  data: buffer, extension: extension };
+                        } catch (error) {
+                            console.log('An error occurred when rotating the file: ' + error);
+                            return { height: 6,width: 4.8,  data: imagebuffer, extension: extension };
                         }
                     } catch (error) {
                         console.log(error);

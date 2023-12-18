@@ -1,6 +1,8 @@
 const fs = require("fs");
 const ReportGenerationUtil = require("./ReportGenerationUtil.js");
 const ProjectReportType = require("../../model/projectReportType");
+const blobManager = require("../../database/uploadimage");
+const path = require('path');
 class ReportDocGeneration {
     async generateReportDoc(projectId, project,companyName,sectionImageProperties,reportType){
         try{
@@ -9,29 +11,52 @@ class ReportDocGeneration {
 
             const createdAtString = project.data.item.createdat;
             const date = new Date(createdAtString);
+            var createdBy='WICR  Waterproofing & Construction';
+
+            if (companyName=='Wicr') {
+                
+            }else{
+                createdBy ='E3 Inspection Reporting Solutions.';                
+            }
             const data = {
                 project:{
                     reportType: reportType,
                     name: project.data.item.name,
                     address: project.data.item.address,
                     description:project.data.item.description,
-                    createdBy:project.data.item.createdby,
+                    createdBy:createdBy,
                     createdAt : date.toLocaleString(),
                     headerName: this.getProjectHeader(reportType)
                 }
             };
+            
             const filePath = projectId + '-projectheader.docx'
             const additionalJsContext = {
                 tile: async () => {
-                    const projurl = project.data.item.url === '' ? 'https://www.deckinspectors.com/wp-content/uploads/2020/07/logo_new_new-1.png' :
-                        project.data.item.url;
-                    const resp = await fetch(
-                        projurl
-                    );
-                    const buffer = resp.arrayBuffer
-                        ? await resp.arrayBuffer()
-                        : await resp.buffer();
-                    return { height: 15,width: 19.8,  data: buffer, extension: '.png' };
+                    var projurl = project.data.item.url===''?'https://deckinspectorsappdata.blob.core.windows.net/highlandmountainshadow/image_1.png':
+                    project.data.item.url;
+
+                    var urlArray = projurl.toString().split('/');
+                    var imageBuffer ;
+                    if (projurl.includes('deckinspectorsappdata')) {
+                        imageBuffer = await blobManager.getBlobBuffer(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
+                    }else{
+                        imageBuffer = await blobManager.getBlobBufferFromOld(urlArray[urlArray.length-1],urlArray[urlArray.length-2]);
+                    }
+                    
+                    if (imageBuffer===undefined) {
+                      console.log('Failed to load image .');
+                      return;
+                    }
+                  
+                  const extension  = path.extname(projurl);
+                  try {
+                    var {buffer} = await jo.rotate(Buffer.from(imageBuffer), {quality:50});
+                    return { height: 15,width: 19.8,  data: buffer, extension: extension };
+                  } catch (error) {
+                    //console.log('An error occurred when rotating the file: ' + error);
+                    return { height: 15,width: 19.8,  data: imageBuffer, extension: extension };
+                  }                                                  
                 },
             };
             const buffer = await ReportGenerationUtil.createDocReportWithParams(template,data,additionalJsContext)
@@ -42,6 +67,7 @@ class ReportDocGeneration {
             console.log(err);
         }
     }
+
     getTemplate(companyName) {
         if (companyName === 'Wicr') {
             return fs.readFileSync('WicrProjectHeader.docx');
