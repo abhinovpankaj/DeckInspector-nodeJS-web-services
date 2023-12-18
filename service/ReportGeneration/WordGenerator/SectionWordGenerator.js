@@ -44,9 +44,8 @@ class SectionWordGenerator {
                                     ...baseSectionDocValues,
                                     ...sectionDocValuesWhenUnitAvailable,
                                     ...invasiveData,
-                                    ...conclusiveData,
-                                    furtherInvasiveRequired: false,
-                                    invasiverepairsinspectedandcompleted: false
+                                    ...conclusiveData,                                    
+                                    
                                 }
                                 return await this.getWord(sectionData.data.item._id, template, sectionDocValues);
                             }

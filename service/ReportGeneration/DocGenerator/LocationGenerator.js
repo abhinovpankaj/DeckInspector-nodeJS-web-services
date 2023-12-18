@@ -10,7 +10,10 @@ class LocationGenerator {
         console.log("Location creation started:", locationId);
         const location = await locations.getLocationById(locationId);
         let locationSections = location.data.item.sections;
-        //sort locations
+        
+        let locationDoc = new LocationDoc();
+        if (locationSections) {
+            //sort locations
         
           locationSections.sort(function(section1,section2){
             
@@ -20,8 +23,6 @@ class LocationGenerator {
                 return (section1.sequenceNo-section2.sequenceNo);
             }
         });
-        let locationDoc = new LocationDoc();
-        if (locationSections) {
             let locationMetaDataHashCode = ReportGenerationUtil.calculateHash(location);
             let locationSectionHashCodes = [];
             let sectionPath = [];
@@ -57,11 +58,20 @@ class LocationGenerator {
     async updateLocation(locationId, locationDoc, reportType, subprojectName = '') {
         const location = await locations.getLocationById(locationId);
         let locationSections = location.data.item.sections;
+        
         let originalHashCode = locationDoc.doc.hashCode;
         let sectionMap = locationDoc.sectionMap;
         let newSectionMap = new Map();
 
         if (locationSections) {
+            locationSections.sort(function(section1,section2){
+            
+                if (section1.sequenceNo===null||section1.sequenceNo===undefined) {
+                    return section1._id-section2._id;
+                }else{
+                    return (section1.sequenceNo-section2.sequenceNo);
+                }
+            });
             try {
                 let locationMetaDataHashCode = ReportGenerationUtil.calculateHash(location);
                 let locationSectionHashCodes = [];
