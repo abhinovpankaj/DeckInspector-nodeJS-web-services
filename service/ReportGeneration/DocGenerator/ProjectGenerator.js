@@ -73,7 +73,7 @@ class ProjectGenerator{
         // }
         projectHashcodeArray.push(ReportGenerationUtil.calculateHash(project));
         const projectHashCode = ReportGenerationUtil.combineHashesInArray(projectHashcodeArray);
-        await this.saveFileToS3(docPath, project.item.name, reportType, projectDoc, projectHashCode);
+        await this.saveFileToS3(docPath, project.data.item.name, reportType, projectDoc, projectHashCode);
         const projectDocToSave = this.getProjectReportHascodeDocToSave(projectDoc, projectId,reportType);
         await ProjectReportHashCodeService.addProjectReportHashCode(projectDocToSave);
         return projectDoc.doc.filePath;
@@ -235,7 +235,7 @@ class ProjectGenerator{
         const projectHashCode = ReportGenerationUtil.combineHashesInArray(projectHashcodeArray);
         if (projectHashCode !== projectDoc.doc.hashCode) {
             console.log("Project Hashcode changed.  Updating Project Doc");
-            await this.saveFileToS3(docPath, project.item.name, reportType, projectDoc, projectHashCode);
+            await this.saveFileToS3(docPath, project.data.item.name, reportType, projectDoc, projectHashCode);
         }
         await ProjectReportHashCodeService.deleteProjectReportHashCodeByIdAndReportType(projectId,reportType);
         const projectDocToSave = this.getProjectReportHascodeDocToSave(projectDoc, projectId,reportType);
