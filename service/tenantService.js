@@ -1,5 +1,5 @@
 "use strict";
-const TenantDAO = require("../model/TenantDAO");
+const TenantDAO = require("../model/tenantsDAO");
 
 var addTenant = async function (tenant) {
   try {
@@ -95,7 +95,7 @@ var editTenant = async function (tenantId, newData) {
 
 var addDiskSpace = async function (tenantId, space) {
   try {
-    const result = await TenantDAO.addDiskSpace(tenantId, space);
+    const result = await TenantDAO.addTenantDiskSpace(tenantId, space);
     if (result.modifiedCount === 1) {
       return {
         success: true,     
@@ -146,7 +146,7 @@ var increaseTenantUsers = async function (tenantId, count) {
 };
 var toggleAccessForTenant = async function (tenantId, isActive) {
   try {
-    const result = await TenantDAO.toggleAccessForTenant(
+    const result = await TenantDAO.toggleTenantAccess(
       tenantId,
       isActive
     );
@@ -207,7 +207,7 @@ var updateTenantsAzureStorageData = async function (tenantId, azureStorageData) 
 };
 var updateLogoURL = async function (tenantId, logoURL) {
   try {
-    const result = await TenantDAO.updateLogoURL(
+    const result = await TenantDAO.updateTenantLogo(
       tenantId,
       iconsData
     );
@@ -266,6 +266,24 @@ var updateTenantExpenses = async function (tenantId, expense) {
     return handleError(error);
   }
 };
+var getDiskWarning = async function(tenantId){
+  try {
+    const result = await TenantDAO.diskLimitreaching(tenantId);
+    if (result) {
+      return {
+        success: true,
+        limitreaching:result.isLimitreaching
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Tenant found with the given ID/failed to get data.",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
 
 
 
@@ -282,8 +300,17 @@ const handleError = (error) => {
 module.exports = {
   addTenant,
   getTenantById,
+  getDiskWarning,
   deleteTenantPermanently,
   getAllTenants,
   editTenant,
   toggleAccessForTenant,
+  addDiskSpace,
+  increaseTenantValidity,
+  increaseTenantUsers,
+  updateAddIconsForTenant,
+  updateTenantsAzureStorageData,
+  updateLogoURL,
+  updateTenantWebsite,
+  updateTenantExpenses
 };
