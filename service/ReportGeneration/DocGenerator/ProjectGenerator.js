@@ -115,7 +115,7 @@ class ProjectGenerator{
             return newSubprojectDoc.doc.filePath;
         }
     }
-    async updateLocationAsync(projectDoc,mySubProject,projectHashcodeArray,locationMap,reportType){
+    async updateLocationAsync(projectDoc,location,projectHashcodeArray,locationMap,reportType){
         if (projectDoc.locationMap.has(location._id.toString())) {
             const locationDoc = await LocationGenerator.updateLocation(location._id,
                 projectDoc.locationMap.get(location._id.toString()),reportType);

@@ -38,7 +38,9 @@ class LocationGenerator {
 
                 locationSectionHashCodes.push(locationMetaDataHashCode);
                 const locationHashCode = ReportGenerationUtil.combineHashesInArray(locationSectionHashCodes);
+                //TODO removing the merge at every level.
                 const filePath = await ReportGenerationUtil.mergeDocxArray(sectionPath, locationId);
+
                 let fileS3url = null;
                 if (filePath != null) {
                     fileS3url = await ProjectReportUploader.uploadToBlobStorage(filePath, locationId, reportType);
