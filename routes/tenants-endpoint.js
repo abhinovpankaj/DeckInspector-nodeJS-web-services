@@ -223,16 +223,15 @@ router.route('/:id/adddiskspace/:diskspace')
         return res.status(500).json(errResponse);
       }
     });
-    //updateTenantsAzureStorageData,updateLogoURL,updateTenantWebsite,updateTenantExpenses
-//getDiskWarningStateData
-router.route('/:id/updatestoragedata/:storage')
+   
+router.route('/:id/updatestoragedatadetails/')
     .post(async function (req, res) {
       try {
         var errResponse;
         const tenantId = req.params.id;
-        const storage = req.params.storage;
+        const azureStorageDetails = req.body;
         
-        var result = await TenantService.updateTenantsAzureStorageData(tenantId, storage);
+        var result = await TenantService.updateTenantsAzureStorageDataDetails(tenantId, azureStorageDetails);
         if (result.reason) {
           return res.status(result.code).json(result);
         }
@@ -241,10 +240,11 @@ router.route('/:id/updatestoragedata/:storage')
         }
       }
       catch (exception) {
-        errResponse = new newErrorResponse(500, false, exception);
+        errResponse = new newErrorResponse(500, false, exception.message);
         return res.status(500).json(errResponse);
       }
     });
+
   router.route('/:id/updatelogo')
     .post(async function (req, res) {
       try {
@@ -293,6 +293,26 @@ router.route('/:id/updatestoragedata/:storage')
         const {expense} = req.body;
         
         var result = await TenantService.updateTenantExpenses(tenantId, expense);
+        if (result.reason) {
+          return res.status(result.code).json(result);
+        }
+        if (result) {
+          return res.status(201).json(result);
+        }
+      }
+      catch (exception) {
+        errResponse = new newErrorResponse(500, false, exception);
+        return res.status(500).json(errResponse);
+      }
+    });
+    router.route('/:id/addusedspace')
+    .post(async function (req, res) {
+      try {
+        var errResponse;
+        const tenantId = req.params.id;
+        const {space} = req.body;
+        
+        var result = await TenantService.addUsedDiskSpace(tenantId, space);
         if (result.reason) {
           return res.status(result.code).json(result);
         }

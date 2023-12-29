@@ -110,6 +110,23 @@ var addDiskSpace = async function (tenantId, space) {
     return handleError(error);
   }
 };
+var addUsedDiskSpace = async function (tenantId, space) {
+  try {
+    const result = await TenantDAO.addTenantUsedDiskSpace(tenantId, space);
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,     
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "failed to add space to give tenant/or tenant not found.",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
 var increaseTenantValidity = async function (tenantId, days) {
   try {
     const result = await TenantDAO.increaseTenantValidity(tenantId, days);
@@ -185,11 +202,12 @@ var updateAddIconsForTenant = async function (tenantId, iconsData) {
     return handleError(error);
   }
 };
-var updateTenantsAzureStorageData = async function (tenantId, azureStorageData) {
+
+var updateTenantsAzureStorageDataDetails = async function (tenantId, azureStorageDetails) {
   try {
-    const result = await TenantDAO.updateTenantsAzureStorageData(
+    const result = await TenantDAO.updateTenantsAzureStorageDataDetails(
       tenantId,
-      azureStorageData
+      azureStorageDetails
     );
     if (result.modifiedCount === 1) {
       return {
@@ -209,7 +227,7 @@ var updateLogoURL = async function (tenantId, logoURL) {
   try {
     const result = await TenantDAO.updateTenantLogo(
       tenantId,
-      iconsData
+      logoURL
     );
     if (result.modifiedCount === 1) {
       return {
@@ -309,8 +327,9 @@ module.exports = {
   increaseTenantValidity,
   increaseTenantUsers,
   updateAddIconsForTenant,
-  updateTenantsAzureStorageData,
+  updateTenantsAzureStorageDataDetails,
   updateLogoURL,
   updateTenantWebsite,
-  updateTenantExpenses
+  updateTenantExpenses,
+  addUsedDiskSpace
 };

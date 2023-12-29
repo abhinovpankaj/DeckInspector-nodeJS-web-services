@@ -24,6 +24,9 @@ module.exports = {
     addTenantDiskSpace: async (id, space) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { "allowedDiskSpace": +space }});
     },
+    addTenantUsedDiskSpace: async (id, space) => {
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { "usedDiskSpace": +space }});
+    },
     increaseTenantValidity: async (id, days) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { validity: +days }});
     },
@@ -43,21 +46,21 @@ module.exports = {
     },    
     updateAddIconsForTenant:async (id,iconsData)=>{
         try {
-            await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{icons:{iconsData}}});
+            return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{icons:iconsData}});
         } catch (error) {
             console.log(error);
         }
         
     },
     updateTenantLogo:async (id,logoURL)=>{
-        await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{logoURL:logoURL}});
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{"icons.logoUrl":logoURL}});
     },
 
     updateTenantWebsite:async (id,website)=>{
-        await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{website:website}});
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{website:website}});
     },
-    updateTenantsAzureStorageData:async(id,azureStorageData)=>{
-        await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{azureDetails:{azureStorageData}}});
+    updateTenantsAzureStorageDataDetails:async(id,azureStorageDetails)=>{
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{azureStorageDetails:azureStorageDetails}});
     },
     updateTenantExpenses: async (id, expense) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: { expenses: expense }});
