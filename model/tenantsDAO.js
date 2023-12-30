@@ -55,7 +55,9 @@ module.exports = {
     updateTenantLogo:async (id,logoURL)=>{
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{"icons.logoUrl":logoURL}});
     },
-
+    updateTenantLogo:async (id,endDate)=>{
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{endDate:endDate}});
+    },
     updateTenantWebsite:async (id,website)=>{
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{website:website}});
     },

@@ -4,7 +4,7 @@ const { MongoClient } = require('mongodb');
 //const uri = "mongodb+srv://deckDbAdmin:deckadmin91@cluster0.60uuo.mongodb.net/?retryWrites=true&w=majority";
 
 const uri = "mongodb+srv://webappuser:EFQGiY42QWSvt8mB@deckinspectorcluster.g1uf6.mongodb.net/?retryWrites=true&w=majority";
-const dbName = "DeckInspectors";
+const dbName = "DeckMultiTenant";//"DeckInspectors";
 function getDBConnectionString(){
     return uri;
 }

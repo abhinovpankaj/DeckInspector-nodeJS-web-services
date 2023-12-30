@@ -10,6 +10,7 @@ const TenantService = require('../service/tenantService');
 
 require("dotenv").config();
 
+
 router.route('/add')
 .post(async function (req,res){
 try{
@@ -141,7 +142,26 @@ router.route('/:id/toggletenantstatus/:state')
       }
     });
 
-
+router.route('/:id/updatevaliditydate')
+.post(async function(req,res){
+  try {
+    var errResponse;
+    const tenantId = req.params.id;
+    const endDate = req.body;
+    
+    var result = await TenantService.updateValidityDate(tenantId, endDate);
+    if (result.reason) {
+      return res.status(result.code).json(result);
+    }
+    if (result) {
+      return res.status(201).json(result);
+    }
+  }
+  catch (exception) {
+    errResponse = new newErrorResponse(500, false, exception);
+    return res.status(500).json(errResponse);
+  }
+});
 
 router.route('/:id/adddiskspace/:diskspace')
     .post(async function (req, res) {

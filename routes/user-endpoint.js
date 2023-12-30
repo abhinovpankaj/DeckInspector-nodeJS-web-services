@@ -105,10 +105,10 @@ try {
                 // Create token
                 const {password,...user} = record;
                 const token = jwt.sign(
-                  { user_id: record._id, username },
+                  { user_id: record._id, username,companyIdentifier},
                   process.env.TOKEN_KEY,
                   {
-                    expiresIn: "30d",
+                    expiresIn: "1d",
                   }
                 );
           

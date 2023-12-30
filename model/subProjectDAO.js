@@ -51,6 +51,8 @@ module.exports = {
     },
 
     assignSubprojectToUser: async (subProjectId, username) => {
+        //add the user to projet assigned to set as well.
+        
         return await mongo.SubProjects.updateOne(
             { 
                 _id: new ObjectId(subProjectId) 

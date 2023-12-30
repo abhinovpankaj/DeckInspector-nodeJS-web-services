@@ -264,6 +264,27 @@ var updateTenantWebsite = async function (tenantId, website) {
   }
 };
 
+var updateValidityDate = async function (tenantId, endDate) {
+  try {
+    const result = await TenantDAO.updateEndDate(
+      tenantId,
+      endDate
+    );
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Tenant found with the given ID/failed to update.",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
 var updateTenantExpenses = async function (tenantId, expense) {
   try {
     const result = await TenantDAO.updateTenantExpenses(
@@ -331,5 +352,6 @@ module.exports = {
   updateLogoURL,
   updateTenantWebsite,
   updateTenantExpenses,
-  addUsedDiskSpace
+  addUsedDiskSpace,
+  updateValidityDate
 };
