@@ -108,8 +108,11 @@ const editLocation = async (locationId, location) => {
     const result = await LocationDAO.editLocation(locationId, location);
     if (result.modifiedCount === 1) {
       const locationFromDB = await LocationDAO.getLocationById(locationId);
-      await updateParentHelper.removeLocationFromParent(locationId, locationFromDB);
-      await updateParentHelper.addLocationMetadataInParent(locationId, locationFromDB);
+      //this approach is pushign the new itemat bottom resulting in sequence issue.
+
+      // await updateParentHelper.removeLocationFromParent(locationId, locationFromDB);
+      // await updateParentHelper.addLocationMetadataInParent(locationId, locationFromDB);
+      await updateParentHelper.addUpdateLocationMetadataInParent(locationId,locationFromDB)
       return {
         success: true,
       };

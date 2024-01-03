@@ -52,6 +52,14 @@ module.exports = {
         }
         
     },
+    updateAdminDetails:async (id,adminDetails)=>{
+        try {
+            return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{adminDetails:adminDetails}});
+        } catch (error) {
+            console.log(error);
+        }
+        
+    },
     updateTenantLogo:async (id,logoURL)=>{
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{"icons.logoUrl":logoURL}});
     },

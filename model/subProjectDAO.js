@@ -72,5 +72,15 @@ module.exports = {
                 $pull: { assignedto: username }
             }
         );
+    },
+
+    addUpdateSubProjectChild : async  (subprojectId, childId, childData)=>{
+        return await mongo.SubProjects.findOneAndUpdate({_id:ObjectId(subprojectId),"children._id":ObjectId(childId)},
+        {
+            $set:{
+                "children.$":childData
+            }
+        },{upsert:true}
+        );
     }
 };

@@ -5,7 +5,7 @@ var addTenant = async function (tenant) {
   try {
     const result = await TenantDAO.addTenant(tenant);
     //Umesh TODO : think about whether we want service layer to know about underlying DB technology
-    if (result.insertedId) {
+    if (result.insertedId) {      
       return {
         success: true,
         id: result.insertedId,
@@ -166,6 +166,27 @@ var toggleAccessForTenant = async function (tenantId, isActive) {
     const result = await TenantDAO.toggleTenantAccess(
       tenantId,
       isActive
+    );
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Tenant found with the given ID/failed to update.",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+var addUpdateAdmin = async function (tenantId, adminDetails) {
+  try {
+    const result = await TenantDAO.updateAdminDetails(
+      tenantId,
+      adminDetails
     );
     if (result.modifiedCount === 1) {
       return {
@@ -353,5 +374,6 @@ module.exports = {
   updateTenantWebsite,
   updateTenantExpenses,
   addUsedDiskSpace,
-  updateValidityDate
+  updateValidityDate,
+  addUpdateAdmin
 };

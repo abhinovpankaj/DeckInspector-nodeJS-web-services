@@ -33,4 +33,13 @@ module.exports = {
     getLocationByParentId: async (parentId) => {
         return await mongo.Locations.find({ parentid: new ObjectId(parentId) }).toArray();
     },
+    addUpdateLocationChild : async  (locationId, childId, childData)=>{
+        return await mongo.Locations.findOneAndUpdate({_id:ObjectId(locationId),"sections._id":ObjectId(childId)},
+        {
+            $set:{
+                "sections.$":childData
+            }
+        },{upsert:true}
+        );
+    }
 }

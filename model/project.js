@@ -686,6 +686,8 @@ var getProjectByAssignedToUserId = async function(userId)
     }   
 }
 
+
+
 var updateProjectChildrenWithAdd = async function(projectId,childrenId,childrenData)
 {
     return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
@@ -730,4 +732,5 @@ module.exports = {
     editProject,
     updateProjectChildrenWithAdd,
     updateProjectChildrenWithRemove
+    
 };

@@ -6,7 +6,7 @@ const ErrorResponse = require('../model/error');
 var ObjectId = require('mongodb').ObjectId;
 const newErrorResponse = require('../model/newError');
 const TenantService = require('../service/tenantService');
-
+const users = require("../model/user");
 
 require("dotenv").config();
 
@@ -183,26 +183,28 @@ router.route('/:id/adddiskspace/:diskspace')
         return res.status(500).json(errResponse);
       }
     });
-  router.route('/:id/increaseValidity/:validity')
-    .post(async function (req, res) {
-      try {
-        var errResponse;
-        const tenantId = req.params.id;
-        const validity = req.params.validity;
+  
+    // router.route('/:id/increaseValidity/:validity')
+    // .post(async function (req, res) {
+    //   try {
+    //     var errResponse;
+    //     const tenantId = req.params.id;
+    //     const validity = req.params.validity;
         
-        var result = await TenantService.increaseTenantValidity(tenantId, validity);
-        if (result.reason) {
-          return res.status(result.code).json(result);
-        }
-        if (result) {
-          return res.status(201).json(result);
-        }
-      }
-      catch (exception) {
-        errResponse = new newErrorResponse(500, false, exception);
-        return res.status(500).json(errResponse);
-      }
-    });
+    //     var result = await TenantService.increaseTenantValidity(tenantId, validity);
+    //     if (result.reason) {
+    //       return res.status(result.code).json(result);
+    //     }
+    //     if (result) {
+    //       return res.status(201).json(result);
+    //     }
+    //   }
+    //   catch (exception) {
+    //     errResponse = new newErrorResponse(500, false, exception);
+    //     return res.status(500).json(errResponse);
+    //   }
+    // });
+  
   router.route('/:id/increasetenantusers/:count')
     .post(async function (req, res) {
       try {
@@ -364,4 +366,46 @@ router.route('/:id/updatestoragedatadetails/')
         return res.status(500).json(errResponse);
       }
     });
+  router.route('/:id/registerAdmin')
+  .post(async function(req,res){
+    try {
+      var errResponse;
+      const tenantId = req.params.id;
+      const {first_name, last_name,username, email, appSecret,companyIdentifier} = req.body;
+      
+      const {password,...adminDetails} = req.body;
+      //create admin in users collection
+      users.registerAdmin(first_name, last_name,username, email, password, appSecret,companyIdentifier, function (err, result){
+        if (err) { res.status(err.status).send(err.message); }
+        else {
+            const user = result;
+                // Create token
+                const token = jwt.sign(
+                { user_id: user._id, email,company:companyIdentifier},
+                process.env.TOKEN_KEY,
+                {
+                expiresIn: "30d",
+                });
+                // save user token
+                user.token = token;
+            
+                // return new user
+                res.status(201).json(user);
+        }
+
+    });
+
+      var result = await TenantService.addUpdateAdmin(tenantId, adminDetails);
+      if (result.reason) {
+        return res.status(result.code).json(result);
+      }
+      if (result) {
+        return res.status(201).json(result);
+      }
+    }
+    catch (exception) {
+      errResponse = new newErrorResponse(500, false, exception);
+      return res.status(500).json(errResponse);
+    }
+  });
 module.exports = router ;

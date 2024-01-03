@@ -258,8 +258,9 @@ var editSubProject = async function (subProjectId,newData) {
         } else{
             if(result.modifiedCount==1){
                 var subProject = await mongo.SubProjects.findOne({ _id: new ObjectId(subProjectId) });
-                var projresult = await Projects.updateProjectChildrenWithRemove(subProject.parentid,subProjectId);
-                var projresult2 = await Projects.updateProjectChildrenWithAdd(subProject.parentid,subProjectId,subProject);
+                var projresult = await Projects.addUpdateProjectChild(subProject.parentid,subProjectId,subProject);
+                //var projresult = await Projects.updateProjectChildrenWithRemove(subProject.parentid,subProjectId);
+               // var projresult2 = await Projects.updateProjectChildrenWithAdd(subProject.parentid,subProjectId,subProject);
                 response = {
                     "data" :{                   
                         "message": "SubProject updated successfully.",

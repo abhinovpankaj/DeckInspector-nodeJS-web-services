@@ -83,7 +83,7 @@ module.exports = {
             }
         });
     },
-
+    
     addChildInSingleLevelProject: async (projectId, childId,childData) => {
         return await mongo.Projects.updateOne({ _id: new ObjectId(projectId) }, {
             $push: {
@@ -103,5 +103,15 @@ module.exports = {
                 }
             }
         });
-   }    
+   },
+
+   addUpdateProjectChild : async  (projectId, childId, childData)=>{
+    return await mongo.Projects.findOneAndUpdate({_id:ObjectId(projectId),"children._id":ObjectId(childId)},
+    {
+        $set:{
+            "children.$":childData
+        }
+    },{upsert:true}
+    );
+}
 };

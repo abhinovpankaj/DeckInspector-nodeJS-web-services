@@ -56,7 +56,37 @@ const removeLocationFromParent = async (locationId, location) => {
     }
   }
 };
+const addUpdateLocationMetadataInParent = async (locationId,location)=>{
+  const locationDataInParent = {
+    _id:locationId,
+    name: location.name,
+    type: location.type,
+    url: location.url,
+    description: location.description,
+    isInvasive: location.isInvasive ? location.isInvasive : false,
+    sequenceNo: location.sequenceNo !== undefined ? location.sequenceNo : null,
+  };
 
+  if (location.parenttype == "subproject") {
+    await subProjectDAO.addUpdateSubProjectChild(
+      location.parentid,
+      locationId,
+      locationDataInParent
+    );
+    console.log(
+      `Added/edited Location metadata with id ${locationId} in subProject id ${location.parentid} successfully`
+    );
+  } else if (location.parenttype == "project") {
+    await ProjectDAO.addUpdateProjectChild(
+      location.parentid,
+      locationId,
+      locationDataInParent
+    );
+    console.log(
+      `Added/edited Location metadata with id ${locationId} in Project id ${location.parentid} successfully`
+    );
+  }
+};
 const addSectionMetadataInParent = async (sectionId, section) => {
   const sectionDataInParent = {
     name: section.name,
@@ -108,7 +138,41 @@ const removeSectionMetadataFromParent = async (sectionId, section) => {
     );
   }
 };
+const addUpdateSectionMetadataFromParent = async (sectionId,section)=>{
+  const sectionDataInParent = {
+    _id:sectionId,
+    name: section.name,
+    conditionalassessment: section.conditionalassessment,
+    visualreview: section.visualreview,
+    coverUrl: section.images ? section.images[0] : "",
+    furtherinvasivereviewrequired: section.furtherinvasivereviewrequired,
+    isInvasive: section.furtherinvasivereviewrequired,
+    visualsignsofleak: section.visualsignsofleak,
+    isuploading: false,
+    count: section.images.length,
+    sequenceNo: section.sequenceNo !== undefined ? section.sequenceNo : null,
+  };
 
+  if (section.parenttype == "project") {
+    await ProjectDAO.addChildInSingleLevelProject(
+      section.parentid,
+      sectionId,
+      sectionDataInParent
+    );
+    console.log(
+      `Added section with id ${sectionId} in Project id ${section.parentid} for Single Level Project successfully`
+    );
+  } else {
+    await LocationDAO.addUpdateLocationChild(
+      section.parentid,
+      sectionId,
+      sectionDataInParent
+    );
+    console.log(
+      `Added section with id ${sectionId} in location id ${section.parentid} successfully`
+    );
+  }
+};
 const addSubprojectMetaDataInProject = async (subProjectId, subProject) => {
   const subProjectDataInParent = {
     name: subProject.name,
@@ -135,6 +199,23 @@ const removeSubprojectMetaDataInProject = async (subProjectId, subProject) => {
   );
 };
 
+const addRemoveSubProjectMetadataInProject = async (subProjectId, subProject) => {
+  const subProjectDataInParent = {
+    _id: subProject._id,
+    name: subProject.name,
+    type: "subproject",
+    url: subProject.url,
+    description: subProject.description,
+    isInvasive: subProject.isInvasive,
+    sequenceNo: subProject.sequenceNo !== undefined ? subProject.sequenceNo : null,
+  };
+
+  await ProjectDAO.addUpdateProjectChild(subProject.parentid,subProjectId ,subProjectDataInParent);
+  console.log(
+    `updated subproject meta data with id ${subProjectId} in project successfully`
+  );
+}
+
 module.exports = {
   addLocationMetadataInParent,
   removeLocationFromParent,
@@ -142,4 +223,7 @@ module.exports = {
   removeSectionMetadataFromParent,
   addSubprojectMetaDataInProject,
   removeSubprojectMetaDataInProject,
+  addRemoveSubProjectMetadataInProject,
+  addUpdateLocationMetadataInParent,
+  addUpdateSectionMetadataFromParent
 };
