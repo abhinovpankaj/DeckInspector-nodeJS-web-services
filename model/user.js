@@ -15,6 +15,18 @@ var addUser = function (user, callback) {
         callback(null, result);
     });
 };
+var addSuperUser = function (user, callback) {
+    mongo.SuperUsers.insertOne({username:user.username,last_name: user.last_name,first_name:user.first_name,email:user.email,
+    password:user.password}, {w: 1}, function (err, result) {
+        if (err) {
+            var error = new Error("addSuperUser()." + err.message);
+            error.status = err.status;
+            callback (error);
+            return;
+        }
+        callback(null, result);
+    });
+};
 var addAdmin = function (user, callback) {
     mongo.Users.insertOne({last_name: user.last_name,first_name:user.first_name,email:user.email,
     password:user.password,username:user.username,role:Role.Admin,access_type:"both"}, {w: 1}, function (err, result) {
@@ -40,7 +52,19 @@ var getUser = async function (emailId, callback) {
         callback(null, result);
     
 };
-
+var getSuperUser = async function (emailId, callback) {
+    
+    var result = await mongo.SuperUsers.findOne({ email: emailId });    
+        
+        if (result === null) {
+            var error1 = new Error("getSuperUser(). \nMessage: No User Found. One Requested.");
+            error1.status = 404;
+            callback (error1);
+            return; 
+        }
+        callback(null, result);
+    
+};
 var getUserbyUsername = async function (username, callback) {
     
     if (username===undefined) {
@@ -51,6 +75,26 @@ var getUserbyUsername = async function (username, callback) {
             return; 
     }
     var result = await mongo.Users.findOne({ username: username });    
+        
+        if (result === null) {
+            var error1 = new Error("getUser(). \nMessage: No User Found. One Requested.");
+            error1.status = 404;
+            callback (error1);
+            return; 
+        }
+        callback(null, result);
+    
+};
+var getSuperUserbyUsername = async function (username, callback) {
+    
+    if (username===undefined) {
+
+        var error1 = new Error("getUser(). \nMessage: No User Found. username undefined.");
+            error1.status = 404;
+            callback (error1);
+            return; 
+    }
+    var result = await mongo.SuperUsers.findOne({ username: username });    
         
         if (result === null) {
             var error1 = new Error("getUser(). \nMessage: No User Found. One Requested.");
@@ -201,5 +245,8 @@ module.exports = {
     removeUser: removeUser,
     getUserbyUsername,
     updateUser,
-    registerAdmin
+    registerAdmin,
+    getSuperUserbyUsername,
+    getSuperUser,
+    addSuperUser
 };

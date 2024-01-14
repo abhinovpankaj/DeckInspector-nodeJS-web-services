@@ -53,6 +53,26 @@ catch (exception) {
   return res.status(500).json(errResponse);
 }
 });
+
+router.route('/alltenants')
+    .get(async function (req, res) {
+      try {
+        var errResponse;
+        var result = await TenantService.getAllTenants();
+        if (result.reason) {
+          return res.status(result.code).json(result);
+        }
+        if (result) {
+          //console.debug(result);
+          return res.status(201).json(result);
+        }
+      }
+      catch (exception) {
+        errResponse = new newErrorResponse(500, false, exception);
+        return res.status(500).json(errResponse);
+      }
+    });
+
 router.route('/:id')
 .get(async function(req,res){
   try{
