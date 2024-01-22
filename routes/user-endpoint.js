@@ -390,5 +390,49 @@ try {
   }
   
 });
+
+router.route('/loginSuperUser')
+.post(async function (req, res)  {
+// our login logic goes here
+try {
+    // Get user input
+    const { username, password } = req.body;
+
+    // Validate user input
+    if (!(username && password)) {
+      res.status(400).send("All input is required");
+    }
+    // Validate if user exist in our database
+    users.getSuperUserbyUsername( username ,async function(err,record){
+        if (err) { res.status(err.status).send(err.message); 
+        }
+        else {
+            if (record && ( await bcrypt.compare(password, record.password))) {
+                // Create token
+                const {password,...user} = record;
+                const token = jwt.sign(
+                  { user_id: record._id, username},
+                  process.env.TOKEN_KEY,
+                  {
+                    expiresIn: "1d",
+                  }
+                );
+          
+                // save user token
+                user.token = token;
+          
+                // user
+                res.status(201).json(user);
+              }
+              else
+                res.status(401).send("Invalid Credentials");
+        }
+    });    
+    
+  } catch (err) {
+    console.log(err);
+  }
+
+});
   
 module.exports = router ;

@@ -26,7 +26,7 @@ module.exports = function(app) {
   app.use("/api/section", sectionRouter);
   app.use("/api/invasivesection", invasivesectionRouter);
   app.use("/api/conclusivesection", conclusiveSectionRouter);
-  app.use("/api/tenants",authenticateToken, tenantRouter);
+  app.use("/api/tenants", authenticateToken,tenantRouter);
 
 };
 

@@ -7,6 +7,8 @@ var ObjectId = require('mongodb').ObjectId;
 const newErrorResponse = require('../model/newError');
 const TenantService = require('../service/tenantService');
 const users = require("../model/user");
+const bcrypt=require('bcrypt');
+var jwt = require('jsonwebtoken');
 
 require("dotenv").config();
 
@@ -428,4 +430,41 @@ router.route('/:id/updatestoragedatadetails/')
       return res.status(500).json(errResponse);
     }
   });
+
+  
+  // router.route('/addSuperUser')
+  // .post(async function(req,res){
+  //   try {
+  //     var errResponse;
+  //     const {first_name, last_name,username, email, password} = req.body;
+  //     //create admin in users collection
+  //     users.addSuperUser({first_name, last_name,username, email, password}, function (err, result){
+  //       if (err) { res.status(err.status).send(err.message); }
+  //       else {
+  //           const user = result;
+  //               // Create token
+  //               const token = jwt.sign(
+  //               { user_id: user._id, email},
+  //               process.env.TOKEN_KEY,
+  //               {
+  //               expiresIn: "30d",
+  //               });
+  //               // save user token
+  //               user.token = token;
+            
+  //               // return new user
+  //               res.status(201).json(user);
+  //       }
+
+  //   });
+  //   }
+  //   catch (exception) {
+  //     errResponse = new newErrorResponse(500, false, exception);
+  //     return res.status(500).json(errResponse);
+  //   }
+  // });
+
+  //#region Login
+
+//#endregion
 module.exports = router ;
