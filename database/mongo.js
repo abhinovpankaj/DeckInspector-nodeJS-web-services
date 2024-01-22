@@ -27,7 +27,7 @@ var Connect = async function () {
         module.exports.ConclusiveSections = client.db(dbName).collection('ConclusiveSection');
         module.exports.ProjectReportHashCode = client.db(dbName).collection('ProjectReportHashCode');
         module.exports.Tenants = client.db(dbName).collection('Tenants');
-        module.exports.Tenants = client.db(dbName).collection('SuperUsers');
+        module.exports.SuperUsers = client.db(dbName).collection('SuperUsers');
         // //module.exports.ClientInfo = db.collection('clientInfo');       
         console.log('Connected to MongoDB');
     } catch (e) {

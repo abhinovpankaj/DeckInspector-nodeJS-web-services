@@ -2,6 +2,9 @@
 var ObjectId = require('mongodb').ObjectId;
 var mongo = require('../database/mongo');
 const Role = require('./role');
+const bcrypt=require('bcrypt');
+var jwt = require('jsonwebtoken');
+
 
 var addUser = function (user, callback) {
     mongo.Users.insertOne({username:user.username,last_name: user.last_name,first_name:user.first_name,email:user.email,
@@ -15,9 +18,10 @@ var addUser = function (user, callback) {
         callback(null, result);
     });
 };
-var addSuperUser = function (user, callback) {
+var addSuperUser = async function (user, callback) {
+    var encryptedPassword = await bcrypt.hash(user.password, 10);
     mongo.SuperUsers.insertOne({username:user.username,last_name: user.last_name,first_name:user.first_name,email:user.email,
-    password:user.password}, {w: 1}, function (err, result) {
+    password:encryptedPassword}, {w: 1}, function (err, result) {
         if (err) {
             var error = new Error("addSuperUser()." + err.message);
             error.status = err.status;
