@@ -23,7 +23,7 @@ router.route('/add')
       try {
         // Get user input
         const { name, description, address, createdBy, url, assignedTo, projecttype } = req.body;
-
+        const companyIdentifier = req.user.company;
         // Validate user input
         if (!name) {
           const errResponse = new ErrorResponse(400, "Name is required", "");
@@ -45,7 +45,8 @@ router.route('/add')
           "projecttype": projecttype,
           "createdat": new Date().toISOString(),
           "iscomplete":false,
-          "isInvasive":false
+          "isInvasive":false,
+          "companyIdentifier": companyIdentifier
         }
 
         // Save the new project to the database
@@ -70,6 +71,9 @@ router.route('/allprojects')
       try {
         var errResponse;
         var result = await projectService.getAllProjects();
+        var companyIdentifier = req.user.company;
+        console.log(req.user);
+        result.projects = result.projects.filter(project => project.companyIdentifier === companyIdentifier);
         if (result.reason) {
           return res.status(result.code).json(result);
         }
@@ -89,8 +93,9 @@ router.route('/filterprojects')
       try {
         var errResponse;
         const { name, isdeleted, iscomplete, createdon } = req.body;
-
+        const companyIdentifier = req.user.company;
         var result = await projectService.getProjectsByNameCreatedOnIsCompletedAndDeleted({ name, isdeleted, iscomplete, createdon });
+        result.projects = result.projects.filter(project => project.companyIdentifier === companyIdentifier);
         if (result.reason) {
           return res.status(result.code).json(result);
         }

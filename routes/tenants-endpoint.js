@@ -412,7 +412,7 @@ router.route('/:id/updatestoragedatadetails/')
                 user.token = token;
             
                 // return new user
-                res.status(201).json(user);
+                // res.status(201).json(user);
         }
 
     });
@@ -426,6 +426,7 @@ router.route('/:id/updatestoragedatadetails/')
       }
     }
     catch (exception) {
+      console.log(exception);
       errResponse = new newErrorResponse(500, false, exception);
       return res.status(500).json(errResponse);
     }

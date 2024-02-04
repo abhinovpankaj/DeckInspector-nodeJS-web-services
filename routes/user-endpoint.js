@@ -61,7 +61,7 @@ try {
                     // Create token
                     const token = jwt.sign(
                     { 
-                      user_id: user._id, email
+                      user_id: user._id, email, company: companyIdentifier
                     },
                     process.env.TOKEN_KEY,
                     {
