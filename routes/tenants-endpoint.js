@@ -18,7 +18,7 @@ router.route('/add')
 try{
   var errResponse;
   // Get user input
-  var { name,companyDescription, website,validity,allowedDiskSpace,allowedUsersCount,expenses} = req.body;
+  var { name,companyDescription, website,allowedDiskSpace,allowedUsersCount,expenses} = req.body;
 
   // Validate user input
   if (name===undefined) {
@@ -27,13 +27,13 @@ try{
     return;
   }
   var registrationDate= (new Date(Date.now())).toISOString();
-
+ var endDate = registrationDate.ad
   var newTenant = {
       "name":name,
       "registrationDate":registrationDate,
       "companyDescription":companyDescription,    
       "website":website,
-      "validity":validity===undefined?10:validity,
+      "endDate":endDate,
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
       "expenses": expenses===undefined?1000:expenses,
@@ -171,7 +171,7 @@ router.route('/:id/updatevaliditydate')
     const tenantId = req.params.id;
     const endDate = req.body;
     
-    var result = await TenantService.updateValidityDate(tenantId, endDate);
+    var result = await TenantService.updateValidityDate(tenantId, new Date(endDate));
     if (result.reason) {
       return res.status(result.code).json(result);
     }
