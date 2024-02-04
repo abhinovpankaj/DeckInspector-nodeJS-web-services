@@ -33,7 +33,7 @@ try{
       "registrationDate":registrationDate,
       "companyDescription":companyDescription,    
       "website":website,
-      "endDate":endDate,
+      "endDate":endDate.toISOString(),
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
       "expenses": expenses===undefined?1000:expenses,
