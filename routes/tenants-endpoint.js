@@ -27,7 +27,7 @@ try{
     return;
   }
   var registrationDate= (new Date(Date.now())).toISOString();
- var endDate = registrationDate.ad
+  var endDate = registrationDate.setDate(registrationDate.getDate()+10) ;
   var newTenant = {
       "name":name,
       "registrationDate":registrationDate,
