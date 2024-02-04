@@ -33,7 +33,7 @@ var addSuperUser = async function (user, callback) {
 };
 var addAdmin = function (user, callback) {
     mongo.Users.insertOne({last_name: user.last_name,first_name:user.first_name,email:user.email,
-    password:user.password,username:user.username,role:Role.Admin,access_type:"both"}, {w: 1}, function (err, result) {
+    password:user.password,username:user.username,role:Role.Admin,access_type:"both", companyIdentifier: user.companyIdentifier}, {w: 1}, function (err, result) {
         if (err) {
             var error = new Error("addAdmin()." + err.message);
             error.status = err.status;
@@ -180,7 +180,7 @@ var registerAdmin =function (first_name, last_name,username, email, password, ap
       // check if user already exist
       // Validate if user exist in our database
       
-      users.getUser(email, async function (err, record) {       
+      getUser(email, async function (err, record) {       
           if (record) {
             var error1 = new Error("User Already Exist. Please Login");
             error1.status = 409;
@@ -191,7 +191,7 @@ var registerAdmin =function (first_name, last_name,username, email, password, ap
               var encryptedPassword = await bcrypt.hash(password, 10);
               
               // Create user in our database
-              users.addAdmin({
+              addAdmin({
                 first_name,
                 last_name, 
                 username,   

@@ -20,7 +20,7 @@ module.exports = function(app) {
   app.use("/api/projectdocuments", projectDocumentsRouter);  
   app.use("/api/projectreports", projectReportsRouter);  
   app.use("/api/image", imageRouter);  
-  app.use("/api/project", projectRouter);
+  app.use("/api/project", authenticateToken, projectRouter);
   app.use("/api/subproject", subprojectRouter);
   app.use("/api/location", locationRouter);
   app.use("/api/section", sectionRouter);
