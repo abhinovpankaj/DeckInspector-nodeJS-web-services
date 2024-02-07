@@ -18,7 +18,7 @@ router.route('/add')
 try{
   var errResponse;
   // Get user input
-  var { name,companyDescription, website,allowedDiskSpace,allowedUsersCount,expenses} = req.body;
+  var { name,companyDescription, website,allowedDiskSpace,allowedUsersCount,expenses,endDate} = req.body;
 
   // Validate user input
   if (name===undefined) {
@@ -27,13 +27,13 @@ try{
     return;
   }
   var registrationDate= (new Date(Date.now())).toISOString();
-  var endDate = registrationDate.setDate(registrationDate.getDate()+10) ;
+  //var endDate = registrationDate.setDate(registrationDate.getDate()+10) ;
   var newTenant = {
       "name":name,
       "registrationDate":registrationDate,
       "companyDescription":companyDescription,    
       "website":website,
-      "endDate":endDate.toISOString(),
+      "endDate":endDate,
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
       "expenses": expenses===undefined?1000:expenses,
