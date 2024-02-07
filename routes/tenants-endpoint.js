@@ -393,9 +393,10 @@ router.route('/:id/updatestoragedatadetails/')
     try {
       var errResponse;
       const tenantId = req.params.id;
-      const {first_name, last_name,username, email, appSecret,companyIdentifier} = req.body;
+      const {first_name, last_name,username, email,companyIdentifier} = req.body;
       
       const {password,...adminDetails} = req.body;
+      var appSecret = process.env.APP_SECRET;
       //create admin in users collection
       users.registerAdmin(first_name, last_name,username, email, password, appSecret,companyIdentifier, function (err, result){
         if (err) { res.status(err.status).send(err.message); }
