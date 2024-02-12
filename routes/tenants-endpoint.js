@@ -9,6 +9,7 @@ const TenantService = require('../service/tenantService');
 const users = require("../model/user");
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
+const { endsWith } = require('lodash');
 
 require("dotenv").config();
 
@@ -37,6 +38,8 @@ try{
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
       "expenses": expenses===undefined?1000:expenses,
+      "isActive":true,
+      "isDeleted":false,
       "companyIdentifier":`${name.toLowerCase()}.ondeckinspectors.com`
   }
 
@@ -128,7 +131,7 @@ router.route('/:id')
   try{
     var errResponse;
     const tenantId = req.params.id;
-    var result = await TenantService.deleteTenantPermanently(tenantId);
+    var result = await TenantService.deleteTenant(tenantId);
     if (result.reason) {
       return res.status(result.code).json(result);
     }
@@ -169,9 +172,9 @@ router.route('/:id/updatevaliditydate')
   try {
     var errResponse;
     const tenantId = req.params.id;
-    const endDate = req.body;
+    const endDate = new Date(req.body)).toISOString();
     
-    var result = await TenantService.updateValidityDate(tenantId, new Date(endDate));
+    var result = await TenantService.updateValidityDate(tenantId, endDate);
     if (result.reason) {
       return res.status(result.code).json(result);
     }

@@ -93,6 +93,24 @@ var editTenant = async function (tenantId, newData) {
   }
 };
 
+var deleteTenant = async function (tenantId) {
+  try {
+    const result = await TenantDAO.deleteTenant(tenantId);
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Tenant found with the given ID",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
 var addDiskSpace = async function (tenantId, space) {
   try {
     const result = await TenantDAO.addTenantDiskSpace(tenantId, space);
@@ -345,6 +363,25 @@ var getDiskWarning = async function(tenantId){
   }
 };
 
+var isTenantActive = async function(identifier){
+  try {
+    const result = await TenantDAO.isTenantActive(identifier);
+    if (result) {
+      return {
+        success: true,
+        allowLogin:!result.isDeleted && result.isActive
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Tenant found with the given identifier.",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
 
 
 
@@ -359,6 +396,7 @@ const handleError = (error) => {
 
 module.exports = {
   addTenant,
+  deleteTenant,
   getTenantById,
   getDiskWarning,
   deleteTenantPermanently,
@@ -375,5 +413,6 @@ module.exports = {
   updateTenantExpenses,
   addUsedDiskSpace,
   updateValidityDate,
-  addUpdateAdmin
+  addUpdateAdmin,
+  isTenantActive
 };

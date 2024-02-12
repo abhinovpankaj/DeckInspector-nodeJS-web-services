@@ -7,6 +7,7 @@ const users = require("../model/user");
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
 const Role=require('../model/role');
+const Tenants  = require('../service/tenantService');
 
 require("dotenv").config();
 
@@ -105,6 +106,19 @@ try {
             if (record && ( await bcrypt.compare(password, record.password))) {
                 // Create token
                 const {password,...user} = record;
+
+                //TODO check if that company is active and not marked for deletion.
+                var loginAllowed = await Tenants.isTenantActive(user.companyIdentifier);
+                if (loginAllowed.success) {
+                  if (!loginAllowed.allowLogin) {
+                    res.status(401).send("Invalid Credentials");
+                    return;
+                  }
+                }else{
+                  res.status(401).send("Invalid Credentials");
+                  return;
+                }
+                
                 const token = jwt.sign(
                   { user_id: record._id, username,company:record.companyIdentifier},
                   process.env.TOKEN_KEY,

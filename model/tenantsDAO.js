@@ -16,7 +16,7 @@ module.exports = {
         }
     },
     getAllTenants: async () => {
-        return await mongo.Tenants.find({}).limit(50).sort({"_id": -1}).toArray();
+        return await mongo.Tenants.find({isDeleted:false}).limit(50).sort({"_id": -1}).toArray();
     },
     getTenantById: async (id) => {
         return await mongo.Tenants.findOne({ _id: new ObjectId(id) }, {files: 0});
@@ -43,6 +43,9 @@ module.exports = {
 
     deleteTenantPermanently: async (id) => {
         return await mongo.Tenants.deleteOne({ _id: new ObjectId(id) });
+    }, 
+    deleteTenant: async (id) => {
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: { isDeleted: true }});
     },    
     updateAddIconsForTenant:async (id,iconsData)=>{
         try {
@@ -75,4 +78,7 @@ module.exports = {
     updateTenantExpenses: async (id, expense) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: { expenses: expense }});
     },
+    isTenantActive : async (identifier)=>{
+        return mongo.Tenants.findOne({ companyIdentifier: identifier });
+    }
 };
