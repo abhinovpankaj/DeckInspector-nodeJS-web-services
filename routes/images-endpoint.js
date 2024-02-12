@@ -27,6 +27,8 @@ router.route('/upload')
             const { containerName, uploader, entityName,id,
                   lasteditedby, 
                  type, parentType} = req.body;
+            var companyIdentifier = req.user.company;
+            companyIdentifier = companyIdentifier.replaceAll(".","-");
             const filetoUpload = req.file;
             //replace all except alphanumeric
             var newcontainerName= containerName.replace(/[^a-zA-Z0-9 ]/g, '');
@@ -38,8 +40,8 @@ router.route('/upload')
                     'uploader': uploader,
                 },
                 tags: {
-                    'project': newcontainerName
-                    // 'owner': newentityName
+                    'project': newcontainerName,
+                    'owner': companyIdentifier
                 }
             };
             

@@ -145,7 +145,25 @@ router.route('/:id')
     return res.status(500).json(errResponse);
   }
 })
-
+// router.route('/:id/getUsageDetails')
+// .get(async function (req,res) {
+//   try {
+//     var errResponse;
+//     const tenantId = req.params.id;
+    
+//     var result = await TenantService.getTenantDetails(tenantId);
+//     if (result.reason) {
+//       return res.status(result.code).json(result);
+//     }
+//     if (result) {
+//       return res.status(201).json(result);
+//     }
+//   }
+//   catch (exception) {
+//     errResponse = new newErrorResponse(500, false, exception);
+//     return res.status(500).json(errResponse);
+//   }
+// });
 router.route('/:id/toggletenantstatus/:state')
     .post(async function (req, res) {
       try {
@@ -172,7 +190,7 @@ router.route('/:id/updatevaliditydate')
   try {
     var errResponse;
     const tenantId = req.params.id;
-    const endDate = new Date(req.body)).toISOString();
+    const endDate = new Date(req.body).toISOString();
     
     var result = await TenantService.updateValidityDate(tenantId, endDate);
     if (result.reason) {
