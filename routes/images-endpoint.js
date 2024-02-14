@@ -9,6 +9,7 @@ var multer = require('multer');
 var upload = multer({ dest: 'uploads/' });
 const bodyParser = require('body-parser');
 var image = require('../model/image');
+var tenantService = require('../service/tenantService');
 
 require("dotenv").config();
 
@@ -29,12 +30,17 @@ router.route('/upload')
                  type, parentType} = req.body;
             var companyIdentifier = req.user.company;
             companyIdentifier = companyIdentifier.replaceAll(".","-");
+            var fileSizeInBytes = req.headers['content-length'] ;
             const filetoUpload = req.file;
+            
             //replace all except alphanumeric
+
             var newcontainerName= containerName.replace(/[^a-zA-Z0-9 ]/g, '');
             newcontainerName = newcontainerName.toLowerCase();
             // var newentityName= entityName.replace(/[^a-zA-Z0-9 ]/g, '');
             // newentityName = newentityName.toLowerCase();
+            //container would be now the companyidentifier
+
             const uploadOptions = {
                 metadata: {
                     'uploader': uploader,
@@ -53,7 +59,7 @@ router.route('/upload')
                 res.status(400).json(errResponse);
                 return;
             }
-            var result = await uploadBlob.uploadFile(newcontainerName, filetoUpload.originalname, filetoUpload.path, uploadOptions);
+            var result = await uploadBlob.uploadFile(companyIdentifier, `${newcontainerName}-${filetoUpload.originalname}`, filetoUpload.path, uploadOptions);
             var response = JSON.parse(result);
             if (response.error) {
                 errResponse = new ErrorResponse(500, 'Internal server error', result.error);
@@ -67,6 +73,10 @@ router.route('/upload')
                 image.updateImageURL(id,
                     response.url, lasteditedby, editedat, 
                     type, parentType);
+                //TODO update the used space against the company
+                tenantService.updateStorageStats(companyIdentifier,1,fileSizeInBytes);
+                // increment the image count  as well
+                
             }
             else
                 res.status(409).json(response);

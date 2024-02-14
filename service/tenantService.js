@@ -179,6 +179,24 @@ var increaseTenantUsers = async function (tenantId, count) {
     return handleError(error);
   }
 };
+var updateStorageStats = async function (companyIdentifier, count,fileSize) {
+  try {
+    const result = await TenantDAO.updateStorageStats(companyIdentifier, count,fileSize);
+    if (result.modifiedCount === 1) {
+      return {
+        success: true,     
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "failed to increase image count/or tenant not found.",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
 var toggleAccessForTenant = async function (tenantId, isActive) {
   try {
     const result = await TenantDAO.toggleTenantAccess(
@@ -382,6 +400,9 @@ var isTenantActive = async function(identifier){
   }
 }
 
+var getTenantDetails = async function(tenantId){
+
+}
 
 
 
@@ -414,5 +435,7 @@ module.exports = {
   addUsedDiskSpace,
   updateValidityDate,
   addUpdateAdmin,
-  isTenantActive
+  isTenantActive,
+  getTenantDetails,
+  updateStorageStats
 };

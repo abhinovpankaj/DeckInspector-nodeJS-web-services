@@ -7,6 +7,7 @@ var ObjectId = require('mongodb').ObjectId;
 const newErrorResponse = require('../model/newError');
 const TenantService = require('../service/tenantService');
 const users = require("../model/user");
+const BlobManager = require('../database/uploadimage');
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
 const { endsWith } = require('lodash');
@@ -145,19 +146,17 @@ router.route('/:id')
     return res.status(500).json(errResponse);
   }
 })
-// router.route('/:id/getUsageDetails')
+// router.route('/:id/getusagedetails')
 // .get(async function (req,res) {
 //   try {
 //     var errResponse;
 //     const tenantId = req.params.id;
     
-//     var result = await TenantService.getTenantDetails(tenantId);
+//     var result = await TenantService.getTenantById(tenantId);
 //     if (result.reason) {
 //       return res.status(result.code).json(result);
 //     }
-//     if (result) {
-//       return res.status(201).json(result);
-//     }
+   
 //   }
 //   catch (exception) {
 //     errResponse = new newErrorResponse(500, false, exception);
