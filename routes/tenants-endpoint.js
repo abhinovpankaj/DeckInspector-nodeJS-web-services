@@ -438,7 +438,7 @@ router.route('/:id/updatestoragedatadetails/')
 
     });
 
-      var result = await TenantService.addUpdateAdmin(tenantId, adminDetails);
+      var result = await TenantService.addUpdateAdmin(tenantId, req.body);
       if (result.reason) {
         return res.status(result.code).json(result);
       }
