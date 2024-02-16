@@ -10,6 +10,7 @@ var upload = multer({ dest: 'uploads/' });
 const bodyParser = require('body-parser');
 var image = require('../model/image');
 var tenantService = require('../service/tenantService');
+const { newPipeline } = require('@azure/storage-blob');
 
 require("dotenv").config();
 
@@ -76,6 +77,68 @@ router.route('/upload')
                 //TODO update the used space against the company
                 tenantService.updateStorageStats(companyIdentifier,1,fileSizeInBytes);
                 // increment the image count  as well
+                
+            }
+            else
+                res.status(409).json(response);
+            return;
+
+        } catch (err) {
+            console.log(err);
+            errResponse = new ErrorResponse(500, "Internal server error", err);
+            res.status(500).json(errResponse);
+        }
+    });
+
+    router.route('/uploadlogos')
+    .post(upload.single("picture"), async function (req, res) {
+        var errResponse;
+        try {
+            var editedat = (new Date(Date.now())).toISOString();
+            const { containerName, uploader, entityName,id,
+                  lasteditedby, 
+                 type, parentType} = req.body;
+            //var companyIdentifier = req.user.company;
+            //companyIdentifier = companyIdentifier.replaceAll(".","-");
+            //var fileSizeInBytes = req.headers['content-length'] ;
+            const filetoUpload = req.file;
+            
+            //replace all except alphanumeric
+
+            var newcontainerName= containerName.replace(/[^a-zA-Z0-9 ]/g, '');
+            newcontainerName = newcontainerName.toLowerCase();
+            // var newentityName= entityName.replace(/[^a-zA-Z0-9 ]/g, '');
+            // newentityName = newentityName.toLowerCase();
+            //container would be now the companyidentifier
+
+            const uploadOptions = {
+                metadata: {
+                    'uploader': uploader,
+                },
+                tags: {
+                    'project': newcontainerName,
+                    
+                }
+            };
+            
+            if (newcontainerName.length < 3) {
+                newcontainerName = `${newcontainerName}-${uploader}`;
+              }
+            if (!(newcontainerName && filetoUpload)) {
+                errResponse = new ErrorResponse(400, "containerName, blobName, filePath is required", "");
+                res.status(400).json(errResponse);
+                return;
+            }
+            var result = await uploadBlob.uploadFile(newcontainerName, `${filetoUpload.originalname}`, filetoUpload.path, uploadOptions);
+            var response = JSON.parse(result);
+            if (response.error) {
+                errResponse = new ErrorResponse(500, 'Internal server error', result.error);
+                console.log(response);
+                res.status(500).json(errResponse);
+                return;
+            }
+            if (response.message) {
+                res.status(201).json(response);                
                 
             }
             else
