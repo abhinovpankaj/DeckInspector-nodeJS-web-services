@@ -63,7 +63,7 @@ module.exports = {
     },
     updateAdminDetails:async (id,adminDetails)=>{
         try {
-            return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$set:{adminDetails:adminDetails}});
+            return await mongo.Tenants.updateOne({ _id: new ObjectId(id)},{$push:{adminDetails:adminDetails}});
         } catch (error) {
             console.log(error);
         }
