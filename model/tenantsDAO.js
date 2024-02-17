@@ -21,6 +21,9 @@ module.exports = {
     getTenantById: async (id) => {
         return await mongo.Tenants.findOne({ _id: new ObjectId(id) }, {files: 0});
     },
+    getTenantByCompanyIdentifier: async (companyIdentifier) => {
+        return await mongo.Tenants.findOne({ companyIdentifier: companyIdentifier }, {files: 0});
+    },
     addTenantDiskSpace: async (id, space) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { "allowedDiskSpace": +space }});
     },

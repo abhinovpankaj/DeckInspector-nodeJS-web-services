@@ -10,16 +10,17 @@ var sectionRouter = require("./routes/section-endpoint");
 var invasivesectionRouter = require("./routes/invasivesection-endpoint");
 var conclusiveSectionRouter = require("./routes/conclusivesection-endpoint");
 var tenantRouter = require("./routes/tenants-endpoint");
+var loginRouter = require("./routes/login-endpoint");
 const { authenticate } = require("passport");
 const jwt = require('jsonwebtoken');
 
 
 module.exports = function(app) {
   app.use(express.json());
-  app.use("/api/user", userRouter);
+  app.use("/api/user", authenticateToken , userRouter);
   app.use("/api/projectdocuments", projectDocumentsRouter);  
   app.use("/api/projectreports", projectReportsRouter);  
-  app.use("/api/image", imageRouter);  
+  app.use("/api/image", authenticateToken, imageRouter);  
   app.use("/api/project", authenticateToken, projectRouter);
   app.use("/api/subproject", subprojectRouter);
   app.use("/api/location", locationRouter);
@@ -27,6 +28,7 @@ module.exports = function(app) {
   app.use("/api/invasivesection", invasivesectionRouter);
   app.use("/api/conclusivesection", conclusiveSectionRouter);
   app.use("/api/tenants", authenticateToken,tenantRouter);
+  app.use("/api/login", loginRouter);
 
 };
 

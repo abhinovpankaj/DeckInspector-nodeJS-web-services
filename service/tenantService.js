@@ -39,6 +39,26 @@ var getTenantById = async function (tenantId) {
     return handleError(error);
   }
 };
+
+var getTenantByCompanyIdentifier = async function (companyIdentifier) {
+  try {
+    const result = await TenantDAO.getTenantByCompanyIdentifier(companyIdentifier);
+    if (result) {
+      return {
+        success: true,
+        Tenant: result,
+      };
+    }
+    return {
+      code: 401,
+      success: false,
+      reason: "No Tenant found with the given ID",
+    };
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
 var deleteTenantPermanently = async function (tenantId) {
   try {
     const result = await TenantDAO.deleteTenantPermanently(tenantId);
@@ -437,5 +457,6 @@ module.exports = {
   addUpdateAdmin,
   isTenantActive,
   getTenantDetails,
-  updateStorageStats
+  updateStorageStats,
+  getTenantByCompanyIdentifier
 };
