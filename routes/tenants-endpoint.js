@@ -79,7 +79,7 @@ router.route('/alltenants')
       }
     });
 
-    router.route('/:companyIdentifier')
+    router.route('/identifier/:companyIdentifier')
     .get(async function(req,res){
       try{
         var errResponse;
