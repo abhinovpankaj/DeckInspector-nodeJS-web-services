@@ -38,9 +38,12 @@ try{
       "endDate":endDate,
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
-      "expenses": expenses===undefined?1000:expenses,
+      "expenses": expenses===undefined?0:expenses,
       "isActive":true,
       "isDeleted":false,
+      "usedDiskSpace":0,
+      "reportCount":0,
+      "imageCount":0,
       "companyIdentifier":`${name.toLowerCase()}.ondeckinspectors.com`
   }
 
