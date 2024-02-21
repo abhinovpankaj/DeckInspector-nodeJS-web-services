@@ -25,7 +25,7 @@ module.exports = {
         return await mongo.Tenants.findOne({ companyIdentifier: companyIdentifier }, {files: 0});
     },
     addTenantDiskSpace: async (id, space) => {
-        return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { "allowedDiskSpace": +space }});
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: { "allowedDiskSpace": space }});
     },
     addTenantUsedDiskSpace: async (id, space) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { "usedDiskSpace": +space }});
@@ -34,7 +34,7 @@ module.exports = {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { validity: +days }});
     },
     increaseTenantUsers: async (id, count) => {
-        return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $inc: { allowedUsersCount: +count }});
+        return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: { allowedUsersCount: count }});
     },
     updateStorageStats:async (identifier,count,size)=>{
         return await mongo.Tenants.updateOne({companyIdentifier:identifier},{$inc:{imageCount:+count,$inc:{usedDiskSpace:+size}}})
