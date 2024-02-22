@@ -213,9 +213,9 @@ router.route('/:id/updatevaliditydate')
     var errResponse;
     const tenantId = req.params.id;
     var {endDate}= req.body;
-    var formattedendDate = new Date(endDate).toISOString();
+    //var formattedendDate = new Date(endDate).toISOString();
     
-    var result = await TenantService.updateValidityDate(tenantId, formattedendDate);
+    var result = await TenantService.updateValidityDate(tenantId, endDate);
     if (result.reason) {
       return res.status(result.code).json(result);
     }
