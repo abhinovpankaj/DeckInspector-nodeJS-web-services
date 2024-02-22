@@ -37,7 +37,7 @@ module.exports = {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: { allowedUsersCount: count }});
     },
     updateStorageStats:async (identifier,count,size)=>{
-        return await mongo.Tenants.updateOne({companyIdentifier:identifier},{$inc:{imageCount:+count,$inc:{usedDiskSpace:+size}}})
+        return await mongo.Tenants.updateOne({companyIdentifier:identifier},{$inc:{imageCount:+count,usedDiskSpace:+size}})
     },
     editTenant: async (id, newData) => {
         return await mongo.Tenants.updateOne({ _id: new ObjectId(id) }, { $set: newData },{upsert:false});

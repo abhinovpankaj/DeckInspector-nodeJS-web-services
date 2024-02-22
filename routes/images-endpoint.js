@@ -30,14 +30,17 @@ router.route('/upload')
                   lasteditedby, 
                  type, parentType} = req.body;
             var companyIdentifier = req.user.company;
-            companyIdentifier = companyIdentifier.replaceAll(".","-");
-            var fileSizeInBytes = req.headers['content-length'] ;
+            // companyIdentifier = companyIdentifier.replaceAll(".","-");
+            // companyIdentifier = companyIdentifier.replaceAll(" ","");
+            var fileSizeInBytes = parseInt(req.headers['content-length']) ;
             const filetoUpload = req.file;
             
             //replace all except alphanumeric
 
             var newcontainerName= containerName.replace(/[^a-zA-Z0-9 ]/g, '');
             newcontainerName = newcontainerName.toLowerCase();
+            newcontainerName = newcontainerName.replaceAll(" ","");
+
             // var newentityName= entityName.replace(/[^a-zA-Z0-9 ]/g, '');
             // newentityName = newentityName.toLowerCase();
             //container would be now the companyidentifier
@@ -60,7 +63,7 @@ router.route('/upload')
                 res.status(400).json(errResponse);
                 return;
             }
-            var result = await uploadBlob.uploadFile(companyIdentifier, `${newcontainerName}-${filetoUpload.originalname}`, filetoUpload.path, uploadOptions);
+            var result = await uploadBlob.uploadFile(newcontainerName, `${newcontainerName}-${filetoUpload.originalname}`, filetoUpload.path, uploadOptions);
             var response = JSON.parse(result);
             if (response.error) {
                 errResponse = new ErrorResponse(500, 'Internal server error', result.error);
