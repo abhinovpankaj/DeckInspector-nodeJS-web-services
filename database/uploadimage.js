@@ -9,7 +9,6 @@ require("dotenv").config();
 //   tags: {project: 'xyz', owner: 'accounts-payable'}
 // }
 const account = process.env.AZURE_STORAGE_ACCOUNT_NAME;
-//const defaultAzureCredential = new DefaultAzureCredential();
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.STORAGE_CONNECTION_STRING);
 
