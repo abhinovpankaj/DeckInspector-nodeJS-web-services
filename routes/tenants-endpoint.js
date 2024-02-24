@@ -7,6 +7,7 @@ var ObjectId = require('mongodb').ObjectId;
 const newErrorResponse = require('../model/newError');
 const TenantService = require('../service/tenantService');
 const users = require("../model/user");
+const tenantsDAO = require("../model/tenantsDAO")
 const BlobManager = require('../database/uploadimage');
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
@@ -47,6 +48,14 @@ try{
       "companyIdentifier":`${name.toLowerCase()}.ondeckinspectors.com`
   }
 
+  const companyName = await tenantsDAO.getTenantByCompanyIdentifier(newTenant.companyIdentifier)
+
+  if(companyName)
+  {
+    return res
+    .status(400)
+    .json(new newErrorResponse(400, false, "Company name is already in use"))
+  }
 
   var result = await TenantService.addTenant(newTenant);    
   if (result.reason) {
