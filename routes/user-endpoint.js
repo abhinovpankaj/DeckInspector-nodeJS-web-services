@@ -17,14 +17,14 @@ router.route('/register')
 .post( function(req, res)  {  
 try {
     // Get user input
-    const { first_name, last_name, email, password,username,access_type,companyIdentifier } = req.body;
+    const { first_name, last_name, email, password,username,access_type } = req.body;
 
     // Validate user input
-    if (!(email && password && first_name && last_name&&username && companyIdentifier)) {
+    if (!(email && password && first_name && last_name&&username)) {
       res.status(400).send("All input is required");
       return;
     }
-
+    var companyIdentifier = req.user.company;
     // check if user already exist
     // Validate if user exist in our database
     

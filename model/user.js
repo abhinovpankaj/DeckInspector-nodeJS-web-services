@@ -8,7 +8,7 @@ var jwt = require('jsonwebtoken');
 
 var addUser = function (user, callback) {
     mongo.Users.insertOne({username:user.username,last_name: user.last_name,first_name:user.first_name,email:user.email,
-    password:user.password,role:Role.User,access_type:user.access_type}, {w: 1}, function (err, result) {
+    password:user.password,role:Role.User,access_type:user.access_type, companyIdentifier: user.companyIdentifier}, {w: 1}, function (err, result) {
         if (err) {
             var error = new Error("addUser()." + err.message);
             error.status = err.status;
@@ -80,7 +80,7 @@ var getUserbyUsername = async function (username, callback) {
     }
     var result = await mongo.Users.findOne({ username: username });    
         
-        if (result === null) {
+        if (!result) {
             var error1 = new Error("getUser(). \nMessage: No User Found. One Requested.");
             error1.status = 404;
             callback (error1);

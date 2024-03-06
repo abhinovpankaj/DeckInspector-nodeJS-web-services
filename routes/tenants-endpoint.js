@@ -7,6 +7,7 @@ var ObjectId = require('mongodb').ObjectId;
 const newErrorResponse = require('../model/newError');
 const TenantService = require('../service/tenantService');
 const users = require("../model/user");
+const tenantsDAO = require("../model/tenantsDAO")
 const BlobManager = require('../database/uploadimage');
 const bcrypt=require('bcrypt');
 var jwt = require('jsonwebtoken');
@@ -38,12 +39,23 @@ try{
       "endDate":endDate,
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
-      "expenses": expenses===undefined?1000:expenses,
+      "expenses": expenses===undefined?0:expenses,
       "isActive":true,
       "isDeleted":false,
+      "usedDiskSpace":0,
+      "reportCount":0,
+      "imageCount":0,
       "companyIdentifier":`${name.toLowerCase()}.ondeckinspectors.com`
   }
 
+  const companyName = await tenantsDAO.getTenantByCompanyIdentifier(newTenant.companyIdentifier)
+
+  if(companyName)
+  {
+    return res
+    .status(400)
+    .json(new newErrorResponse(400, false, "Company name is already in use"))
+  }
 
   var result = await TenantService.addTenant(newTenant);    
   if (result.reason) {
@@ -79,7 +91,7 @@ router.route('/alltenants')
       }
     });
 
-    router.route('/:companyIdentifier')
+    router.route('/identifier/:companyIdentifier')
     .get(async function(req,res){
       try{
         var errResponse;
@@ -209,7 +221,8 @@ router.route('/:id/updatevaliditydate')
   try {
     var errResponse;
     const tenantId = req.params.id;
-    const endDate = new Date(req.body).toISOString();
+    var {endDate}= req.body;
+    //var formattedendDate = new Date(endDate).toISOString();
     
     var result = await TenantService.updateValidityDate(tenantId, endDate);
     if (result.reason) {
