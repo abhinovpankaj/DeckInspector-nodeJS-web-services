@@ -39,6 +39,9 @@ try{
       "endDate":endDate,
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
       "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
+      "mobileUserCount": mobileUserCount===undefined?0:mobileUserCount,
+      "webUserCount": webUserCount===undefined?0:webUserCount,
+      "bothUserCount": botheUserCount===undefined?0:bothUserCount,
       "expenses": expenses===undefined?0:expenses,
       "isActive":true,
       "isDeleted":false,
@@ -143,7 +146,10 @@ router.route('/:id')
     }
     var newTenant = {
       "name": updateData.name,
-      "companyDescription":updateData.companyDescription     
+      "companyDescription":updateData.companyDescription,
+      "mobileUserCount": updateData.mobileUserCount,
+      "webUserCount": updateData.webUserCount,
+      "bothUserCount": updateData.bothUserCount,
    }
 
     var result = await TenantService.editTenant(tenantId,newTenant);
