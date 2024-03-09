@@ -21,7 +21,7 @@ router.route('/add')
 try{
   var errResponse;
   // Get user input
-  var { name,companyDescription, website,allowedDiskSpace,allowedUsersCount,expenses,endDate} = req.body;
+  var { name,companyDescription, website,allowedDiskSpace,mobileUserCount,webUserCount,bothUserCount,endDate} = req.body;
 
   // Validate user input
   if (name===undefined) {
@@ -42,7 +42,7 @@ try{
       "mobileUserCount": mobileUserCount===undefined?0:mobileUserCount,
       "webUserCount": webUserCount===undefined?0:webUserCount,
       "bothUserCount": botheUserCount===undefined?0:bothUserCount,
-      "expenses": expenses===undefined?0:expenses,
+      
       "isActive":true,
       "isDeleted":false,
       "usedDiskSpace":0,
