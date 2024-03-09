@@ -38,19 +38,19 @@ try {
         //res.status(result.status).json(result.users);
         switch(access_type) {
           case "both":
-            if (tenant.bothUserCount<users.filter(user=>user.bothUserCount)) {
+            if (tenant.bothUserCount<users.filter(user=>user.bothUserCount).length) {
               res.status(409).send("Cannot add a new user, limit reached. Please contact system admin");
             return; 
             }
             break;
           case "mobile":
-            if (tenant.mobileUserCount<users.filter(user=>user.mobileUserCount)) {
+            if (tenant.mobileUserCount<users.filter(user=>user.mobileUserCount).length) {
               res.status(409).send("Cannot add a new user, limit reached. Please contact system admin");
             return; 
             }
             break;
           case "web":
-            if (tenant.webUserCount<users.filter(user=>user.webUserCount)) {
+            if (tenant.webUserCount<users.filter(user=>user.webUserCount).length) {
               res.status(409).send("Cannot add a new user, limit reached. Please contact system admin");
             return; 
             }
