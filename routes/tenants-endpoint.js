@@ -41,7 +41,7 @@ try{
      
       "mobileUserCount": mobileUserCount===undefined?0:mobileUserCount,
       "webUserCount": webUserCount===undefined?0:webUserCount,
-      "bothUserCount": botheUserCount===undefined?0:bothUserCount,
+      "bothUserCount": bothUserCount===undefined?0:bothUserCount,
       
       "isActive":true,
       "isDeleted":false,
