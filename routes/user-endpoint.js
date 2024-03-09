@@ -25,6 +25,40 @@ try {
       return;
     }
     var companyIdentifier = req.user.company;
+    
+    //check if the count is exceeding the limit
+    var tenant = Tenants.getTenantByCompanyIdentifier(companyIdentifier);
+    users.getAllUser(function(err,result){
+      if(err){
+        res.status(err.status).send(err.message);
+      }
+      else{
+        //console.debug(result);
+        var users  = result.users.filter(user => user.companyIdentifier && user.companyIdentifier === companyIdentifier);
+        //res.status(result.status).json(result.users);
+        switch(access_type) {
+          case "both":
+            if (tenant.bothUserCount<users.filter(user=>user.bothUserCount)) {
+              res.status(409).send("Cannot add a new user, limit reached. Please contact system admin");
+            return; 
+            }
+            break;
+          case "mobile":
+            if (tenant.mobileUserCount<users.filter(user=>user.mobileUserCount)) {
+              res.status(409).send("Cannot add a new user, limit reached. Please contact system admin");
+            return; 
+            }
+            break;
+          case "web":
+            if (tenant.webUserCount<users.filter(user=>user.webUserCount)) {
+              res.status(409).send("Cannot add a new user, limit reached. Please contact system admin");
+            return; 
+            }
+            break;
+        }
+      }
+    });
+    
     // check if user already exist
     // Validate if user exist in our database
     
@@ -187,7 +221,31 @@ router.route('/update')
 .post(async function(req,res){
   try {
       // Get user input
-      const user = req.body; 
+      const user = req.body;
+      //check if the count is exceeding the limit
+      var tenant = Tenants.getTenantByCompanyIdentifier(companyIdentifier);
+      var users  = result.users.filter(user => user.companyIdentifier && user.companyIdentifier === companyIdentifier);
+        //res.status(result.status).json(result.users);
+      switch(access_type) {
+        case "both":
+          if (tenant.bothUserCount<users.filter(user=>user.bothUserCount)) {
+            res.status(409).send("Cannot update, limit reached. Please contact system admin");
+          return; 
+          }
+          break;
+        case "mobile":
+          if (tenant.mobileUserCount<users.filter(user=>user.mobileUserCount)) {
+            res.status(409).send("Cannot update, limit reached. Please contact system admin");
+          return; 
+          }
+          break;
+        case "web":
+          if (tenant.webUserCount<users.filter(user=>user.webUserCount)) {
+            res.status(409).send("Cannot update, limit reached. Please contact system admin");
+          return; 
+          }
+          break;
+      } 
       if("password" in user)
         user.password = await bcrypt.hash(user.password, 10);
       users.updateUser(user,function(err,result){
@@ -252,28 +310,6 @@ catch(exception){
 }
 });
 //#endregion
-
-router.route('/allusersbytenant')
-.get(async function(req,res){
-  
-try{
-  var companyIdentifier = req.query.company;
-  users.getAllUser(function(err,result){
-    if(err){
-      res.status(err.status).send(err.message);
-    }
-    else{
-      console.debug(result);
-      result.users = result.users.filter(user => user.companyIdentifier && user.companyIdentifier === companyIdentifier);
-      res.status(result.status).json(result.users);
-    }
-  });
-}
-catch(exception){
-  res.status(500).send(`Intenal server error.${exception}"`);
-}
-});
-
 router.route('/:username')
 .get(async function(req,res){
   try{
