@@ -38,7 +38,7 @@ try{
       "website":website,
       "endDate":endDate,
       "allowedDiskSpace":allowedDiskSpace===undefined?10:allowedDiskSpace,    
-      "allowedUsersCount": allowedUsersCount===undefined?5:allowedUsersCount,
+     
       "mobileUserCount": mobileUserCount===undefined?0:mobileUserCount,
       "webUserCount": webUserCount===undefined?0:webUserCount,
       "bothUserCount": botheUserCount===undefined?0:bothUserCount,
