@@ -309,6 +309,30 @@ catch(exception){
   res.status(500).send(`Intenal server error.${exception}"`);
 }
 });
+
+router.route('/allusersbytenant')
+.get(async function(req,res){
+
+try{
+  var companyIdentifier = req.query.company;
+  users.getAllUser(function(err,result){
+    if(err){
+      res.status(err.status).send(err.message);
+    }
+    else{
+      console.debug(result);
+      result.users = result.users.filter(user => user.companyIdentifier && user.companyIdentifier === companyIdentifier);
+      res.status(result.status).json(result.users);
+    }
+  });
+}
+catch(exception){
+  res.status(500).send(`Intenal server error.${exception}"`);
+}
+});
+
+
+
 //#endregion
 router.route('/:username')
 .get(async function(req,res){
