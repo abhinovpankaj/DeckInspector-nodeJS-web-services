@@ -33,7 +33,7 @@ async function uploadFile(containerName, blobName, localFileWithPath, uploadOpti
     return (`{"message":"${blobName} succeeded","url":"${blockBlobClient.url}"}`);
     //console.log(uploadResult);
   } catch (err) {
-    return (`{"error": "${err.message}"}`);
+    return (`{"error": "${err.message} occured"}`);
   }
 
 }
