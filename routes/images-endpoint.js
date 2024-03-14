@@ -52,6 +52,7 @@ router.route('/upload')
                 return;
             }
             var result = await uploadBlob.uploadFile(newcontainerName, filetoUpload.originalname, filetoUpload.path, uploadOptions);
+            console.log(`Trying to create and upload in ${containerName}: ${result}`);
             var response = JSON.parse(result);
             if (response.error) {
                 errResponse = new ErrorResponse(500, 'Internal server error', result.error);
