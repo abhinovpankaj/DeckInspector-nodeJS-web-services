@@ -1384,6 +1384,23 @@ async function buildFilledClientForm(req) {
         console.log('clientform: signer controls rewritten:', r.rewritten);
       } catch (e) { console.error('clientform: signer rewrite failed:', e && e.message); }
 
+      // OWNER SUPPLIED PHOTOS (David, Sep 8 2026): the Owner-Supplied-Photos
+      // master has no picture slots at all, so the photos the owner sends of
+      // the completed repairs could never appear in the report. The web form
+      // now collects them ({url, caption} list, uploaded via /api/image/upload)
+      // and a photo page (2 per row, captions) is appended just before the
+      // signature block - Word and PDF alike, since both come through here.
+      try {
+        const op = Array.isArray(req.body && req.body.ownerPhotos) ? req.body.ownerPhotos : [];
+        if (op.length) {
+          // Onsite Visit flavour: the page goes AFTER the per-location annex
+          // and before the Post-Repair Confirmation page.
+          const r = await appendOwnerPhotos(zip, xml, op, { onsite: !!annex });
+          xml = r.xml;
+          console.log('clientform: owner supplied photos appended:', r.added, 'of', op.length, r.skipped.length ? ('skipped: ' + r.skipped.join(', ')) : '');
+        }
+      } catch (e) { console.error('clientform: owner photos append failed (report continues without them):', e && e.message); }
+
       // Photos: each is a URL already uploaded via /api/image/upload. Fetch the
       // bytes and embed them into the matching picture content control.
       const picsByRef = {};
@@ -1452,6 +1469,81 @@ async function buildFilledClientForm(req) {
       }
 
       return { outBuf, form, ext: form.ext, contentType: form.contentType };
+}
+
+// Build the "OWNER SUPPLIED PHOTOS OF COMPLETED REPAIRS" page(s) and insert
+// them before the signature lead-in paragraph (fallback: end of the body).
+// photos: [{url, caption}] - jpg/png only (anything else is skipped and
+// reported). Two photos per row in a borderless table, each capped at
+// 2.95in x 2.6in keeping its aspect ratio, caption centred under it.
+async function appendOwnerPhotos(zip, xml, photos, opts) {
+  opts = opts || {};
+  const axios = require('axios');
+  const EMU = 914400;
+  const MAX_W = Math.round(2.95 * EMU), MAX_H = Math.round(2.6 * EMU);
+  const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const skipped = [];
+  const cells = [];
+  let n = 0;
+  for (let i = 0; i < Math.min(photos.length, 60); i++) {
+    const ph = photos[i] || {};
+    const url = String(ph.url || '').trim();
+    if (!url) continue;
+    const extMatch = url.split('?')[0].toLowerCase().match(/\.(png|jpe?g)$/);
+    if (!extMatch) { skipped.push('photo ' + (i + 1) + ' (not jpg/png)'); continue; }
+    const ext = extMatch[1] === 'jpeg' ? 'jpg' : extMatch[1];
+    let buf;
+    try {
+      const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 60000 });
+      buf = Buffer.from(resp.data);
+    } catch (e) { skipped.push('photo ' + (i + 1) + ' (download failed)'); continue; }
+    n++;
+    const dims = FinalReportGenerator.getImageDims(buf, ext === 'jpg' ? 'jpeg' : ext);
+    const ar = Math.max(1, dims.w) / Math.max(1, dims.h);
+    let cx = MAX_W, cy = Math.round(MAX_W / ar);
+    if (cy > MAX_H) { cy = MAX_H; cx = Math.round(MAX_H * ar); }
+    const media = 'media/ownerphoto' + n + '.' + ext;
+    zip.file('word/' + media, buf);
+    FinalReportGenerator.ensureContentType(zip, ext);
+    const rid = 'rIdOwnerPhoto' + n;
+    FinalReportGenerator.ensureImageRel(zip, 'word/_rels/document.xml.rels',
+      '<Relationship Id="' + rid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="' + media + '"/>', rid);
+    const img = FinalReportGenerator.inlineImageXml(rid, cx, cy, 9000 + n, 'OwnerPhoto' + n);
+    const caption = String(ph.caption || '').trim();
+    cells.push('<w:tc><w:tcPr><w:tcW w:w="4680" w:type="dxa"/><w:vAlign w:val="top"/></w:tcPr>'
+      + '<w:p><w:pPr><w:keepNext/><w:spacing w:before="120" w:after="40"/><w:jc w:val="center"/></w:pPr>' + img + '</w:p>'
+      + '<w:p><w:pPr><w:spacing w:after="160"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t xml:space="preserve">'
+      + esc(caption || ('Photo ' + n)) + '</w:t></w:r></w:p></w:tc>');
+  }
+  if (!n) return { xml, added: 0, skipped };
+  const emptyCell = '<w:tc><w:tcPr><w:tcW w:w="4680" w:type="dxa"/></w:tcPr><w:p/></w:tc>';
+  let rows = '';
+  for (let i = 0; i < cells.length; i += 2) {
+    rows += '<w:tr><w:trPr><w:cantSplit/></w:trPr>' + cells[i] + (cells[i + 1] || emptyCell) + '</w:tr>';
+  }
+  const noBorder = '<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>';
+  const block = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'
+    + '<w:p><w:pPr><w:keepNext/><w:spacing w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="EE0000"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>OWNER SUPPLIED PHOTOS OF COMPLETED REPAIRS</w:t></w:r></w:p>'
+    + '<w:p><w:pPr><w:keepNext/><w:spacing w:after="120"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">'
+    + esc('The following ' + n + ' photo' + (n === 1 ? '' : 's') + ' of the completed repairs were supplied by the owner or the owner\'s agent and are included as submitted. '
+      + (opts.onsite ? 'They supplement the inspector\'s on-site observations documented above.' : 'This final report relies on these photos in lieu of an on-site visit.'))
+    + '</w:t></w:r></w:p>'
+    + '<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblBorders>' + noBorder + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblLook w:val="0000"/></w:tblPr>'
+    + '<w:tblGrid><w:gridCol w:w="4680"/><w:gridCol w:w="4680"/></w:tblGrid>' + rows + '</w:tbl>'
+    + '<w:p/>';
+  // Insert before the signature lead-in paragraph ("This report is based
+  // solely upon the undersigned...") so the photos precede the certification.
+  // Onsite Visit (repairs master): after the annex loops, right before the
+  // "POST-REPAIR INSPECTION CONFIRMATION" page (that heading already starts
+  // a new page, so the photo page sits cleanly between the two).
+  let lead = opts.onsite ? xml.indexOf('POST-REPAIR INSPECTION CONFIRMATION') : -1;
+  if (lead === -1) lead = xml.indexOf('based solely upon the undersigned');
+  let at = -1;
+  if (lead !== -1) at = Math.max(xml.lastIndexOf('<w:p>', lead), xml.lastIndexOf('<w:p ', lead));
+  if (at === -1) at = xml.lastIndexOf('<w:sectPr');
+  if (at === -1) at = xml.lastIndexOf('</w:body>');
+  if (at === -1) return { xml, added: 0, skipped: skipped.concat(['no insertion point']) };
+  return { xml: xml.slice(0, at) + block + xml.slice(at), added: n, skipped };
 }
 
 // Floating-anchor branding for the client blank forms. The images are anchored
