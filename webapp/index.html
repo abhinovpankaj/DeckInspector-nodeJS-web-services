@@ -261,6 +261,15 @@ input,select{font-family:inherit;font-size:16px}
 .fc-doc .docx-wrapper{background:transparent!important;padding:0!important}
 .fc-doc .docx-wrapper>section.docx{margin:0 auto 14px;box-shadow:0 2px 10px rgba(0,0,0,.14)}
 .fc-updating{position:sticky;top:0;z-index:3;font-size:12px;color:var(--brand);background:#eef4ff;border:1px solid #cfe0ff;border-radius:8px;padding:5px 10px;margin-bottom:8px;display:inline-block}
+/* Owner Supplied Photos (David, Sep 8): photos of the completed repairs the
+   owner sends in, appended to the report as a captioned photo page. */
+.fc-op{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 4px}
+.fc-op .fc-opc{border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px;position:relative}
+.fc-op .fc-opc img{width:100%;height:96px;object-fit:cover;border-radius:6px;display:block;background:#eceff3}
+.fc-op .fc-opc input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:11.5px;font-family:inherit;margin-top:4px}
+.fc-op .fc-opx{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(192,0,0,.9);color:#fff;font-weight:800;cursor:pointer;line-height:22px;padding:0;font-size:13px}
+.fc-opadd{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--brand);font-weight:700;border:1.5px dashed var(--brand);border-radius:8px;padding:7px 10px;font-size:12.5px;margin-top:4px}
+.fc-opadd input{display:none}
 @media(max-width:820px){.fc-wrap{flex-direction:column}.fc-side{flex-basis:auto;max-width:none;width:100%}}
 .unitgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .ucard{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow .15s;border:none;text-align:left;font-size:15px}
@@ -1285,6 +1294,23 @@ input,select{font-family:inherit;font-size:16px}
                 </div>
               </template>
             </template>
+            <template v-if="formEd.key==='finalcompletion'">
+              <h5>Owner Supplied Photos</h5>
+              <div class="hint" style="margin:0 0 4px;font-size:11.5px">Photos the owner sent of the completed repairs. They are added to the report as a captioned photo page{{ formEd.annex ? ' after the on-site findings, before the Post-Repair Confirmation' : ' before the signature' }}.</div>
+              <div v-if="formEd.ownerPhotos.length" class="fc-op">
+                <div v-for="(ph, i) in formEd.ownerPhotos" :key="ph.url" class="fc-opc">
+                  <img :src="ph.url" :alt="ph.caption || ('Photo ' + (i+1))">
+                  <button type="button" class="fc-opx" title="Remove this photo" @click="opRemove(i)">&times;</button>
+                  <input type="text" :value="ph.caption" :placeholder="'Caption (Photo ' + (i+1) + ')'" @input="opCaption(i, $event.target.value)">
+                </div>
+              </div>
+              <label class="fc-opadd">
+                <span v-if="formEd.opBusy">Uploading {{ formEd.opBusy }}&hellip;</span>
+                <span v-else>&#128247; Add owner photos</span>
+                <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple :disabled="!!formEd.opBusy" @change="opPick($event)">
+              </label>
+              <div class="hint" style="margin:4px 0 0;font-size:11px">JPG or PNG, up to 60 photos.</div>
+            </template>
           </div>
           <div class="fc-doc" ref="fcDoc">
             <span v-if="formEd.previewBusy" class="fc-updating">Updating preview…</span>
@@ -1600,7 +1626,7 @@ const { createApp } = Vue;
 // Build stamp: bump on every deploy. The page checks the server for a newer
 // stamp when the tab regains focus (and every 10 min) and offers a reload -
 // so a fix is never silently missed because the page was never reloaded.
-const APP_BUILD = '2026-09-04.2';
+const APP_BUILD = '2026-09-08.1';
 
 // ---- Final Upon Completion: side-menu field labels + section grouping ----
 // Control IDs are stable in the 5.0 master. Labels below make the side menu
@@ -1681,7 +1707,7 @@ createApp({
              email: '', propertyName: '', customerName: '', phone: '', shipLine: '', ship: {}, txnDateStr: '', txnDateIso: '',
              inspectionAmount: '', reportAmount: '',
              creating: false, error: '', message: '' },
-      formEd: { open: false, loading: false, key: '', label: '', ext: 'docx', tokenHtml: '', renderedHtml: '', controls: {}, rcByRow: {}, values: {}, photos: {}, busy: false, busyKind: '' },
+      formEd: { open: false, loading: false, key: '', label: '', ext: 'docx', tokenHtml: '', renderedHtml: '', controls: {}, rcByRow: {}, values: {}, photos: {}, ownerPhotos: [], opBusy: '', annex: false, busy: false, busyKind: '' },
       filterMode: 'active', addOpen: false, savingProject: false, deletingProject: null,
       addForm: { name: '', address: '', description: '', projecttype: 'multilevel', formId: null, inspDate: '', inspTime: '', url: '' },
       forms: [], photoBusy: false,
@@ -2454,7 +2480,7 @@ createApp({
       const mode = f.key === 'finalcompletion' ? 'sidedoc' : 'canvas';
       // annex:true = the "Onsite Visit" flavour - same form values, but the
       // server generates the integrated report from the repairs master.
-      this.formEd = { open: true, loading: true, mode, key: f.key, label: f.label, ext: f.ext, annex: !!f.annex, tokenHtml: '', renderedHtml: '', controls: {}, values: {}, photos: {}, custom: {}, origDate: '', rrByRow: {}, signerRefs: {}, busy: false, busyKind: '', previewBusy: false, previewErr: '', saved: false, lastFileUrl: '' };
+      this.formEd = { open: true, loading: true, mode, key: f.key, label: f.label, ext: f.ext, annex: !!f.annex, tokenHtml: '', renderedHtml: '', controls: {}, values: {}, photos: {}, custom: {}, origDate: '', rrByRow: {}, signerRefs: {}, ownerPhotos: [], opBusy: '', busy: false, busyKind: '', previewBusy: false, previewErr: '', saved: false, lastFileUrl: '' };
       try {
         const res = await this.api('/project/clientformlayout?key=' + encodeURIComponent(f.key));
         if (!res.ok) throw new Error('bad');
@@ -2570,7 +2596,7 @@ createApp({
       try {
         if (this.formEd.mode !== 'sidedoc' || !this.current) return;
         const key = this.fcStoreKey(); if (!key) return;
-        localStorage.setItem(key, JSON.stringify({ values: this.formEd.values, origDate: this.formEd.origDate, custom: this.formEd.custom, ts: (new Date()).getTime() }));
+        localStorage.setItem(key, JSON.stringify({ values: this.formEd.values, origDate: this.formEd.origDate, custom: this.formEd.custom, ownerPhotos: this.fcOwnerPhotos(), ts: (new Date()).getTime() }));
         this.formEd.saved = true;
       } catch (e) { /* storage unavailable — ignore */ }
     },
@@ -2603,6 +2629,7 @@ createApp({
         // auto-filled original Visual inspection date (David, Aug 21).
         if (d && typeof d.origDate === 'string' && d.origDate.trim()) this.formEd.origDate = d.origDate;
         if (d && d.custom) this.formEd.custom = d.custom;
+        if (d && Array.isArray(d.ownerPhotos)) this.formEd.ownerPhotos = d.ownerPhotos.filter(p => p && p.url).map(p => ({ url: String(p.url), caption: String(p.caption || '') }));
         this.formEd.saved = true;
         return true;
       } catch (e) { return false; }
@@ -2618,7 +2645,7 @@ createApp({
         // method (html2pdf) reflowed pages and is kept only as a fallback.
         const res = await this.api('/project/clientformpdf', {
           method: 'POST',
-          json: { key: this.formEd.key, values: this.formEd.values, photos: this.formEd.photos, origDate: this.formEd.origDate || '', projectId: this.current ? this.projectId(this.current) : '', includeAnnex: !!this.formEd.annex, signer: this.formSignerPayload() },
+          json: { key: this.formEd.key, values: this.formEd.values, photos: this.formEd.photos, ownerPhotos: this.fcOwnerPhotos(), origDate: this.formEd.origDate || '', projectId: this.current ? this.projectId(this.current) : '', includeAnnex: !!this.formEd.annex, signer: this.formSignerPayload() },
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -2665,7 +2692,7 @@ createApp({
       try {
         const ok = await this.fcLoadDocxPreview();
         if (!ok) throw new Error('renderer');
-        const res = await this.api('/project/clientformfill', { method: 'POST', json: { key: this.formEd.key, values: this.formEd.values, photos: this.formEd.photos, origDate: this.formEd.origDate || '' } });
+        const res = await this.api('/project/clientformfill', { method: 'POST', json: { key: this.formEd.key, values: this.formEd.values, photos: this.formEd.photos, ownerPhotos: this.fcOwnerPhotos(), origDate: this.formEd.origDate || '' } });
         if (!res.ok) throw new Error('build');
         const buf = await res.arrayBuffer();
         const host = this.$refs.fcRender;
@@ -2720,6 +2747,62 @@ createApp({
       const ctx = this.fcClean(c.context);
       return (ctx && /[A-Za-z]/.test(ctx)) ? ctx.slice(0, 44) : 'Field';
     },
+    // ---- Owner Supplied Photos (David, Sep 8, 2026) ----
+    // The owner's photos of the completed repairs, sent to the server as
+    // [{url, caption}] and appended as a captioned photo page before the
+    // signature block (Owner-Supplied form) or after the on-site annex, before
+    // the Post-Repair Confirmation (Onsite Visit form) - David, Sep 8: "Same
+    // for onsite inspection".
+    fcOwnerPhotos() {
+      if (!Array.isArray(this.formEd.ownerPhotos)) return [];
+      return this.formEd.ownerPhotos.filter(p => p && p.url).map(p => ({ url: p.url, caption: String(p.caption || '').trim() }));
+    },
+    async opPick(e) {
+      const files = Array.from(e.target.files || []);
+      e.target.value = '';
+      if (!files.length) return;
+      const room = 60 - this.formEd.ownerPhotos.length;
+      if (room <= 0) { this.toast('Up to 60 owner photos per report.', 'err'); return; }
+      const list = files.slice(0, room);
+      let failed = 0;
+      for (let i = 0; i < list.length; i++) {
+        const file = list[i];
+        this.formEd.opBusy = (i + 1) + ' of ' + list.length;
+        try {
+          if (!/^image\/(jpeg|png)$/i.test(file.type || '') && !/\.(jpe?g|png)$/i.test(file.name || '')) { failed++; continue; }
+          const dot = file.name ? file.name.lastIndexOf('.') : -1;
+          const ext = dot !== -1 ? file.name.slice(dot).toLowerCase() : '.jpg';
+          const uname = 'ownerphoto-' + Date.now() + '-' + i + ext;
+          const fd = new FormData();
+          fd.append('picture', file, uname);
+          fd.append('containerName', String((this.current && this.current.name) || 'project').replace(/\s+/g, '').toLowerCase());
+          fd.append('uploader', (this.user && this.user.username) || 'web');
+          fd.append('entityName', (this.current && this.current.name) || 'project');
+          const res = await this.api('/image/upload', { method: 'POST', body: fd });
+          if (!res.ok) throw new Error('upload');
+          const j = await res.json();
+          const url = j.url || (j.data && j.data.url) || '';
+          if (!url) throw new Error('upload');
+          this.formEd.ownerPhotos.push({ url, caption: '' });
+        } catch (err) {
+          if (err && err.message === 'auth') { this.formEd.opBusy = ''; return; }
+          failed++;
+        }
+      }
+      this.formEd.opBusy = '';
+      if (failed) this.toast(failed + ' photo' + (failed === 1 ? '' : 's') + ' could not be added (JPG or PNG only).', 'err');
+      else this.toast(list.length + ' owner photo' + (list.length === 1 ? '' : 's') + ' added.');
+      this.fcQueue();
+    },
+    opRemove(i) {
+      this.formEd.ownerPhotos.splice(i, 1);
+      this.fcQueue();
+    },
+    opCaption(i, v) {
+      if (!this.formEd.ownerPhotos[i]) return;
+      this.formEd.ownerPhotos[i].caption = v;
+      this.fcQueue();
+    },
     async ffPickPhoto(ref, e) {
       const file = (e.target.files || [])[0];
       e.target.value = '';
@@ -2760,7 +2843,7 @@ createApp({
           // Visual report. Handing back a blob minutes after the click made
           // Chrome treat it as an "automatic download" and block it (David,
           // Aug 22: this was the only report that would not download).
-          json: { key: this.formEd.key, values: this.formEd.values, photos: this.formEd.photos, origDate: this.formEd.origDate || '', projectId: this.current ? this.projectId(this.current) : '', includeAnnex: !!this.formEd.annex, signer: this.formSignerPayload(), deliver: 'url', fileName: wantName },
+          json: { key: this.formEd.key, values: this.formEd.values, photos: this.formEd.photos, ownerPhotos: this.fcOwnerPhotos(), origDate: this.formEd.origDate || '', projectId: this.current ? this.projectId(this.current) : '', includeAnnex: !!this.formEd.annex, signer: this.formSignerPayload(), deliver: 'url', fileName: wantName },
         });
         if (!res.ok) throw new Error('bad');
         const ctype = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
