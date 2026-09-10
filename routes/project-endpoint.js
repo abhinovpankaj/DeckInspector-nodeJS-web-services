@@ -1528,8 +1528,13 @@ async function appendOwnerPhotos(zip, xml, photos, opts) {
     const img = FinalReportGenerator.inlineImageXml(rid, cx, cy, 9000 + n, 'OwnerPhoto' + n)
       .replace('<a:stretch>', srcRect + '<a:stretch>');
     const caption = String(ph.caption || '').trim();
+    // No keepNext inside the cells: Word reads "keep with next" on paragraphs
+    // in table rows as "keep these ROWS together", which chained all the rows
+    // into one unbreakable block, abandoned the heading on its own page and
+    // opened a page-sized gap (David's 2070 S. Mountain View report, Sep 10).
+    // cantSplit on the row already keeps each caption with its photo.
     cells.push('<w:tc><w:tcPr><w:tcW w:w="' + CELL_DXA + '" w:type="dxa"/><w:vAlign w:val="top"/></w:tcPr>'
-      + '<w:p><w:pPr><w:keepNext/><w:spacing w:before="120" w:after="40"/><w:jc w:val="center"/></w:pPr>' + img + '</w:p>'
+      + '<w:p><w:pPr><w:spacing w:before="120" w:after="40"/><w:jc w:val="center"/></w:pPr>' + img + '</w:p>'
       + '<w:p><w:pPr><w:spacing w:after="160"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t xml:space="preserve">'
       + esc(caption || ('Photo ' + n)) + '</w:t></w:r></w:p></w:tc>');
   }
@@ -1542,15 +1547,24 @@ async function appendOwnerPhotos(zip, xml, photos, opts) {
   }
   const noBorder = '<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>';
   const zeroMar = '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>';
-  const block = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'
-    + '<w:p><w:pPr><w:keepNext/><w:spacing w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="EE0000"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>OWNER SUPPLIED PHOTOS OF COMPLETED REPAIRS</w:t></w:r></w:p>'
+  // New page via pageBreakBefore on the heading itself - NOT a separate
+  // page-break paragraph. When the preceding text ends near the bottom of a
+  // page, Word pushes a break-only paragraph onto the next page and the break
+  // then opens a THIRD page: a blank page above the heading (David, Sep 10).
+  const block = '<w:p><w:pPr><w:pageBreakBefore/><w:keepNext/><w:spacing w:before="0" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="EE0000"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>OWNER SUPPLIED PHOTOS OF COMPLETED REPAIRS</w:t></w:r></w:p>'
     + '<w:p><w:pPr><w:keepNext/><w:spacing w:after="120"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">'
     + esc('The following ' + n + ' photo' + (n === 1 ? '' : 's') + ' of the completed repairs were supplied by the owner or the owner\'s agent and are included as submitted. '
       + (opts.onsite ? 'They supplement the inspector\'s on-site observations documented above.' : 'This final report relies on these photos in lieu of an on-site visit.'))
     + '</w:t></w:r></w:p>'
     + '<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders>' + noBorder + '</w:tblBorders><w:tblLayout w:type="fixed"/>' + zeroMar + '<w:tblLook w:val="0000"/></w:tblPr>'
     + '<w:tblGrid><w:gridCol w:w="' + CELL_DXA + '"/><w:gridCol w:w="' + GAP_DXA + '"/><w:gridCol w:w="' + CELL_DXA + '"/></w:tblGrid>' + rows + '</w:tbl>'
-    + '<w:p/>';
+    ;
+  // Trailing paragraph after the table only when nothing else supplies one:
+  // onsite - the next heading starts its own page, and a spilled empty
+  // paragraph there would turn that break into a blank page; owner-supplied
+  // - the template's own empty paragraph follows the table (see below).
+  let tail = '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>';
+  if (opts.onsite) tail = '';
   // Insert before the signature lead-in paragraph ("This report is based
   // solely upon the undersigned...") so the photos precede the certification.
   // Onsite Visit (repairs master): after the annex loops, right before the
@@ -1560,10 +1574,21 @@ async function appendOwnerPhotos(zip, xml, photos, opts) {
   if (lead === -1) lead = xml.indexOf('based solely upon the undersigned');
   let at = -1;
   if (lead !== -1) at = Math.max(xml.lastIndexOf('<w:p>', lead), xml.lastIndexOf('<w:p ', lead));
+  // The template keeps an EMPTY keep-with-next paragraph right before the
+  // lead-in. Left in front of our heading it is dragged onto the photo page
+  // by its keepNext (a stray blank line above the heading); moved behind the
+  // table it is the spacing before the lead-in instead. So insert before it.
+  if (at !== -1 && !opts.onsite) {
+    const prevStart = Math.max(xml.lastIndexOf('<w:p>', at - 1), xml.lastIndexOf('<w:p ', at - 1));
+    if (prevStart !== -1) {
+      const prev = xml.slice(prevStart, at);
+      if (!/<w:t[ >]/.test(prev) && !/<w:drawing|<w:br |<w:tbl/.test(prev) && /<w:p[ >]/.test(prev) && prev.indexOf('</w:p>') === prev.length - 6) { at = prevStart; tail = ''; }
+    }
+  }
   if (at === -1) at = xml.lastIndexOf('<w:sectPr');
   if (at === -1) at = xml.lastIndexOf('</w:body>');
   if (at === -1) return { xml, added: 0, skipped: skipped.concat(['no insertion point']) };
-  return { xml: xml.slice(0, at) + block + xml.slice(at), added: n, skipped };
+  return { xml: xml.slice(0, at) + block + tail + xml.slice(at), added: n, skipped };
 }
 
 // Returns an upright JPEG when the EXIF Orientation tag says the pixels are
