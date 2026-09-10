@@ -15,6 +15,7 @@ var loginRouter = require("./routes/login-endpoint");
 var locationFormRouter = require("./routes/locationform-endpoint");
 var migrateRouter = require("./routes/migrate-endpoint");
 var qboRouter = require("./routes/qbo-endpoint");
+var apkRouter = require("./routes/apk-endpoint");
 const { authenticate } = require("passport");
 const jwt = require("jsonwebtoken");
 
@@ -37,6 +38,8 @@ module.exports = function (app) {
   app.use("/api/migrate", migrateRouter);
   // PUBLIC QuickBooks OAuth callback (state-signed; see routes/qbo-endpoint.js)
   app.use("/api/qbo", qboRouter);
+  // PUBLIC Android APK install page + download (routes/apk-endpoint.js)
+  app.use("/apk", apkRouter);
 };
 
 function authenticateToken(req, res, next) {
