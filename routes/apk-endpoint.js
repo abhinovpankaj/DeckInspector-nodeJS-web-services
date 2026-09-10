@@ -8,7 +8,9 @@
 //   apk/latest.json                             {version, build, file, url, sha, branch, builtAt}
 //
 // These routes are PUBLIC (no login) and mounted at /apk:
-//   GET /apk              install page: version, Download button, instructions
+//   GET /apk              install page: version, Download button (direct blob link -
+//                         a redirect that fails during an app restart saved an HTML error
+//                         page as the .apk on a field phone, Sep 10), instructions
 //   GET /apk/download     302 to the newest APK
 //   GET /apk/latest.json  the manifest (no-cache), for the page and for checks
 const express = require("express");
@@ -83,14 +85,15 @@ code{background:#eef2f8;padding:1px 5px;border-radius:5px}
 <div class="card">
 ${j ? `<p class="ver">${esc(j.version)} <span style="font-size:16px;font-weight:600;color:#5b6472">(build ${esc(j.build)})</span></p>
 <p class="meta">${when ? "Built " + esc(when) : ""}${j.sha ? " &middot; " + esc(String(j.sha).slice(0, 7)) : ""}</p>
-<a class="btn" href="/apk/download">&#11015; Download APK</a>`
+<a class="btn" href="${esc(j.url)}" download="${esc(j.file)}">&#11015; Download APK</a>
+<p class="meta" style="margin:10px 0 0;text-align:center">File: ${esc(j.file)}${j.size ? " &middot; " + esc((j.size / 1048576).toFixed(1)) + " MB" : ""}</p>`
 : `<p class="ver">No build published yet</p><p class="meta">${esc(err)}</p><a class="btn off">Download APK</a>`}
 </div>
 <div class="card">
 <b>Install on the phone</b>
 <ol>
-<li>Open this page on the phone and tap <b>Download APK</b>.</li>
-<li>When the download finishes, tap <b>Open</b> (or open it from Files &rarr; Downloads).</li>
+<li>Open this page on the phone and tap <b>Download APK</b>. Wait for the download notification to say it finished (about 49 MB &mdash; if it is only a few KB, delete it and try again).</li>
+<li>Tap the finished download to <b>Open</b> it (or open it from Files &rarr; Downloads).</li>
 <li>If Android asks, allow this browser to install unknown apps, then tap <b>Install</b>.</li>
 <li>Open E3 Inspections and sign in. Existing sign-in and offline data are kept.</li>
 </ol>
