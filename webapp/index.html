@@ -274,6 +274,9 @@ input,select{font-family:inherit;font-size:16px}
 .fc-opdrop.fc-opover{background:#e3edff;border-color:#0b3d91;border-style:solid}
 .fc-opdrop.fc-opbusy{cursor:progress;opacity:.8}
 .fc-opdrop input{display:none}
+.fc-opfolder{display:block;text-align:center;font-size:12px;color:var(--brand);cursor:pointer;margin-top:6px;text-decoration:underline}
+.fc-opfolder input{display:none}
+.fc-opfolder.fc-opbusy{cursor:progress;opacity:.6}
 @media(max-width:820px){.fc-wrap{flex-direction:column}.fc-side{flex-basis:auto;max-width:none;width:100%}}
 .unitgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .ucard{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow .15s;border:none;text-align:left;font-size:15px}
@@ -1310,9 +1313,10 @@ input,select{font-family:inherit;font-size:16px}
               </div>
               <label class="fc-opdrop" :class="{'fc-opover': formEd.opOver, 'fc-opbusy': !!formEd.opBusy}" @dragenter.prevent="formEd.opOver=true" @dragover.prevent="formEd.opOver=true" @dragleave.prevent="formEd.opOver=false" @drop.prevent="opDrop($event)">
                 <template v-if="formEd.opBusy"><b>Uploading {{ formEd.opBusy }}&hellip;</b></template>
-                <template v-else><b>&#128247; Drag &amp; drop owner photos here</b><small>or click to choose files &middot; JPG or PNG, up to 60</small></template>
+                <template v-else><b>&#128247; Drag &amp; drop owner photos here</b><small>several photos or a whole folder at once &middot; or click to choose files &middot; JPG or PNG, up to 60</small></template>
                 <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple :disabled="!!formEd.opBusy" @change="opPick($event)">
               </label>
+              <label class="fc-opfolder" :class="{'fc-opbusy': !!formEd.opBusy}">&#128193; Choose a folder of photos&hellip;<input type="file" webkitdirectory directory multiple :disabled="!!formEd.opBusy" @change="opPick($event)"></label>
             </template>
           </div>
           <div class="fc-doc" ref="fcDoc">
@@ -1629,7 +1633,7 @@ const { createApp } = Vue;
 // Build stamp: bump on every deploy. The page checks the server for a newer
 // stamp when the tab regains focus (and every 10 min) and offers a reload -
 // so a fix is never silently missed because the page was never reloaded.
-const APP_BUILD = '2026-09-08.1';
+const APP_BUILD = '2026-09-10.1';
 
 // ---- Final Upon Completion: side-menu field labels + section grouping ----
 // Control IDs are stable in the 5.0 master. Labels below make the side menu
@@ -2767,31 +2771,81 @@ createApp({
     },
     // Drag & drop (David, Sep 9): drop photos straight onto the box - files
     // from a folder, or images dragged from another window.
-    opDrop(e) {
+    // Sep 10 (David): "upload multiple photos at one time or a folder with
+    // photos". Dropped folders are walked with the FileSystem entry API
+    // (webkitGetAsEntry / createReader), so a folder - or several folders -
+    // dropped on the box adds every JPG/PNG inside it (subfolders included).
+    // Entries MUST be collected synchronously inside the drop handler; the
+    // DataTransfer is emptied once the event returns.
+    async opDrop(e) {
       this.formEd.opOver = false;
       if (this.formEd.opBusy) return;
       const dt = e.dataTransfer;
-      let files = [];
+      const entries = [], plain = [];
       if (dt && dt.items && dt.items.length) {
-        for (const it of Array.from(dt.items)) { if (it.kind === 'file') { const f = it.getAsFile(); if (f) files.push(f); } }
+        for (const it of Array.from(dt.items)) {
+          if (it.kind !== 'file') continue;
+          const ent = typeof it.webkitGetAsEntry === 'function' ? it.webkitGetAsEntry() : null;
+          if (ent) entries.push(ent);
+          else { const f = it.getAsFile(); if (f) plain.push(f); }
+        }
       }
-      if (!files.length && dt && dt.files) files = Array.from(dt.files);
+      if (!entries.length && !plain.length && dt && dt.files) plain.push(...Array.from(dt.files));
+      let files = plain;
+      if (entries.length) {
+        this.formEd.opBusy = 'reading folder';
+        try { files = plain.concat(await this.opWalkEntries(entries)); }
+        catch (err) { console.error('owner photos: folder read failed', err); }
+        this.formEd.opBusy = '';
+      }
       return this.opAddFiles(files);
     },
+    // Flatten FileSystemEntry[] (files + directories, recursive) into File[].
+    // readEntries() returns results in batches - keep calling until empty.
+    async opWalkEntries(entries) {
+      const out = [];
+      const readAll = (reader) => new Promise((resolve, reject) => {
+        const acc = [];
+        const step = () => reader.readEntries((batch) => { if (!batch.length) resolve(acc); else { acc.push(...batch); step(); } }, reject);
+        step();
+      });
+      const walk = async (ent, depth) => {
+        if (out.length >= 60) return;
+        if (ent.isFile) {
+          const f = await new Promise((resolve) => ent.file(resolve, () => resolve(null)));
+          if (f) out.push(f);
+        } else if (ent.isDirectory && depth < 6) {
+          const kids = await readAll(ent.createReader());
+          kids.sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true }));
+          for (const k of kids) await walk(k, depth + 1);
+        }
+      };
+      for (const ent of entries) await walk(ent, 0);
+      return out;
+    },
     async opAddFiles(files) {
-      if (!files.length) return;
+      const given = Array.from(files || []);
+      files = given.filter(f => f && (/^image\/(jpeg|png)$/i.test(f.type || '') || /\.(jpe?g|png)$/i.test(f.name || '')));
+      const skipped = given.length - files.length;
+      if (!files.length) { if (skipped) this.toast('No JPG or PNG photos found in what you dropped.', 'err'); return; }
       const room = 60 - this.formEd.ownerPhotos.length;
       if (room <= 0) { this.toast('Up to 60 owner photos per report.', 'err'); return; }
       const list = files.slice(0, room);
-      let failed = 0;
-      for (let i = 0; i < list.length; i++) {
+      const stamp = Date.now();
+      const results = new Array(list.length).fill(null);
+      let done = 0, failed = 0, unreadable = 0, auth = false;
+      this.formEd.opBusy = '0 of ' + list.length;
+      const uploadOne = async (i) => {
         const file = list[i];
-        this.formEd.opBusy = (i + 1) + ' of ' + list.length;
         try {
-          if (!/^image\/(jpeg|png)$/i.test(file.type || '') && !/\.(jpe?g|png)$/i.test(file.name || '')) { failed++; continue; }
+          // OneDrive "online-only" placeholders (cloud icon in Explorer) drag in
+          // with a name and size but no readable bytes - the upload then fails
+          // instantly. Probe the first bytes so we can say so (David, Sep 10).
+          try { await file.slice(0, 4).arrayBuffer(); }
+          catch (_) { unreadable++; throw new Error('unreadable'); }
           const dot = file.name ? file.name.lastIndexOf('.') : -1;
           const ext = dot !== -1 ? file.name.slice(dot).toLowerCase() : '.jpg';
-          const uname = 'ownerphoto-' + Date.now() + '-' + i + ext;
+          const uname = 'ownerphoto-' + stamp + '-' + i + ext;
           const fd = new FormData();
           fd.append('picture', file, uname);
           fd.append('containerName', String((this.current && this.current.name) || 'project').replace(/\s+/g, '').toLowerCase());
@@ -2802,15 +2856,26 @@ createApp({
           const j = await res.json();
           const url = j.url || (j.data && j.data.url) || '';
           if (!url) throw new Error('upload');
-          this.formEd.ownerPhotos.push({ url, caption: '' });
+          results[i] = { url, caption: '' };
         } catch (err) {
-          if (err && err.message === 'auth') { this.formEd.opBusy = ''; return; }
+          if (err && err.message === 'auth') auth = true;
           failed++;
         }
-      }
+        done++;
+        this.formEd.opBusy = done + ' of ' + list.length;
+      };
+      // 4 uploads in flight at a time; results are added in the original order.
+      let next = 0;
+      const worker = async () => { while (next < list.length && !auth) { const i = next++; await uploadOne(i); } };
+      await Promise.all([0, 1, 2, 3].map(worker));
+      for (const r of results) if (r) this.formEd.ownerPhotos.push(r);
       this.formEd.opBusy = '';
-      if (failed) this.toast(failed + ' photo' + (failed === 1 ? '' : 's') + ' could not be added (JPG or PNG only).', 'err');
-      else this.toast(list.length + ' owner photo' + (list.length === 1 ? '' : 's') + ' added.');
+      if (auth) return;
+      const added = list.length - failed;
+      if (unreadable) this.toast(added + ' added. ' + unreadable + ' photo' + (unreadable === 1 ? '' : 's') + ' could not be read by the browser - this happens with OneDrive "online-only" files. In File Explorer right-click the folder, choose "Always keep on this device", then drop them again.', 'err');
+      else if (failed) this.toast(added + ' added, ' + failed + ' photo' + (failed === 1 ? '' : 's') + ' could not be uploaded.', 'err');
+      else this.toast(added + ' owner photo' + (added === 1 ? '' : 's') + ' added.' + (skipped ? ' (' + skipped + ' non-JPG/PNG file' + (skipped === 1 ? '' : 's') + ' skipped.)' : ''));
+      if (list.length < files.length) this.toast('Only the first ' + list.length + ' were added - up to 60 owner photos per report.', 'err');
       this.fcQueue();
     },
     opRemove(i) {
