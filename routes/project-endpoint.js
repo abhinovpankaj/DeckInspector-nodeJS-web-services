@@ -1474,13 +1474,20 @@ async function buildFilledClientForm(req) {
 // Build the "OWNER SUPPLIED PHOTOS OF COMPLETED REPAIRS" page(s) and insert
 // them before the signature lead-in paragraph (fallback: end of the body).
 // photos: [{url, caption}] - jpg/png only (anything else is skipped and
-// reported). Two photos per row in a borderless table, each capped at
-// 2.95in x 2.6in keeping its aspect ratio, caption centred under it.
+// reported). Layout (David, Sep 9: "not properly oriented, not the same size
+// and the margins are not matching"): EVERY photo sits in the same 3.15in x
+// 2.6in box, two per row, the pair spanning exactly the 6.5in text width so
+// the outer edges line up with the page margins. Each photo is centre-cropped
+// to the box by Word itself (a:srcRect - no pixels re-encoded, nothing
+// stretched) and phone photos carrying an EXIF orientation are rotated to
+// upright first (Word ignores EXIF; the pixels are remapped like /image/rotate).
 async function appendOwnerPhotos(zip, xml, photos, opts) {
   opts = opts || {};
   const axios = require('axios');
   const EMU = 914400;
-  const MAX_W = Math.round(2.95 * EMU), MAX_H = Math.round(2.6 * EMU);
+  const BOX_W_IN = 3.15, BOX_H_IN = 2.6, GAP_DXA = 288;           // 3.15 + 0.2 + 3.15 = 6.5in
+  const CELL_DXA = Math.round(BOX_W_IN * 1440);                     // 4536
+  const cx = Math.round(BOX_W_IN * EMU), cy = Math.round(BOX_H_IN * EMU);
   const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const skipped = [];
   const cells = [];
@@ -1491,45 +1498,58 @@ async function appendOwnerPhotos(zip, xml, photos, opts) {
     if (!url) continue;
     const extMatch = url.split('?')[0].toLowerCase().match(/\.(png|jpe?g)$/);
     if (!extMatch) { skipped.push('photo ' + (i + 1) + ' (not jpg/png)'); continue; }
-    const ext = extMatch[1] === 'jpeg' ? 'jpg' : extMatch[1];
+    let ext = extMatch[1] === 'jpeg' ? 'jpg' : extMatch[1];
     let buf;
     try {
       const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 60000 });
       buf = Buffer.from(resp.data);
     } catch (e) { skipped.push('photo ' + (i + 1) + ' (download failed)'); continue; }
+    // Upright first: honour the EXIF orientation tag phones write.
+    if (ext === 'jpg') {
+      try { const up = await ownerPhotoUpright(buf); if (up) buf = up; }
+      catch (e) { console.error('owner photo orientation skipped:', e && e.message); }
+    }
     n++;
     const dims = FinalReportGenerator.getImageDims(buf, ext === 'jpg' ? 'jpeg' : ext);
-    const ar = Math.max(1, dims.w) / Math.max(1, dims.h);
-    let cx = MAX_W, cy = Math.round(MAX_W / ar);
-    if (cy > MAX_H) { cy = MAX_H; cx = Math.round(MAX_H * ar); }
     const media = 'media/ownerphoto' + n + '.' + ext;
     zip.file('word/' + media, buf);
     FinalReportGenerator.ensureContentType(zip, ext);
     const rid = 'rIdOwnerPhoto' + n;
     FinalReportGenerator.ensureImageRel(zip, 'word/_rels/document.xml.rels',
       '<Relationship Id="' + rid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="' + media + '"/>', rid);
-    const img = FinalReportGenerator.inlineImageXml(rid, cx, cy, 9000 + n, 'OwnerPhoto' + n);
+    // Centre-crop to the box's shape (percent-of-edge in 1000ths of a percent).
+    let l = 0, t = 0;
+    if (dims && dims.w > 0 && dims.h > 0) {
+      const srcAr = dims.w / dims.h, boxAr = BOX_W_IN / BOX_H_IN;
+      if (srcAr > boxAr) l = Math.round(((1 - boxAr / srcAr) / 2) * 100000);      // too wide: trim sides
+      else if (srcAr < boxAr) t = Math.round(((1 - srcAr / boxAr) / 2) * 100000); // too tall: trim top/bottom
+    }
+    const srcRect = (l || t) ? '<a:srcRect l="' + l + '" t="' + t + '" r="' + l + '" b="' + t + '"/>' : '';
+    const img = FinalReportGenerator.inlineImageXml(rid, cx, cy, 9000 + n, 'OwnerPhoto' + n)
+      .replace('<a:stretch>', srcRect + '<a:stretch>');
     const caption = String(ph.caption || '').trim();
-    cells.push('<w:tc><w:tcPr><w:tcW w:w="4680" w:type="dxa"/><w:vAlign w:val="top"/></w:tcPr>'
+    cells.push('<w:tc><w:tcPr><w:tcW w:w="' + CELL_DXA + '" w:type="dxa"/><w:vAlign w:val="top"/></w:tcPr>'
       + '<w:p><w:pPr><w:keepNext/><w:spacing w:before="120" w:after="40"/><w:jc w:val="center"/></w:pPr>' + img + '</w:p>'
       + '<w:p><w:pPr><w:spacing w:after="160"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t xml:space="preserve">'
       + esc(caption || ('Photo ' + n)) + '</w:t></w:r></w:p></w:tc>');
   }
   if (!n) return { xml, added: 0, skipped };
-  const emptyCell = '<w:tc><w:tcPr><w:tcW w:w="4680" w:type="dxa"/></w:tcPr><w:p/></w:tc>';
+  const emptyCell = '<w:tc><w:tcPr><w:tcW w:w="' + CELL_DXA + '" w:type="dxa"/></w:tcPr><w:p/></w:tc>';
+  const gapCell = '<w:tc><w:tcPr><w:tcW w:w="' + GAP_DXA + '" w:type="dxa"/></w:tcPr><w:p/></w:tc>';
   let rows = '';
   for (let i = 0; i < cells.length; i += 2) {
-    rows += '<w:tr><w:trPr><w:cantSplit/></w:trPr>' + cells[i] + (cells[i + 1] || emptyCell) + '</w:tr>';
+    rows += '<w:tr><w:trPr><w:cantSplit/></w:trPr>' + cells[i] + gapCell + (cells[i + 1] || emptyCell) + '</w:tr>';
   }
   const noBorder = '<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>';
+  const zeroMar = '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>';
   const block = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'
     + '<w:p><w:pPr><w:keepNext/><w:spacing w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="EE0000"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>OWNER SUPPLIED PHOTOS OF COMPLETED REPAIRS</w:t></w:r></w:p>'
     + '<w:p><w:pPr><w:keepNext/><w:spacing w:after="120"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">'
     + esc('The following ' + n + ' photo' + (n === 1 ? '' : 's') + ' of the completed repairs were supplied by the owner or the owner\'s agent and are included as submitted. '
       + (opts.onsite ? 'They supplement the inspector\'s on-site observations documented above.' : 'This final report relies on these photos in lieu of an on-site visit.'))
     + '</w:t></w:r></w:p>'
-    + '<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblBorders>' + noBorder + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblLook w:val="0000"/></w:tblPr>'
-    + '<w:tblGrid><w:gridCol w:w="4680"/><w:gridCol w:w="4680"/></w:tblGrid>' + rows + '</w:tbl>'
+    + '<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders>' + noBorder + '</w:tblBorders><w:tblLayout w:type="fixed"/>' + zeroMar + '<w:tblLook w:val="0000"/></w:tblPr>'
+    + '<w:tblGrid><w:gridCol w:w="' + CELL_DXA + '"/><w:gridCol w:w="' + GAP_DXA + '"/><w:gridCol w:w="' + CELL_DXA + '"/></w:tblGrid>' + rows + '</w:tbl>'
     + '<w:p/>';
   // Insert before the signature lead-in paragraph ("This report is based
   // solely upon the undersigned...") so the photos precede the certification.
@@ -1544,6 +1564,22 @@ async function appendOwnerPhotos(zip, xml, photos, opts) {
   if (at === -1) at = xml.lastIndexOf('</w:body>');
   if (at === -1) return { xml, added: 0, skipped: skipped.concat(['no insertion point']) };
   return { xml: xml.slice(0, at) + block + xml.slice(at), added: n, skipped };
+}
+
+// Returns an upright JPEG when the EXIF Orientation tag says the pixels are
+// stored rotated/flipped (phones do this), else null (nothing to do). Word
+// ignores EXIF, so the photo must be physically upright. Jimp.read() already
+// applies the EXIF orientation while decoding (verified on this jimp version
+// for orientations 3, 6 and 8), so re-encoding is all it takes; the output
+// carries no EXIF, so nothing can rotate it a second time.
+async function ownerPhotoUpright(buf) {
+  let o = 1;
+  try { const r = require('exif-parser').create(buf).parse(); o = Number((r && r.tags && r.tags.Orientation) || 1); } catch (e) { return null; }
+  if (!o || o === 1) return null;
+  const Jimp = require('jimp');
+  const img = await new Promise((ok, bad) => Jimp.read(buf, (e, i) => (e ? bad(e) : ok(i))));
+  img.quality(88);
+  return await new Promise((ok, bad) => img.getBuffer(Jimp.MIME_JPEG, (e, b) => (e ? bad(e) : ok(b))));
 }
 
 // Floating-anchor branding for the client blank forms. The images are anchored
