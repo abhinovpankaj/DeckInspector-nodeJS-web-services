@@ -158,10 +158,10 @@ class ReportGeneration{
         try{
             if(child.type === ProjectChildType.PROJECTLOCATION)
             {
-                const loc_html =  await generateDocReportForLocation(child._id,companyName,sectionImageProperties,reportType);
+                const loc_html =  await generateDocReportForLocation((child.id || child._id),companyName,sectionImageProperties,reportType);
                 return loc_html;
             }else if(child.type ===  ProjectChildType.SUBPROJECT){
-                const subProjectHtml = await generateDocReportForSubProject(child._id,companyName,sectionImageProperties,reportType);
+                const subProjectHtml = await generateDocReportForSubProject((child.id || child._id),companyName,sectionImageProperties,reportType);
                 return subProjectHtml;
             }
         }catch(error){
@@ -173,10 +173,10 @@ class ReportGeneration{
         try{
             if(child.type === ProjectChildType.PROJECTLOCATION)
             {
-                const loc_html =  await generateReportForLocation(child._id,sectionImageProperties,reportType);
+                const loc_html =  await generateReportForLocation((child.id || child._id),sectionImageProperties,reportType);
                 return loc_html;
             }else if(child.type ===  ProjectChildType.SUBPROJECT){
-                const subProjectHtml = await generateReportForSubProject(child._id,sectionImageProperties,reportType);
+                const subProjectHtml = await generateReportForSubProject((child.id || child._id),sectionImageProperties,reportType);
                 return subProjectHtml;
             }
         }catch(error){
