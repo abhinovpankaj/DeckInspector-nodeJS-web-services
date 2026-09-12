@@ -13,7 +13,7 @@ const generateDocReportForSubProject = async function generateDocReportForSubPro
     const subProjectdoc = [];
     const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
     for (let key in orderdLocationsInSubProject) {
-        const promise = generateDocReportForLocation(orderdLocationsInSubProject[key]._id,companyName,sectionImageProperties,reportType,subprojectName)
+        const promise = generateDocReportForLocation((orderdLocationsInSubProject[key].id || orderdLocationsInSubProject[key]._id),companyName,sectionImageProperties,reportType,subprojectName)
             .then((loc_html) => {
                 subProjectdoc[key]= loc_html;
             });
@@ -37,7 +37,7 @@ const generateReportForSubProject = async function generateReportForSubProject(s
     {
         const orderdLocationsInSubProject = reordersubProjectLocations(subProjectData.data.item.children);
         for (let key in orderdLocationsInSubProject) {
-            const promise = generateReportForLocation(orderdLocationsInSubProject[key]._id,sectionImageProperties,reportType)
+            const promise = generateReportForLocation((orderdLocationsInSubProject[key].id || orderdLocationsInSubProject[key]._id),sectionImageProperties,reportType)
                 .then((loc_html) => {
                 locsHtmls[key] = loc_html;
                 });
