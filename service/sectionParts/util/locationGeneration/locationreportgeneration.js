@@ -57,15 +57,15 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
           }
           const newSections = mysections.filter(section =>  isSectionIncluded(reportType, section));
           await Promise.all(newSections.map(async (section, index) => {
-            const sectionData =  await sections.getSectionById(section._id);
-            const invasiveSectionData = await invasiveSections.getInvasiveSectionByParentId(section._id);
+            const sectionData =  await sections.getSectionById((section.id || section._id));
+            const invasiveSectionData = await invasiveSections.getInvasiveSectionByParentId((section.id || section._id));
             if(sectionData.data && sectionData.data.item)
             {
               var sectionDocValues;
 
               if (reportType===ProjectReportType.INVASIVEONLY) {
                 if (invasiveSectionData.data && invasiveSectionData.data.item) {
-                  const conclusiveSectionData = await conclusiveSections.getConclusiveSectionByParentId(section._id);
+                  const conclusiveSectionData = await conclusiveSections.getConclusiveSectionByParentId((section.id || section._id));
                   if (conclusiveSectionData.data && conclusiveSectionData.data.item) {
                     sectionDocValues = {
                       isUnitUnavailable: sectionData.data.item.unitUnavailable?'true':'false',
@@ -178,7 +178,7 @@ const generateDocReportForLocation = async function (locationId,companyName, sec
           const newSections = mysections.filter(section =>  isSectionIncluded(reportType, section));
           
           await Promise.all(newSections.map(async (section, index) => {
-          const sectionData =  await sections.getSectionById(section._id);
+          const sectionData =  await sections.getSectionById((section.id || section._id));
           
           if(sectionData.data && sectionData.data.item) {
 
@@ -369,7 +369,7 @@ const getSectionshtmls = async function (location, sections, sectionImagePropert
     const newSections = sections.filter(section =>  isSectionIncluded(reportType, section));
 
     await Promise.all(newSections.map(async (section, index) => {
-      const processExecutor = SectionPartProcessExecutorFactory.getProcessExecutorChain(location, section.name, section._id, sectionImageProperties, reportType);
+      const processExecutor = SectionPartProcessExecutorFactory.getProcessExecutorChain(location, section.name, (section.id || section._id), sectionImageProperties, reportType);
       const sectionHtml = await processExecutor.executeProcess();
       sectionHtmls[index] = sectionHtml;
     }));
